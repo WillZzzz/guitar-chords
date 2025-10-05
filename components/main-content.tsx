@@ -5,9 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
+import ChordHistory from "@/components/chord-history"
 import AuthModal from "@/components/auth/auth-modal"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/contexts/auth-context"
 import { Music } from "lucide-react"
 
@@ -16,9 +18,9 @@ export default function MainContent() {
   const { user } = useAuth()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900">
       {/* Enhanced Header with Fixed Button Spacing */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 items-center h-20 gap-4">
             {/* Left spacer */}
@@ -33,15 +35,16 @@ export default function MainContent() {
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-pulse" />
               </div>
               <div className="space-y-1 text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent leading-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-gray-100 dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent leading-tight">
                   Guitar Chord Theory
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 font-medium">Master chords, theory & progressions</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Master chords, theory & progressions</p>
               </div>
             </div>
 
             {/* Right side controls - positioned absolutely on mobile */}
             <div className="hidden sm:flex items-center justify-end space-x-4">
+              <ThemeToggle />
               <LanguageToggle />
               <UserMenu />
               {!user && <AuthModal />}
@@ -49,6 +52,7 @@ export default function MainContent() {
 
             {/* Mobile controls - separate row */}
             <div className="sm:hidden fixed top-4 right-4 flex items-center space-x-3 z-50">
+              <ThemeToggle />
               <LanguageToggle />
               <UserMenu />
               {!user && <AuthModal />}
@@ -59,7 +63,11 @@ export default function MainContent() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
+          {/* Chord History Section */}
+          <div className="mb-8">
+            <ChordHistory onChordSelect={setSelectedChord} />
+          </div>
           <Tabs defaultValue="finder" className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger

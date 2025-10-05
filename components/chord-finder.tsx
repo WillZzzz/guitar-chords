@@ -10,6 +10,7 @@ import { getChordData } from "@/lib/chord-utils"
 import { playChordFromPositionsSmart, stopAllAudio } from "@/lib/audio-utils-hybrid"
 import { useAuth } from "@/contexts/auth-context"
 import { addFavoriteChord, removeFavoriteChord, isChordFavorite } from "@/lib/local-storage"
+import { useChordHistory } from "@/hooks/use-chord-history"
 import { toast } from "sonner"
 import ChordDiagram from "./chord-diagram"
 import MiniChordDiagram from "./mini-chord-diagram"
@@ -60,6 +61,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFavorited, setIsFavorited] = useState(false)
   const { user } = useAuth()
+  const { addToHistory } = useChordHistory()
 
   const chordData = getChordData(selectedChord)
   const tonalChordData = Chord.get(selectedChord)
@@ -84,6 +86,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
       const chord = searchTerm.trim()
       setSelectedChord(chord)
       onChordSelect?.(chord)
+      addToHistory(chord)
 
       // Add to recent searches
       const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
@@ -97,6 +100,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const handleChordClick = (chord: string) => {
     setSelectedChord(chord)
     onChordSelect?.(chord)
+    addToHistory(chord)
 
     // Add to recent searches
     const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
