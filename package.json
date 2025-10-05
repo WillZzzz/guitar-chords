@@ -41,6 +41,7 @@
     "@supabase/supabase-js": "latest",
     "@tonaljs/tonal": "latest",
     "autoprefixer": "^10.4.20",
+    "chord-fingering": "^1.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",

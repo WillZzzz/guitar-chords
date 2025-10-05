@@ -2,6 +2,7 @@
 
 import { getTonalRelatedChords, identifyChordFromTonal, findScalesContainingTonalChord } from "./tonal-integration"
 import { getChordInfo, type ChordInfo } from "./chord-libraries"
+import { getChordFromFingeringLibrary, isValidChordInFingeringLibrary } from "./chord-fingering-integration"
 
 export interface ChordPosition {
   string: number // 1-6, where 6 is the low E string and 1 is the high E string
@@ -1361,9 +1362,35 @@ const chordFingeringDatabase: Record<string, ChordVariation[]> = {
   ],
 }
 
-// Get chord data function with Tonal.js integration
+// Get chord data function with enhanced fallback system
 export function getChordData(chordName: string): ChordInfo | null {
-  return getChordInfo(chordName)
+  // First try our custom chord library
+  let chordInfo = getChordInfo(chordName)
+  
+  // If not found, try the chord-fingering library as fallback
+  if (!chordInfo) {
+    const fingeringChord = getChordFromFingeringLibrary(chordName)
+    if (fingeringChord) {
+      // Convert fingering library format to our ChordInfo format
+      chordInfo = {
+        name: fingeringChord.fullName || fingeringChord.symbol,
+        symbol: fingeringChord.symbol,
+        notes: fingeringChord.notes,
+        intervals: fingeringChord.intervals,
+        quality: fingeringChord.intervals.includes('3m') ? 'Minor' : 'Major', // Simple quality detection
+        variations: fingeringChord.fingerings.map(f => ({
+          name: f.name || 'Position',
+          positions: f.positions,
+          startFret: f.startFret || 1,
+          difficulty: f.difficulty || 'Intermediate',
+          description: f.description || `${f.name} fingering`,
+        })),
+        semitones: [], // Not provided by fingering library
+      }
+    }
+  }
+  
+  return chordInfo
 }
 
 // Get chord variations from fingering database
@@ -1460,9 +1487,15 @@ export function getChordFunction(chord: string, key: string): string {
   return functions[index] || "Unknown"
 }
 
-// Check if chord exists in our library
+// Check if chord exists in our library or fingering library
 export function isValidChord(chordName: string): boolean {
-  return getChordInfo(chordName) !== null
+  // Check our custom library first
+  if (getChordInfo(chordName) !== null) {
+    return true
+  }
+  
+  // Check chord-fingering library as fallback
+  return isValidChordInFingeringLibrary(chordName)
 }
 
 // Get chord complexity score (1-10)
