@@ -816,6 +816,51 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       description: "Jazzy Amaj7 chord",
     },
   ],
+  Bbmaj7: [
+    {
+      name: "Bbmaj7 (Barre 6th)",
+      positions: [
+        { string: 1, fret: 6, finger: 1 },
+        { string: 2, fret: 8, finger: 3 },
+        { string: 3, fret: 7, finger: 2 },
+        { string: 4, fret: 8, finger: 4 },
+        { string: 5, fret: 6, finger: 1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      startFret: 6,
+      description: "Bb major 7th barre chord - jazz essential",
+    },
+    {
+      name: "Bbmaj7 (Open)",
+      positions: [
+        { string: 1, fret: 1, finger: 1 },
+        { string: 2, fret: 3, finger: 3 },
+        { string: 3, fret: 2, finger: 2 },
+        { string: 4, fret: 3, finger: 4 },
+        { string: 5, fret: -1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Intermediate",
+      description: "Easier Bb major 7th fingering",
+    },
+  ],
+  Bmaj7: [
+    {
+      name: "Bmaj7 (Barre 7th)",
+      positions: [
+        { string: 1, fret: 7, finger: 1 },
+        { string: 2, fret: 9, finger: 3 },
+        { string: 3, fret: 8, finger: 2 },
+        { string: 4, fret: 9, finger: 4 },
+        { string: 5, fret: 7, finger: 1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      startFret: 7,
+      description: "B major 7th barre chord",
+    },
+  ],
 
   // MINOR 7TH CHORDS - Fixed positions
   Cm7: [
