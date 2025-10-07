@@ -5,8 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
-import UserMenu from "@/components/auth/user-menu"
-import LanguageToggle from "@/components/language-toggle"
 import { Music } from "lucide-react"
 
 export default function MainContent() {
@@ -38,35 +36,25 @@ export default function MainContent() {
               </div>
             </div>
 
-            {/* Right side controls */}
-            <div className="flex items-center justify-end space-x-3">
-              <LanguageToggle />
-              <UserMenu />
-            </div>
+            {/* Right side controls - removed for clean layout */}
+            <div></div>
           </div>
 
           {/* Mobile Layout */}
-          <div className="sm:hidden flex items-center justify-between h-20 px-2">
-            {/* Left - Logo/Title (smaller) */}
-            <div className="flex items-center space-x-2 flex-1 min-w-0">
+          <div className="sm:hidden flex items-center justify-center h-20 px-2">
+            <div className="flex items-center space-x-2">
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                   <Music className="h-5 w-5 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-pulse" />
               </div>
-              <div className="min-w-0">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent truncate">
+              <div>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
                   Guitar Chord Theory
                 </h1>
                 <p className="text-xs text-gray-600 font-medium">Master chords & theory</p>
               </div>
-            </div>
-
-            {/* Right - Controls */}
-            <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-              <LanguageToggle />
-              <UserMenu />
             </div>
           </div>
         </div>
