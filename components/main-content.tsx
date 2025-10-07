@@ -5,15 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
-import AuthButton from "@/components/auth/auth-button"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
-import { useAuth } from "@/contexts/auth-context"
 import { Music } from "lucide-react"
 
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
-  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -45,7 +42,6 @@ export default function MainContent() {
             <div className="flex items-center justify-end space-x-3">
               <LanguageToggle />
               <UserMenu />
-              {!user && <AuthButton />}
             </div>
           </div>
 
@@ -71,7 +67,6 @@ export default function MainContent() {
             <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
               <LanguageToggle />
               <UserMenu />
-              {!user && <AuthButton />}
             </div>
           </div>
         </div>
