@@ -14,8 +14,8 @@ interface LanguageContextType {
 const translations = {
   en: {
     // Header
-    "header.title": "Chord Theory",
-    "header.subtitle": "Explore chord fingerings, understand music theory, and discover related chords.",
+    "header.title": "Guitar Chord Theory",
+    "header.subtitle": "Master chords, theory & progressions",
 
     // Navigation
     "nav.chord-finder": "Chord Finder",
@@ -51,8 +51,8 @@ const translations = {
   },
   zh: {
     // Header
-    "header.title": "和弦理论",
-    "header.subtitle": "探索和弦指法，理解音乐理论，发现相关和弦。",
+    "header.title": "吉他和弦理论",
+    "header.subtitle": "掌握和弦、理论和进行",
 
     // Navigation
     "nav.chord-finder": "和弦查找",

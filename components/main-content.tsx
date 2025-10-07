@@ -5,10 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
+import UserMenu from "@/components/auth/user-menu"
+import LanguageToggle from "@/components/language-toggle"
+import { useLanguage } from "@/contexts/language-context"
 import { Music } from "lucide-react"
 
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
+  const { t } = useLanguage()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -30,18 +34,21 @@ export default function MainContent() {
               </div>
               <div className="space-y-1 text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent leading-tight">
-                  Guitar Chord Theory
+                  {t("header.title")}
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 font-medium">Master chords, theory & progressions</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">{t("header.subtitle")}</p>
               </div>
             </div>
 
-            {/* Right side controls - removed for clean layout */}
-            <div></div>
+            {/* Right side - User Menu and Language Toggle */}
+            <div className="flex justify-end items-center gap-2">
+              <LanguageToggle />
+              <UserMenu />
+            </div>
           </div>
 
           {/* Mobile Layout */}
-          <div className="sm:hidden flex items-center justify-center h-20 px-2">
+          <div className="sm:hidden flex items-center justify-between h-20 px-2">
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -51,10 +58,16 @@ export default function MainContent() {
               </div>
               <div>
                 <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-                  Guitar Chord Theory
+                  {t("header.title")}
                 </h1>
-                <p className="text-xs text-gray-600 font-medium">Master chords & theory</p>
+                <p className="text-xs text-gray-600 font-medium">{t("header.subtitle")}</p>
               </div>
+            </div>
+            
+            {/* Mobile User Menu and Language Toggle */}
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <LanguageToggle />
+              <UserMenu />
             </div>
           </div>
         </div>
@@ -69,19 +82,19 @@ export default function MainContent() {
                 value="finder"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white"
               >
-                Chord Finder
+                {t("nav.chord-finder")}
               </TabsTrigger>
               <TabsTrigger
                 value="reverse"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white"
               >
-                Reverse Lookup
+                {t("nav.reverse-lookup")}
               </TabsTrigger>
               <TabsTrigger
                 value="progression"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white"
               >
-                Progression Builder
+                {t("nav.progression-builder")}
               </TabsTrigger>
             </TabsList>
 
