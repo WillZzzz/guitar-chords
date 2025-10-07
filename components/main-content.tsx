@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
-import AuthModal from "@/components/auth/auth-modal"
+import AuthButton from "@/components/auth/auth-button"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
 import { useAuth } from "@/contexts/auth-context"
@@ -20,12 +20,13 @@ export default function MainContent() {
       {/* Enhanced Header with Fixed Button Spacing */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 items-center h-20 gap-4">
+          {/* Desktop Layout */}
+          <div className="hidden sm:grid sm:grid-cols-3 items-center h-20 gap-4">
             {/* Left spacer */}
-            <div className="hidden sm:block"></div>
+            <div></div>
 
             {/* Centered Logo/Title */}
-            <div className="flex items-center justify-center space-x-3 col-span-3 sm:col-span-1">
+            <div className="flex items-center justify-center space-x-3">
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                   <Music className="h-6 w-6 text-white" />
@@ -40,18 +41,37 @@ export default function MainContent() {
               </div>
             </div>
 
-            {/* Right side controls - positioned absolutely on mobile */}
-            <div className="hidden sm:flex items-center justify-end space-x-4">
+            {/* Right side controls */}
+            <div className="flex items-center justify-end space-x-3">
               <LanguageToggle />
               <UserMenu />
-              {!user && <AuthModal />}
+              {!user && <AuthButton />}
+            </div>
+          </div>
+
+          {/* Mobile Layout */}
+          <div className="sm:hidden flex items-center justify-between h-20 px-2">
+            {/* Left - Logo/Title (smaller) */}
+            <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Music className="h-5 w-5 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-pulse" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent truncate">
+                  Guitar Chord Theory
+                </h1>
+                <p className="text-xs text-gray-600 font-medium">Master chords & theory</p>
+              </div>
             </div>
 
-            {/* Mobile controls - separate row */}
-            <div className="sm:hidden fixed top-4 right-4 flex items-center space-x-3 z-50">
+            {/* Right - Controls */}
+            <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
               <LanguageToggle />
               <UserMenu />
-              {!user && <AuthModal />}
+              {!user && <AuthButton />}
             </div>
           </div>
         </div>
