@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
+import { useLanguage } from "@/contexts/language-context"
 import { getSavedProgressions, deleteSavedProgression, type SavedProgression } from "@/lib/local-storage"
 import { formatDistanceToNow } from "date-fns"
 import { ListMusic, Trash2 } from "lucide-react"
@@ -14,6 +15,7 @@ import { toast } from "sonner"
 
 export default function SavedProgressions() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [progressions, setProgressions] = useState<SavedProgression[]>([])
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function SavedProgressions() {
     if (user) {
       deleteSavedProgression(user.id, progressionId)
       setProgressions(getSavedProgressions(user.id))
-      toast.success("Progression deleted")
+      toast.success(t("saved-progressions.toast-deleted"))
     }
   }
 
@@ -37,8 +39,8 @@ export default function SavedProgressions() {
       <Card>
         <CardContent className="p-8 text-center">
           <ListMusic className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Sign in to view your saved progressions</h3>
-          <p className="text-muted-foreground">Save your chord progressions for later practice</p>
+          <h3 className="text-lg font-semibold mb-2">{t("saved-progressions.sign-in-message")}</h3>
+          <p className="text-muted-foreground">{t("saved-progressions.sign-in-subtitle")}</p>
         </CardContent>
       </Card>
     )
@@ -49,8 +51,8 @@ export default function SavedProgressions() {
       <Card>
         <CardContent className="p-8 text-center">
           <ListMusic className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No saved progressions yet</h3>
-          <p className="text-muted-foreground">Create chord progressions in the builder and save them here</p>
+          <h3 className="text-lg font-semibold mb-2">{t("saved-progressions.no-saved-yet")}</h3>
+          <p className="text-muted-foreground">{t("saved-progressions.create-progressions")}</p>
         </CardContent>
       </Card>
     )
@@ -62,9 +64,9 @@ export default function SavedProgressions() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ListMusic className="h-5 w-5" />
-            Saved Progressions
+            {t("saved-progressions.title")}
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Your saved chord progressions for practice and reference</p>
+          <p className="text-sm text-muted-foreground">{t("saved-progressions.description")}</p>
         </CardHeader>
       </Card>
 
@@ -81,7 +83,7 @@ export default function SavedProgressions() {
                     <div>
                       <h3 className="font-semibold text-lg">{progression.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        Saved {formatDistanceToNow(new Date(progression.created_at), { addSuffix: true })}
+                        {t("saved-progressions.saved-ago", { time: formatDistanceToNow(new Date(progression.created_at), { addSuffix: true }) })}
                       </p>
                     </div>
                   </div>
