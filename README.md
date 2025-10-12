@@ -11,6 +11,41 @@ A comprehensive web application for learning guitar chords, music theory, and ch
 - **Playing Tips**: Beginner-friendly guidance for chord execution
 - **Related Chords**: Discover chord variations and extensions
 
+## Feature Roadmap
+
+### Core Learning Features
+- **Scale Explorer** - Interactive scales (major, minor, pentatonic, modes) with fretboard visualization
+- **Metronome** - Built-in practice tool with BPM control and time signatures
+- **Chord Variations** - Show inversions, different voicings, open vs barre chord options
+- **Song Database** - Popular songs with chord progressions for practice
+- **Practice Mode** - Timed chord changes, progress tracking, difficulty levels
+
+### Enhanced Learning Tools
+- **Chord Transition Trainer** - Practice switching between specific chord pairs
+- **Circle of Fifths** - Interactive visualization for key relationships
+- **Capo Calculator** - Transpose chords for different capo positions
+- **Tuning Options** - Support for different tunings (Drop D, Open G, etc.)
+- **Strumming Patterns** - Visual patterns with audio examples
+
+### User Experience Improvements
+- **Dark Mode** - Theme toggle for better viewing experience
+- **Chord History** - Recently viewed/played chords tracking
+- **Export Features** - PDF chord sheets, progression exports
+- **Search Improvements** - Fuzzy search with chord suggestions
+- **Mobile Optimization** - Enhanced touch controls for chord diagrams
+
+### Audio Enhancements
+- **Recording** - Record and playback practice sessions
+- **Loop Mode** - Repeat progressions for practice
+- **Volume Control** - Individual chord volume adjustment
+- **Tempo Control** - Adjustable playback speed
+
+### Platform Expansion
+- **iOS App (React Native/Expo)** - Native mobile app with offline support
+- **Android App** - Cross-platform mobile development
+- **Desktop App** - Electron wrapper for desktop experience
+- **Progressive Web App (PWA)** - Installable web app with offline capabilities
+
 ## Tech Stack
 
 - **Framework**: Next.js 14 with TypeScript

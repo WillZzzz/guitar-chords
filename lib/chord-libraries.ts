@@ -61,6 +61,19 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       descriptionKey: "desc.classic-open-major",
     },
     {
+      name: "C Major (Alternative)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 2, finger: 3 },
+        { string: 5, fret: 3, finger: 4 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Beginner",
+      description: "Alternative fingering for C major",
+    },
+    {
       name: "C Major (Barre 3rd)",
       positions: [
         { string: 1, fret: 3, finger: 1 },
@@ -74,6 +87,20 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       startFret: 3,
       description: "Barre chord version, moveable shape",
       descriptionKey: "desc.barre-chord-version",
+    },
+    {
+      name: "C Major (8th Fret)",
+      positions: [
+        { string: 1, fret: 8, finger: 1 },
+        { string: 2, fret: 8, finger: 1 },
+        { string: 3, fret: 9, finger: 2 },
+        { string: 4, fret: 10, finger: 4 },
+        { string: 5, fret: 10, finger: 3 },
+        { string: 6, fret: 8, finger: 1 },
+      ],
+      difficulty: "Advanced",
+      startFret: 8,
+      description: "High position C major for bright tone",
     },
   ],
   "C#": [
@@ -269,6 +296,32 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       ],
       difficulty: "Beginner",
       description: "Classic open G major chord",
+    },
+    {
+      name: "G Major (Alternative)",
+      positions: [
+        { string: 1, fret: 3, finger: 4 },
+        { string: 2, fret: 0 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: 2, finger: 2 },
+        { string: 6, fret: 3, finger: 3 },
+      ],
+      difficulty: "Beginner",
+      description: "Alternative fingering for easier transitions",
+    },
+    {
+      name: "G Major (Rock)",
+      positions: [
+        { string: 1, fret: 3, finger: 3 },
+        { string: 2, fret: 3, finger: 4 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: 2, finger: 1 },
+        { string: 6, fret: 3, finger: 2 },
+      ],
+      difficulty: "Intermediate",
+      description: "Rock style G with added high B note",
     },
     {
       name: "G Major (Barre 3rd)",
@@ -1172,6 +1225,271 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       ],
       difficulty: "Beginner",
       description: "A power chord",
+    },
+  ],
+
+  // 11TH CHORDS - Advanced Jazz Voicings
+  C11: [
+    {
+      name: "C11 (Jazz Voicing)",
+      positions: [
+        { string: 1, fret: 1, finger: 1 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 2, finger: 2 },
+        { string: 5, fret: 3, finger: 3 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "C11 jazz chord with suspended sound",
+    },
+  ],
+  D11: [
+    {
+      name: "D11 (Open)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 2, finger: 2 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: -1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "Open D11 chord",
+    },
+  ],
+  E11: [
+    {
+      name: "E11 (Open)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 0 },
+        { string: 3, fret: 2, finger: 2 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: 2, finger: 1 },
+        { string: 6, fret: 0 },
+      ],
+      difficulty: "Advanced",
+      description: "E11 with open strings",
+    },
+  ],
+
+  // 13TH CHORDS - Advanced Jazz Extensions
+  C13: [
+    {
+      name: "C13 (Jazz)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 2, finger: 2 },
+        { string: 5, fret: 3, finger: 3 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "C13 with 6th and 7th",
+    },
+  ],
+  D13: [
+    {
+      name: "D13 (Jazz)",
+      positions: [
+        { string: 1, fret: 2, finger: 2 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 2, finger: 3 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: -1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "D13 dominant chord",
+    },
+  ],
+
+  // ALTERED DOMINANTS - Jazz/Blues Extensions
+  "C7#5": [
+    {
+      name: "C7#5 (Altered)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 4, finger: 4 },
+        { string: 4, fret: 2, finger: 2 },
+        { string: 5, fret: 3, finger: 3 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "C7 with raised 5th",
+    },
+  ],
+  "C7b5": [
+    {
+      name: "C7b5 (Altered)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 2, finger: 2 },
+        { string: 4, fret: 2, finger: 3 },
+        { string: 5, fret: 3, finger: 4 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "C7 with flattened 5th",
+    },
+  ],
+  "G7#5": [
+    {
+      name: "G7#5 (Altered)",
+      positions: [
+        { string: 1, fret: 1, finger: 1 },
+        { string: 2, fret: 0 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 4, finger: 4 },
+        { string: 5, fret: 2, finger: 2 },
+        { string: 6, fret: 3, finger: 3 },
+      ],
+      difficulty: "Advanced",
+      description: "G7 with augmented 5th",
+    },
+  ],
+  "D7b9": [
+    {
+      name: "D7b9 (Altered)",
+      positions: [
+        { string: 1, fret: 1, finger: 1 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 2, finger: 2 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: -1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "D7 with flattened 9th",
+    },
+  ],
+
+  // SLASH CHORDS - Bass Note Inversions
+  "C/E": [
+    {
+      name: "C/E (First Inversion)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 2, finger: 2 },
+        { string: 5, fret: 2, finger: 3 },
+        { string: 6, fret: 0 },
+      ],
+      difficulty: "Intermediate",
+      description: "C major with E in bass",
+    },
+  ],
+  "C/G": [
+    {
+      name: "C/G (Second Inversion)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 2, finger: 2 },
+        { string: 5, fret: 3, finger: 3 },
+        { string: 6, fret: 3, finger: 4 },
+      ],
+      difficulty: "Intermediate",
+      description: "C major with G in bass",
+    },
+  ],
+  "D/F#": [
+    {
+      name: "D/F# (First Inversion)",
+      positions: [
+        { string: 1, fret: 2, finger: 2 },
+        { string: 2, fret: 3, finger: 3 },
+        { string: 3, fret: 2, finger: 1 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: -1 },
+        { string: 6, fret: 2, finger: 4 },
+      ],
+      difficulty: "Intermediate",
+      description: "D major with F# in bass",
+    },
+  ],
+  "G/B": [
+    {
+      name: "G/B (First Inversion)",
+      positions: [
+        { string: 1, fret: 3, finger: 3 },
+        { string: 2, fret: 0 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: 2, finger: 1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Intermediate",
+      description: "G major with B in bass",
+    },
+  ],
+  "Am/C": [
+    {
+      name: "Am/C (First Inversion)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 2, finger: 3 },
+        { string: 4, fret: 2, finger: 2 },
+        { string: 5, fret: 3, finger: 4 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Intermediate",
+      description: "A minor with C in bass",
+    },
+  ],
+
+  // JAZZ VOICINGS - Professional Jazz Chords
+  Cmaj9: [
+    {
+      name: "Cmaj9 (Jazz)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 3, finger: 3 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 2, finger: 2 },
+        { string: 5, fret: 3, finger: 4 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "C major 9th jazz voicing",
+    },
+  ],
+  Dm9: [
+    {
+      name: "Dm9 (Jazz)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 1, finger: 1 },
+        { string: 3, fret: 2, finger: 2 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: -1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      description: "D minor 9th chord",
+    },
+  ],
+  Em11: [
+    {
+      name: "Em11 (Jazz)",
+      positions: [
+        { string: 1, fret: 0 },
+        { string: 2, fret: 0 },
+        { string: 3, fret: 0 },
+        { string: 4, fret: 0 },
+        { string: 5, fret: 2, finger: 1 },
+        { string: 6, fret: 0 },
+      ],
+      difficulty: "Intermediate",
+      description: "E minor 11th - open voicing",
     },
   ],
 }

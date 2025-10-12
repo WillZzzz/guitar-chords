@@ -12,6 +12,7 @@ import { playChordFromPositionsSmart, stopAllAudio } from "@/lib/audio-utils-hyb
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import { addFavoriteChord, removeFavoriteChord, isChordFavorite } from "@/lib/local-storage"
+import { useChordHistory } from "@/hooks/use-chord-history"
 import { toast } from "sonner"
 import ChordDiagram from "./chord-diagram"
 import MiniChordDiagram from "./mini-chord-diagram"
@@ -62,6 +63,8 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFavorited, setIsFavorited] = useState(false)
   const { user } = useAuth()
+  const { addToHistory } = useChordHistory()
+  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null)
   const { t } = useLanguage()
 
   const chordData = getChordData(selectedChord)
@@ -87,6 +90,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
       const chord = searchTerm.trim()
       setSelectedChord(chord)
       onChordSelect?.(chord)
+      addToHistory(chord)
 
       // Add to recent searches
       const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
@@ -100,6 +104,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const handleChordClick = (chord: string) => {
     setSelectedChord(chord)
     onChordSelect?.(chord)
+    addToHistory(chord)
 
     // Add to recent searches
     const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
@@ -147,6 +152,25 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
       setIsFavorited(true)
       toast.success(t("msg.added-to-favorites"))
     }
+  }
+
+  const insertAtCursor = (text: string) => {
+    if (!inputRef) return
+
+    const start = inputRef.selectionStart || 0
+    const end = inputRef.selectionEnd || 0
+    const currentValue = searchTerm
+    
+    const newValue = currentValue.slice(0, start) + text + currentValue.slice(end)
+    setSearchTerm(newValue)
+    
+    // Set cursor position after inserted text and refocus
+    setTimeout(() => {
+      if (inputRef) {
+        inputRef.focus()
+        inputRef.setSelectionRange(start + text.length, start + text.length)
+      }
+    }, 0)
   }
 
   const getRelatedChords = (chordName: string) => {
@@ -218,6 +242,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input
+              ref={setInputRef}
               placeholder={t("chord-finder.search-placeholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -227,6 +252,111 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
             <Button onClick={handleSearch} className="bg-green-600 hover:bg-green-700">
               {t("ui.search")}
             </Button>
+          </div>
+
+          {/* Chord Helper Buttons */}
+          <div className="space-y-3 border-t pt-3">
+            <h4 className="text-sm font-medium text-gray-700">Quick Insert:</h4>
+            
+            {/* Category 1: Accidentals */}
+            <div className="space-y-1">
+              <span className="text-xs text-gray-500 font-medium">Accidentals</span>
+              <div className="flex gap-1 overflow-x-auto pb-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertAtCursor("#")}
+                  className="h-10 px-3 text-sm shrink-0 hover:bg-blue-50 border-blue-200"
+                >
+                  #
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertAtCursor("b")}
+                  className="h-10 px-3 text-sm shrink-0 hover:bg-blue-50 border-blue-200"
+                >
+                  ♭
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertAtCursor("ø")}
+                  className="h-10 px-3 text-sm shrink-0 hover:bg-blue-50 border-blue-200"
+                >
+                  ø
+                </Button>
+              </div>
+            </div>
+
+            {/* Category 2: Numbers */}
+            <div className="space-y-1">
+              <span className="text-xs text-gray-500 font-medium">Numbers</span>
+              <div className="flex gap-1 overflow-x-auto pb-1">
+                {["5", "6", "7", "9", "11", "13"].map((num) => (
+                  <Button
+                    key={num}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertAtCursor(num)}
+                    className="h-10 px-3 text-sm shrink-0 hover:bg-green-50 border-green-200"
+                  >
+                    {num}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Category 3: Basic Types */}
+            <div className="space-y-1">
+              <span className="text-xs text-gray-500 font-medium">Basic Types</span>
+              <div className="flex gap-1 overflow-x-auto pb-1">
+                {["maj", "min", "dim", "aug", "sus", "add"].map((type) => (
+                  <Button
+                    key={type}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertAtCursor(type)}
+                    className="h-10 px-3 text-sm shrink-0 hover:bg-purple-50 border-purple-200"
+                  >
+                    {type}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Category 4: Common Combinations */}
+            <div className="space-y-1">
+              <span className="text-xs text-gray-500 font-medium">Combinations</span>
+              <div className="flex gap-1 overflow-x-auto pb-1">
+                {["maj7", "min7", "dim7", "sus2", "sus4", "add9"].map((combo) => (
+                  <Button
+                    key={combo}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertAtCursor(combo)}
+                    className="h-10 px-3 text-sm shrink-0 hover:bg-orange-50 border-orange-200"
+                  >
+                    {combo}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Clear Button */}
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("")
+                  inputRef?.focus()
+                }}
+                className="h-10 px-4 text-sm hover:bg-red-50 border-red-200 text-red-600"
+              >
+                Clear Input
+              </Button>
+            </div>
           </div>
 
           {/* Examples */}
