@@ -6,7 +6,6 @@ import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
 import ChordHistory from "@/components/chord-history"
-import AuthModal from "@/components/auth/auth-modal"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -47,7 +46,6 @@ export default function MainContent() {
               <ThemeToggle />
               <LanguageToggle />
               <UserMenu />
-              {!user && <AuthModal />}
             </div>
 
             {/* Mobile controls - separate row */}
@@ -55,7 +53,6 @@ export default function MainContent() {
               <ThemeToggle />
               <LanguageToggle />
               <UserMenu />
-              {!user && <AuthModal />}
             </div>
           </div>
         </div>
@@ -69,24 +66,30 @@ export default function MainContent() {
             <ChordHistory onChordSelect={setSelectedChord} />
           </div>
           <Tabs defaultValue="finder" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
               <TabsTrigger
                 value="finder"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
               >
-                Chord Finder
+                <span className="block">
+                  Chord<br />Finder
+                </span>
               </TabsTrigger>
               <TabsTrigger
                 value="reverse"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
               >
-                Reverse Lookup
+                <span className="block">
+                  Reverse<br />Lookup
+                </span>
               </TabsTrigger>
               <TabsTrigger
                 value="progression"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
               >
-                Progression Builder
+                <span className="block">
+                  Progression<br />Builder
+                </span>
               </TabsTrigger>
             </TabsList>
 
