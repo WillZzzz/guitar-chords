@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/contexts/auth-context"
+import { useLanguage } from "@/contexts/language-context"
 import { toast } from "sonner"
 
 interface AuthModalProps {
@@ -19,6 +20,7 @@ interface AuthModalProps {
 export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { signIn, signUp } = useAuth()
+  const { t } = useLanguage()
 
   const [signInData, setSignInData] = useState({
     email: "",
@@ -42,12 +44,12 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
       if (error) {
         toast.error(error.message)
       } else {
-        toast.success("Welcome back!")
+        toast.success(t("msg.welcome-back"))
         onOpenChange(false)
         setSignInData({ email: "", password: "" })
       }
     } catch (error) {
-      toast.error("An unexpected error occurred")
+      toast.error(t("msg.error-unexpected"))
     } finally {
       setIsLoading(false)
     }
@@ -57,12 +59,12 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     e.preventDefault()
 
     if (signUpData.password !== signUpData.confirmPassword) {
-      toast.error("Passwords do not match")
+      toast.error(t("msg.passwords-no-match"))
       return
     }
 
     if (signUpData.password.length < 6) {
-      toast.error("Password must be at least 6 characters")
+      toast.error(t("msg.password-min-length"))
       return
     }
 
@@ -74,12 +76,12 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
       if (error) {
         toast.error(error.message)
       } else {
-        toast.success("Account created! Please check your email to verify your account.")
+        toast.success(t("msg.account-created"))
         onOpenChange(false)
         setSignUpData({ email: "", password: "", confirmPassword: "", displayName: "" })
       }
     } catch (error) {
-      toast.error("An unexpected error occurred")
+      toast.error(t("msg.error-unexpected"))
     } finally {
       setIsLoading(false)
     }
@@ -89,23 +91,23 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center">Welcome to Chord Theory</DialogTitle>
+          <DialogTitle className="text-center">{t("auth.welcome")}</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="signin">{t("auth.sign-in")}</TabsTrigger>
+            <TabsTrigger value="signup">{t("auth.sign-up")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4">
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signin-email">Email</Label>
+                <Label htmlFor="signin-email">{t("auth.email")}</Label>
                 <Input
                   id="signin-email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t("auth.email-placeholder")}
                   value={signInData.email}
                   onChange={(e) => setSignInData((prev) => ({ ...prev, email: e.target.value }))}
                   required

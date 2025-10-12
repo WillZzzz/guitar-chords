@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Music, Clock, Play, Volume2, Heart } from "lucide-react"
 import { getChordData } from "@/lib/chord-utils"
+import { getTranslatedChordDescription } from "@/lib/chord-libraries"
 import { playChordFromPositionsSmart, stopAllAudio } from "@/lib/audio-utils-hybrid"
 import { useAuth } from "@/contexts/auth-context"
+import { useLanguage } from "@/contexts/language-context"
 import { addFavoriteChord, removeFavoriteChord, isChordFavorite } from "@/lib/local-storage"
 import { useChordHistory } from "@/hooks/use-chord-history"
 import { toast } from "sonner"
@@ -63,6 +65,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const { user } = useAuth()
   const { addToHistory } = useChordHistory()
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null)
+  const { t } = useLanguage()
 
   const chordData = getChordData(selectedChord)
   const tonalChordData = Chord.get(selectedChord)
@@ -133,7 +136,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 
   const toggleFavorite = () => {
     if (!user || !chordData) {
-      toast.error("Please sign in to save favorites")
+      toast.error(t("msg.sign-in-to-save"))
       return
     }
 
@@ -143,11 +146,11 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
     if (isFavorited) {
       removeFavoriteChord(user.id, selectedChord, chordType)
       setIsFavorited(false)
-      toast.success("Removed from favorites")
+      toast.success(t("msg.removed-from-favorites"))
     } else {
       addFavoriteChord(user.id, selectedChord, chordType, rootNote)
       setIsFavorited(true)
-      toast.success("Added to favorites")
+      toast.success(t("msg.added-to-favorites"))
     }
   }
 
@@ -220,7 +223,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
     return (
       <div className="p-6">
         <div className="text-center text-muted-foreground">
-          <p>Chord not found. Try searching for a different chord.</p>
+          <p>{t("analysis.chord-not-found")}</p>
         </div>
       </div>
     )
@@ -233,21 +236,21 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Search Chords
+{t("ui.search")} {t("common.chord")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input
               ref={setInputRef}
-              placeholder="Enter chord name (e.g., Am, C7, Fmaj7)"
+              placeholder={t("chord-finder.search-placeholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               className="flex-1"
             />
             <Button onClick={handleSearch} className="bg-green-600 hover:bg-green-700">
-              Search
+              {t("ui.search")}
             </Button>
           </div>
 
@@ -358,7 +361,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 
           {/* Examples */}
           <div>
-            <h4 className="text-sm font-medium mb-2">Examples:</h4>
+            <h4 className="text-sm font-medium mb-2">{t("chord-finder.popular-chords")}:</h4>
             <div className="flex flex-wrap gap-2">
               {EXAMPLE_CHORDS.map((chord) => (
                 <Button
@@ -379,7 +382,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
             <div>
               <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                Recent Searches:
+{t("chord-finder.recent-searches")}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {recentSearches.map((chord) => (
@@ -405,7 +408,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Music className="h-5 w-5" />
-              {chordData.name} - Fingering Options
+{chordData.name} - {t("variations.fingering-options")}
             </div>
             <div className="flex items-center gap-2">
               {user && (
@@ -446,8 +449,10 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
                         </Badge>
                       </div>
 
-                      {variation.description && (
-                        <p className="text-sm text-muted-foreground">{variation.description}</p>
+                      {(variation.description || variation.descriptionKey) && (
+                        <p className="text-sm text-muted-foreground">
+                          {getTranslatedChordDescription(variation, t, selectedChord)}
+                        </p>
                       )}
 
                       <div className="flex items-center gap-4">
@@ -457,11 +462,11 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
                           className="gap-2"
                         >
                           {isPlaying ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Play className="h-4 w-4" />}
-                          {isPlaying ? "Playing..." : "Play"}
+{isPlaying ? t("chord-finder.playing") : t("chord-finder.play")}
                         </Button>
 
                         {variation.startFret && variation.startFret > 1 && (
-                          <span className="text-sm text-muted-foreground">Starting fret: {variation.startFret}</span>
+                          <span className="text-sm text-muted-foreground">{t("content.starting-fret")} {variation.startFret}</span>
                         )}
                       </div>
                     </div>
@@ -480,13 +485,13 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
       {/* Section 3: Music Theory */}
       <Card>
         <CardHeader>
-          <CardTitle>Music Theory & Analysis</CardTitle>
+          <CardTitle>{t("section.music-theory")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Basic Information using Tonal.js */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium mb-3">Chord Notes</h4>
+              <h4 className="font-medium mb-3">{t("section.chord-notes")}</h4>
               <div className="flex flex-wrap gap-2">
                 {tonalChordData.notes?.map((note: string, index: number) => (
                   <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
@@ -495,12 +500,12 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
                 ))}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                These are the individual notes that make up the {tonalChordData.name || selectedChord} chord.
+{t("variations.individual-notes", { chord: tonalChordData.name || selectedChord })}
               </p>
             </div>
 
             <div>
-              <h4 className="font-medium mb-3">Interval Formula</h4>
+              <h4 className="font-medium mb-3">{t("section.interval-formula")}</h4>
               <Badge variant="secondary" className="font-mono text-lg px-3 py-1">
                 {tonalChordData.intervals?.join("-") || "1-3-5"}
               </Badge>
@@ -513,39 +518,39 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
           {/* Detailed Analysis */}
           <div className="space-y-4">
             <div>
-              <h4 className="font-medium mb-3">Chord Analysis</h4>
+              <h4 className="font-medium mb-3">{t("section.chord-analysis")}</h4>
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div className="flex items-start gap-3">
                   <Badge variant="outline" className="mt-0.5">
                     Type
                   </Badge>
                   <div>
-                    <p className="font-medium">{tonalChordData.quality || "Unknown"} Chord</p>
+                    <p className="font-medium">{getChordQualityDisplay(tonalChordData.quality || "Unknown", selectedChord, t)} {t("common.chord")}</p>
                     <p className="text-sm text-muted-foreground">
-                      {getDetailedChordDescription(tonalChordData.quality || "major", selectedChord)}
+                      {getDetailedChordDescription(tonalChordData.quality || "major", selectedChord, t)}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Badge variant="outline" className="mt-0.5">
-                    Semitones
+{t("analysis.semitones")}
                   </Badge>
                   <div>
                     <p className="font-medium">{tonalChordData.semitones?.join(", ") || "0, 4, 7"}</p>
                     <p className="text-sm text-muted-foreground">
-                      Semitone distances from the root note to each chord tone.
+                      {t("analysis.semitone-distances")}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Badge variant="outline" className="mt-0.5">
-                    Function
+                    {t("analysis.function")}
                   </Badge>
                   <div>
                     <p className="font-medium">{getChordFunction(selectedChord)}</p>
-                    <p className="text-sm text-muted-foreground">{getChordFunctionDescription(selectedChord)}</p>
+                    <p className="text-sm text-muted-foreground">{getChordFunctionDescription(selectedChord, t)}</p>
                   </div>
                 </div>
               </div>
@@ -553,9 +558,9 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 
             {/* Common Progressions */}
             <div>
-              <h4 className="font-medium mb-3">Common Progressions</h4>
+              <h4 className="font-medium mb-3">{t("section.common-progressions")}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {getCommonProgressions(selectedChord).map((progression, index) => (
+                {getCommonProgressions(selectedChord, t).map((progression, index) => (
                   <div key={index} className="border rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="secondary" className="text-xs">
@@ -577,10 +582,10 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 
             {/* Playing Tips */}
             <div>
-              <h4 className="font-medium mb-3">Playing Tips</h4>
+              <h4 className="font-medium mb-3">{t("section.playing-tips")}</h4>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <ul className="space-y-2 text-sm">
-                  {getPlayingTips(selectedChord, chordData).map((tip, index) => (
+                  {getPlayingTips(selectedChord, chordData, t).map((tip, index) => (
                     <li key={index} className="flex items-start gap-2">
                       <span className="text-amber-600 mt-1">•</span>
                       <span>{tip}</span>
@@ -596,7 +601,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
       {/* Section 4: Related Chords */}
       <Card>
         <CardHeader>
-          <CardTitle>Related Chords</CardTitle>
+          <CardTitle>{t("section.related-chords")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -637,22 +642,87 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 }
 
 // Enhanced helper functions using Tonal.js where possible
-function getDetailedChordDescription(quality: string, chordName: string): string {
-  const root = chordName.charAt(0)
-  const descriptions: { [key: string]: string } = {
-    Major: `A major chord built on ${root}, containing a major third (4 semitones) and perfect fifth (7 semitones). Creates a bright, stable, and happy sound that forms the foundation of Western harmony.`,
-    Minor: `A minor chord built on ${root}, containing a minor third (3 semitones) and perfect fifth (7 semitones). The flattened third gives it a darker, more melancholic character compared to major chords.`,
-    "Dominant 7th": `A major triad with an added minor seventh (10 semitones from root). This creates harmonic tension that naturally wants to resolve, making it essential in blues, jazz, and classical harmony.`,
-    "Major 7th": `A major triad with an added major seventh (11 semitones from root). Creates a dreamy, sophisticated sound popular in jazz and contemporary music. Less tense than dominant 7th chords.`,
-    "Minor 7th": `A minor triad with an added minor seventh. Commonly used in jazz, R&B, and funk, it's less sad than a plain minor chord and adds harmonic richness without strong tension.`,
-    Suspended: `Replaces the third with either a second (sus2) or fourth (sus4), creating an open, unresolved sound that neither major nor minor. Often resolves back to the major or minor version.`,
-    Diminished: `Built entirely of minor thirds (3 semitones each), creating maximum harmonic tension. Often used as passing chords or to create dramatic, unstable moments in music.`,
-    Augmented: `Contains a major third and augmented fifth (8 semitones), creating a mysterious, floating quality. The augmented fifth creates harmonic ambiguity and is popular in impressionist music.`,
+function getChordQualityDisplay(quality: string, chordName: string, t: (key: string, params?: Record<string, string>) => string): string {
+  // Get chord data from Tonal.js to check type when quality is Unknown
+  const tonalChord = Chord.get(chordName)
+  const chordType = tonalChord.type || ""
+  
+  // Handle Unknown quality cases by checking type
+  if (quality === "Unknown") {
+    // Suspended chords
+    if (chordType.includes("suspended") || chordName.toLowerCase().includes("sus")) {
+      return t("common.suspended")
+    }
+    // Eleventh chords  
+    if (chordType.includes("eleventh") || chordName.toLowerCase().includes("11")) {
+      return t("common.eleventh")
+    }
+    // Add chords (when type is null but chord name contains "add")
+    if (chordName.toLowerCase().includes("add")) {
+      return t("common.add")
+    }
   }
-  return (
-    descriptions[quality] ||
-    `A ${quality.toLowerCase()} chord with unique harmonic properties that adds color and character to musical progressions.`
-  )
+  
+  // Map other known qualities to translations
+  const qualityMap: { [key: string]: string } = {
+    "Major": "common.major",
+    "Minor": "common.minor",
+    "Dominant 7th": "common.dominant-7th",
+    "Major 7th": "common.major-7th",
+    "Minor 7th": "common.minor-7th",
+    "Diminished": "common.diminished",
+    "Augmented": "common.augmented"
+  }
+  
+  const translationKey = qualityMap[quality]
+  if (translationKey) {
+    return t(translationKey)
+  }
+  
+  return quality || t("analysis.unknown")
+}
+
+function getDetailedChordDescription(quality: string, chordName: string, t: (key: string, params?: Record<string, string>) => string): string {
+  const root = chordName.charAt(0)
+  
+  // Get chord data from Tonal.js to check type when quality is Unknown
+  const tonalChord = Chord.get(chordName)
+  const chordType = tonalChord.type || ""
+  
+  // Map quality names to translation keys
+  const qualityKeyMap: { [key: string]: string } = {
+    "Major": "major",
+    "Minor": "minor", 
+    "Dominant 7th": "dominant-7th",
+    "Major 7th": "major-7th",
+    "Minor 7th": "minor-7th",
+    "Suspended": "suspended",
+    "Diminished": "diminished",
+    "Augmented": "augmented"
+  }
+  
+  // Handle Unknown quality cases by checking type
+  if (quality === "Unknown") {
+    // Suspended chords
+    if (chordType.includes("suspended") || chordName.toLowerCase().includes("sus")) {
+      return t("chord-explanations.suspended", { root, quality: "suspended" })
+    }
+    // Eleventh chords
+    if (chordType.includes("eleventh") || chordName.toLowerCase().includes("11")) {
+      return t("chord-explanations.eleventh", { root, quality: "eleventh" })
+    }
+    // Add chords
+    if (chordName.toLowerCase().includes("add")) {
+      return t("chord-explanations.add", { root, quality: "add" })
+    }
+  }
+
+  const translationKey = qualityKeyMap[quality]
+  if (translationKey) {
+    return t(`chord-explanations.${translationKey}`, { root, quality })
+  }
+  
+  return t("chord-explanations.default", { quality: quality.toLowerCase() })
 }
 
 function getChordFunction(chordName: string): string {
@@ -670,85 +740,80 @@ function getChordFunction(chordName: string): string {
   return functions[root] || "Variable Function"
 }
 
-function getChordFunctionDescription(chordName: string): string {
+function getChordFunctionDescription(chordName: string, t: (key: string) => string): string {
   const func = getChordFunction(chordName)
   const descriptions: { [key: string]: string } = {
-    "Tonic (I)": "The home chord that provides stability and resolution. Songs often start and end on this chord.",
-    "Subdominant (IV)":
-      "Creates a sense of departure from home, often leading to the dominant. Provides harmonic contrast.",
-    "Dominant (V)": "Creates tension that wants to resolve back to the tonic. Essential for establishing key centers.",
-    "Variable Function": "Can serve different harmonic functions depending on the musical context and key.",
+    "Tonic (I)": t("theory.tonic-desc"),
+    "Subdominant (IV)": t("theory.subdominant-desc"),
+    "Dominant (V)": t("theory.dominant-desc"),
+    "Variable Function": t("theory.variable-desc"),
   }
-  return descriptions[func] || "Serves various harmonic functions in different musical contexts."
+  return descriptions[func] || t("theory.default-desc")
 }
 
-function getCommonProgressions(chordName: string): Array<{ name: string; chords: string[]; description: string }> {
+function getCommonProgressions(chordName: string, t: (key: string) => string): Array<{ name: string; chords: string[]; description: string }> {
   const root = chordName.charAt(0)
   const progressions: { [key: string]: Array<{ name: string; chords: string[]; description: string }> } = {
     C: [
       {
         name: "I-V-vi-IV",
         chords: ["C", "G", "Am", "F"],
-        description: "The most popular progression in Western music",
+        description: t("progression-desc.i-v-vi-iv"),
       },
-      { name: "ii-V-I", chords: ["Dm", "G", "C"], description: "Essential jazz progression" },
+      { name: "ii-V-I", chords: ["Dm", "G", "C"], description: t("progression-desc.ii-v-i") },
     ],
     G: [
-      { name: "I-V-vi-IV", chords: ["G", "D", "Em", "C"], description: "Classic rock and pop progression" },
-      { name: "I-vi-ii-V", chords: ["G", "Em", "Am", "D"], description: "Circle of fifths progression" },
+      { name: "I-V-vi-IV", chords: ["G", "D", "Em", "C"], description: t("progression-desc.classic-rock") },
+      { name: "I-vi-ii-V", chords: ["G", "Em", "Am", "D"], description: t("progression-desc.circle-fifths") },
     ],
     Am: [
-      { name: "i-VII-VI-VII", chords: ["Am", "G", "F", "G"], description: "Natural minor progression" },
-      { name: "i-iv-V-i", chords: ["Am", "Dm", "E", "Am"], description: "Harmonic minor progression" },
+      { name: "i-VII-VI-VII", chords: ["Am", "G", "F", "G"], description: t("progression-desc.natural-minor") },
+      { name: "i-iv-V-i", chords: ["Am", "Dm", "E", "Am"], description: t("progression-desc.harmonic-minor") },
     ],
     F: [
-      { name: "I-V-vi-IV", chords: ["F", "C", "Dm", "Bb"], description: "Popular in folk and country" },
-      { name: "I-vi-IV-V", chords: ["F", "Dm", "Bb", "C"], description: "50s progression" },
+      { name: "I-V-vi-IV", chords: ["F", "C", "Dm", "Bb"], description: t("progression-desc.folk-country") },
+      { name: "I-vi-IV-V", chords: ["F", "Dm", "Bb", "C"], description: t("progression-desc.fifties") },
     ],
   }
   return (
     progressions[root] || [
-      { name: "Basic Triad", chords: [chordName], description: "Use as part of standard progressions" },
+      { name: "Basic Triad", chords: [chordName], description: t("progression-desc.basic-triad") },
     ]
   )
 }
 
-function getPlayingTips(chordName: string, chordData: any): string[] {
+function getPlayingTips(chordName: string, chordData: any, t: (key: string) => string): string[] {
   const tips = []
 
   // General tips based on chord type
   if (chordName.includes("F") && !chordName.includes("#")) {
-    tips.push(
-      "F chords often require barre technique - practice pressing firmly across all strings with your index finger",
-    )
+    tips.push(t("tips.barre-chord"))
   }
 
   if (chordName.includes("B") && !chordName.includes("b")) {
-    tips.push("B major is challenging for beginners - try the easier version higher up the neck first")
+    tips.push(t("tips.b-major"))
   }
 
   if (chordName.includes("7")) {
-    tips.push("7th chords add harmonic richness - practice transitioning smoothly to and from basic triads")
+    tips.push(t("analysis.seventh-chords"))
   }
 
   if (chordName.includes("m") && !chordName.includes("maj")) {
-    tips.push(
-      "Minor chords often feel more comfortable when you arch your fingers well to avoid muting adjacent strings",
-    )
+    tips.push(t("tips.minor-comfort"))
   }
 
   // Add difficulty-based tips
   if (chordData.variations && chordData.variations[0]?.difficulty === "Beginner") {
-    tips.push("This is a great chord for beginners - focus on clean finger placement and avoid touching other strings")
+    tips.push(t("tips.beginner-friendly"))
   }
 
   if (chordData.variations && chordData.variations.some((v: any) => v.difficulty === "Advanced")) {
-    tips.push("Advanced variations available - master the basic form first before attempting more complex fingerings")
+    tips.push(t("tips.advanced-available"))
   }
 
   // Universal tips
-  tips.push("Practice chord changes slowly at first, focusing on accuracy over speed")
-  tips.push("Make sure each string rings clearly by pressing firmly just behind the frets")
+  tips.push(t("tips.practice-slowly"))
+  tips.push(t("tips.clean-notes"))
 
   return tips.slice(0, 4) // Limit to 4 tips to avoid overwhelming
 }

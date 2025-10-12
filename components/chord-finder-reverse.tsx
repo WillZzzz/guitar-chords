@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useLanguage } from "@/contexts/language-context"
 import { Music2, RotateCcw } from "lucide-react"
 
 interface ChordFinderReverseProps {
@@ -22,6 +23,7 @@ interface ChordMatch {
 export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverseProps) {
   const [selectedNotes, setSelectedNotes] = useState<string[]>([])
   const [possibleChords, setPossibleChords] = useState<ChordMatch[]>([])
+  const { t } = useLanguage()
 
   useEffect(() => {
     if (selectedNotes.length >= 2) {
@@ -52,18 +54,18 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Music2 className="h-5 w-5" />
-              Select Notes to Find Chords
+{t("variations.select-notes")}
             </div>
             <Button onClick={clearSelection} variant="outline" size="sm" className="gap-2 bg-transparent">
               <RotateCcw className="h-4 w-4" />
-              Clear
+{t("ui.clear")}
             </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Note Selection */}
           <div>
-            <h3 className="text-sm font-medium mb-3">Click notes to select:</h3>
+            <h3 className="text-sm font-medium mb-3">{t("variations.click-notes-select")}:</h3>
             <div className="grid grid-cols-6 gap-2">
               {NOTES.map((note) => (
                 <Button
@@ -83,7 +85,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
           {/* Selected Notes Display */}
           {selectedNotes.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium mb-2">Selected Notes:</h3>
+              <h3 className="text-sm font-medium mb-2">{t("variations.selected-notes")}:</h3>
               <div className="flex flex-wrap gap-2">
                 {selectedNotes.map((note) => (
                   <Badge key={note} variant="secondary" className="bg-purple-100">
@@ -97,7 +99,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
           {/* Possible Chords */}
           {possibleChords.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium mb-3">Possible Chords (sorted by confidence):</h3>
+              <h3 className="text-sm font-medium mb-3">{t("variations.possible-chords")}:</h3>
               <div className="space-y-3">
                 {possibleChords.map((chord, index) => (
                   <div
@@ -124,7 +126,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-muted-foreground">Notes: {chord.notes.join(", ")}</span>
+                        <span className="text-sm text-muted-foreground">{t("variations.notes")}: {chord.notes.join(", ")}</span>
                         <span className="text-xs text-muted-foreground">• {chord.type}</span>
                       </div>
                     </div>
@@ -148,14 +150,14 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
 
           {selectedNotes.length >= 2 && possibleChords.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No matching chords found for the selected notes.</p>
-              <p className="text-sm mt-1">Try selecting different notes or fewer notes.</p>
+              <p>{t("variations.no-matching-chords")}</p>
+              <p className="text-sm mt-1">{t("variations.try-different-notes")}</p>
             </div>
           )}
 
           {selectedNotes.length < 2 && (
             <div className="text-center py-8 text-muted-foreground">
-              <p>Select at least 2 notes to find possible chords.</p>
+              <p>{t("variations.select-min-notes")}</p>
             </div>
           )}
         </CardContent>

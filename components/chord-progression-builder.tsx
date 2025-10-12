@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { useAuth } from "@/contexts/auth-context"
+import { useLanguage } from "@/contexts/language-context"
 import { saveProgression } from "@/lib/local-storage"
 import { playChordFromPositions } from "@/lib/audio-utils"
 import { getChordData, identifyChordFromNotes } from "@/lib/chord-utils"
@@ -36,12 +37,12 @@ const commonChords = [
   "E7",
 ]
 
-const commonProgressions = [
-  { name: "I-V-vi-IV", chords: ["C", "G", "Am", "F"] },
-  { name: "vi-IV-I-V", chords: ["Am", "F", "C", "G"] },
-  { name: "I-vi-IV-V", chords: ["C", "Am", "F", "G"] },
-  { name: "ii-V-I", chords: ["Dm", "G", "C"] },
-  { name: "12-Bar Blues", chords: ["C", "C", "C", "C", "F", "F", "C", "C", "G", "F", "C", "G"] },
+const getCommonProgressions = (t: (key: string) => string) => [
+  { name: "I-V-vi-IV", displayName: t("progression-desc.i-v-vi-iv"), chords: ["C", "G", "Am", "F"] },
+  { name: "vi-IV-I-V", displayName: t("progression-desc.classic-rock"), chords: ["Am", "F", "C", "G"] },
+  { name: "I-vi-IV-V", displayName: t("progression-desc.fifties"), chords: ["C", "Am", "F", "G"] },
+  { name: "ii-V-I", displayName: t("progression-desc.ii-v-i"), chords: ["Dm", "G", "C"] },
+  { name: "12-Bar Blues", displayName: t("progression-desc.12-bar-blues"), chords: ["C", "C", "C", "C", "F", "F", "C", "C", "G", "F", "C", "G"] },
 ]
 
 // All chromatic notes
@@ -49,6 +50,7 @@ const allNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B
 
 export default function ChordProgressionBuilder() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [progression, setProgression] = useState<string[]>([])
   const [progressionName, setProgressionName] = useState("")
   const [progressionDescription, setProgressionDescription] = useState("")
@@ -93,9 +95,9 @@ export default function ChordProgressionBuilder() {
       if (chordData) {
         addChord(chord)
         setCustomChord("")
-        toast.success(`Added ${chord} to progression`)
+        toast.success(t("progression-builder.toast-added", { chord }))
       } else {
-        toast.error(`Chord "${chord}" not recognized. Try a different spelling.`)
+        toast.error(t("progression-builder.toast-chord-not-recognized", { chord }))
       }
     }
   }
@@ -126,7 +128,7 @@ export default function ChordProgressionBuilder() {
 
   const addChordFromNotes = (chordName: string) => {
     addChord(chordName)
-    toast.success(`Added ${chordName} to progression`)
+    toast.success(t("progression-builder.toast-added", { chord: chordName }))
   }
 
   // Play individual chord
@@ -142,14 +144,14 @@ export default function ChordProgressionBuilder() {
         const success = await playChordFromPositions(positions, chordName.charAt(0))
 
         if (!success) {
-          toast.error("Could not play chord audio")
+          toast.error(t("progression-builder.toast-audio-error"))
         }
       } else {
-        toast.error("Chord fingering not available")
+        toast.error(t("progression-builder.toast-fingering-unavailable"))
       }
     } catch (error) {
       console.error("Error playing chord:", error)
-      toast.error("Audio playback failed")
+      toast.error(t("progression-builder.toast-audio-failed"))
     }
 
     // Reset playing state after delay
@@ -182,7 +184,7 @@ export default function ChordProgressionBuilder() {
       }
     } catch (error) {
       console.error("Error playing progression:", error)
-      toast.error("Progression playback failed")
+      toast.error(t("progression-builder.toast-progression-failed"))
     }
 
     setPlayingChord(null)
@@ -191,17 +193,17 @@ export default function ChordProgressionBuilder() {
 
   const saveCurrentProgression = () => {
     if (!user) {
-      toast.error("Please sign in to save progressions")
+      toast.error(t("progression-builder.toast-sign-in-required"))
       return
     }
 
     if (!progressionName.trim()) {
-      toast.error("Please enter a name for your progression")
+      toast.error(t("progression-builder.toast-name-required"))
       return
     }
 
     if (progression.length === 0) {
-      toast.error("Please add some chords to your progression")
+      toast.error(t("progression-builder.toast-chords-required"))
       return
     }
 
@@ -218,7 +220,7 @@ export default function ChordProgressionBuilder() {
       tagArray.length > 0 ? tagArray : undefined,
     )
 
-    toast.success("Progression saved successfully!")
+    toast.success(t("progression-builder.toast-saved"))
 
     // Clear form
     setProgressionName("")
@@ -232,14 +234,14 @@ export default function ChordProgressionBuilder() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ListMusic className="h-5 w-5" />
-            Chord Progression Builder
+            {t("progression-builder.title")}
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Build and save your chord progressions</p>
+          <p className="text-sm text-muted-foreground">{t("progression-builder.description")}</p>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Common Chords */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">Add Chords</h3>
+            <h3 className="text-lg font-semibold mb-3">{t("progression-builder.add-chords")}</h3>
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
               {commonChords.map((chord) => (
                 <Button
@@ -257,18 +259,18 @@ export default function ChordProgressionBuilder() {
 
             {/* Custom Chord Input with Tabs */}
             <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
-              <h4 className="text-sm font-medium mb-3">Add Custom Chord</h4>
+              <h4 className="text-sm font-medium mb-3">{t("progression-builder.add-custom-chord")}</h4>
 
               <Tabs defaultValue="name" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="name">By Name</TabsTrigger>
-                  <TabsTrigger value="notes">By Notes</TabsTrigger>
+                  <TabsTrigger value="name">{t("progression-builder.by-name")}</TabsTrigger>
+                  <TabsTrigger value="notes">{t("progression-builder.by-notes")}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="name" className="space-y-3">
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Enter chord name (e.g., Cmaj7, F#m, Bb9)"
+                      placeholder={t("progression-builder.chord-name-placeholder")}
                       value={customChord}
                       onChange={(e) => setCustomChord(e.target.value)}
                       onKeyPress={(e) => {
@@ -285,15 +287,15 @@ export default function ChordProgressionBuilder() {
                       className="gap-1"
                     >
                       <Plus className="h-4 w-4" />
-                      Add
+                      {t("ui.add")}
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Try: Cmaj7, Am7, F#dim, Bbsus4, G13, etc.</p>
+                  <p className="text-xs text-muted-foreground">{t("progression-builder.chord-name-examples")}</p>
                 </TabsContent>
 
                 <TabsContent value="notes" className="space-y-4">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-3">Select notes to build a chord:</p>
+                    <p className="text-sm text-muted-foreground mb-3">{t("progression-builder.select-notes-instruction")}</p>
 
                     {/* Note Selection Grid */}
                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2 mb-4">
@@ -320,7 +322,7 @@ export default function ChordProgressionBuilder() {
                     {/* Selected Notes Display */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-3 bg-white rounded-lg border">
                       <div className="flex-1">
-                        <span className="text-sm font-medium">Selected Notes: </span>
+                        <span className="text-sm font-medium">{t("progression-builder.selected-notes")}</span>
                         {selectedNotes.length > 0 ? (
                           <div className="flex flex-wrap gap-1 mt-1">
                             {selectedNotes.map((note) => (
@@ -330,7 +332,7 @@ export default function ChordProgressionBuilder() {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-sm text-muted-foreground">None</span>
+                          <span className="text-sm text-muted-foreground">{t("progression-builder.none")}</span>
                         )}
                       </div>
                       <Button
@@ -341,7 +343,7 @@ export default function ChordProgressionBuilder() {
                         disabled={selectedNotes.length === 0}
                       >
                         <X className="h-3 w-3" />
-                        Clear
+                        {t("ui.clear")}
                       </Button>
                     </div>
 
@@ -350,7 +352,7 @@ export default function ChordProgressionBuilder() {
                       <div>
                         <h5 className="text-sm font-medium mb-2 flex items-center gap-1">
                           <Music className="h-4 w-4" />
-                          Possible Chords ({possibleChords.length})
+                          {t("progression-builder.possible-chords")} ({possibleChords.length})
                         </h5>
 
                         {possibleChords.length > 0 ? (
@@ -381,8 +383,8 @@ export default function ChordProgressionBuilder() {
                         ) : (
                           <div className="text-center py-4 text-muted-foreground bg-white rounded-lg border">
                             <Music className="mx-auto h-8 w-8 mb-2 opacity-50" />
-                            <p className="text-sm">No chords found with these notes</p>
-                            <p className="text-xs">Try adding or removing notes</p>
+                            <p className="text-sm">{t("progression-builder.no-chords-found")}</p>
+                            <p className="text-xs">{t("progression-builder.try-different-notes")}</p>
                           </div>
                         )}
                       </div>
@@ -391,16 +393,16 @@ export default function ChordProgressionBuilder() {
                     {selectedNotes.length === 1 && (
                       <div className="text-center py-4 text-muted-foreground bg-blue-50 rounded-lg border">
                         <Music className="mx-auto h-8 w-8 mb-2 text-blue-400" />
-                        <p className="text-sm font-medium text-blue-700">Select one more note</p>
-                        <p className="text-xs text-blue-600">Chords need at least 2 notes</p>
+                        <p className="text-sm font-medium text-blue-700">{t("progression-builder.select-one-more")}</p>
+                        <p className="text-xs text-blue-600">{t("progression-builder.chords-need-two")}</p>
                       </div>
                     )}
 
                     {selectedNotes.length === 0 && (
                       <div className="text-center py-4 text-muted-foreground">
                         <Music className="mx-auto h-8 w-8 mb-2 opacity-50" />
-                        <p className="text-sm">Select notes above to build a chord</p>
-                        <p className="text-xs">Click on the note buttons to get started</p>
+                        <p className="text-sm">{t("progression-builder.select-notes-to-build")}</p>
+                        <p className="text-xs">{t("progression-builder.click-to-start")}</p>
                       </div>
                     )}
                   </div>
@@ -411,9 +413,9 @@ export default function ChordProgressionBuilder() {
 
           {/* Common Progressions */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">Common Progressions</h3>
+            <h3 className="text-lg font-semibold mb-3">{t("progression-builder.common-progressions")}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {commonProgressions.map((prog, index) => (
+              {getCommonProgressions(t).map((prog, index) => (
                 <Card
                   key={index}
                   className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
@@ -421,6 +423,7 @@ export default function ChordProgressionBuilder() {
                 >
                   <CardContent className="p-3">
                     <h4 className="font-semibold text-sm mb-2">{prog.name}</h4>
+                    <p className="text-xs text-muted-foreground mb-2">{prog.displayName}</p>
                     <div className="flex flex-wrap gap-1">
                       {prog.chords.map((chord, chordIndex) => (
                         <Badge key={chordIndex} variant="outline" className="text-xs">
@@ -440,7 +443,7 @@ export default function ChordProgressionBuilder() {
       <Card className="chord-card">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Your Progression</span>
+            <span>{t("progression-builder.your-progression")}</span>
             <div className="flex gap-2">
               {progression.length > 0 && (
                 <Button
@@ -453,18 +456,18 @@ export default function ChordProgressionBuilder() {
                   {playingProgression ? (
                     <>
                       <Volume2 className="h-4 w-4 animate-pulse" />
-                      Playing...
+                      {t("progression-builder.playing")}
                     </>
                   ) : (
                     <>
                       <Play className="h-4 w-4" />
-                      Play All
+                      {t("progression-builder.play-all")}
                     </>
                   )}
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={clearProgression}>
-                Clear
+                {t("ui.clear")}
               </Button>
             </div>
           </CardTitle>
@@ -473,7 +476,7 @@ export default function ChordProgressionBuilder() {
           {progression.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ListMusic className="mx-auto h-12 w-12 mb-4" />
-              <p>No chords added yet. Click on chords above to build your progression.</p>
+              <p>{t("progression-builder.no-chords-yet")}</p>
             </div>
           ) : (
             <DragDropContext onDragEnd={handleDragEnd}>
@@ -538,37 +541,37 @@ export default function ChordProgressionBuilder() {
       {progression.length > 0 && (
         <Card className="chord-card">
           <CardHeader>
-            <CardTitle>Save Progression</CardTitle>
+            <CardTitle>{t("progression-builder.save-progression")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Name *</label>
+              <label className="text-sm font-medium mb-2 block">{t("progression-builder.name-required")}</label>
               <Input
-                placeholder="Enter progression name..."
+                placeholder={t("progression-builder.name-placeholder")}
                 value={progressionName}
                 onChange={(e) => setProgressionName(e.target.value)}
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Description</label>
+              <label className="text-sm font-medium mb-2 block">{t("progression-builder.description-optional")}</label>
               <Textarea
-                placeholder="Optional description..."
+                placeholder={t("progression-builder.description-placeholder")}
                 value={progressionDescription}
                 onChange={(e) => setProgressionDescription(e.target.value)}
                 rows={3}
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Tags</label>
+              <label className="text-sm font-medium mb-2 block">{t("progression-builder.tags")}</label>
               <Input
-                placeholder="Enter tags separated by commas..."
+                placeholder={t("progression-builder.tags-placeholder")}
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
               />
             </div>
             <Button onClick={saveCurrentProgression} className="w-full">
               <Save className="h-4 w-4 mr-2" />
-              Save Progression
+              {t("progression-builder.save-button")}
             </Button>
           </CardContent>
         </Card>

@@ -9,24 +9,25 @@ import ChordHistory from "@/components/chord-history"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { useAuth } from "@/contexts/auth-context"
+import { useLanguage } from "@/contexts/language-context"
 import { Music } from "lucide-react"
 
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
-  const { user } = useAuth()
+  const { t } = useLanguage()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900">
       {/* Enhanced Header with Fixed Button Spacing */}
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 items-center h-20 gap-4">
+          {/* Desktop Layout */}
+          <div className="hidden sm:grid sm:grid-cols-3 items-center h-20 gap-4">
             {/* Left spacer */}
-            <div className="hidden sm:block"></div>
+            <div></div>
 
             {/* Centered Logo/Title */}
-            <div className="flex items-center justify-center space-x-3 col-span-3 sm:col-span-1">
+            <div className="flex items-center justify-center space-x-3">
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                   <Music className="h-6 w-6 text-white" />
@@ -35,9 +36,9 @@ export default function MainContent() {
               </div>
               <div className="space-y-1 text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-gray-100 dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent leading-tight">
-                  Guitar Chord Theory
+                  {t("header.title")}
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Master chords, theory & progressions</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">{t("header.subtitle")}</p>
               </div>
             </div>
 
@@ -47,9 +48,27 @@ export default function MainContent() {
               <LanguageToggle />
               <UserMenu />
             </div>
+          </div>
 
-            {/* Mobile controls - separate row */}
-            <div className="sm:hidden fixed top-4 right-4 flex items-center space-x-3 z-50">
+          {/* Mobile Layout */}
+          <div className="sm:hidden flex items-center justify-between h-20 px-2">
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Music className="h-5 w-5 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-pulse" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                  {t("header.title")}
+                </h1>
+                <p className="text-xs text-gray-600 font-medium">{t("header.subtitle")}</p>
+              </div>
+            </div>
+            
+            {/* Mobile User Menu and Language Toggle with Theme Toggle */}
+            <div className="flex-shrink-0 flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
               <UserMenu />
@@ -72,7 +91,14 @@ export default function MainContent() {
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
               >
                 <span className="block">
-                  Chord<br />Finder
+                  {t("nav.chord-finder")
+                    .split(' ')
+                    .map((word, index, arr) => (
+                      <span key={index}>
+                        {word}
+                        {index < arr.length - 1 && <br />}
+                      </span>
+                    ))}
                 </span>
               </TabsTrigger>
               <TabsTrigger
@@ -80,7 +106,14 @@ export default function MainContent() {
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
               >
                 <span className="block">
-                  Reverse<br />Lookup
+                  {t("nav.reverse-lookup")
+                    .split(' ')
+                    .map((word, index, arr) => (
+                      <span key={index}>
+                        {word}
+                        {index < arr.length - 1 && <br />}
+                      </span>
+                    ))}
                 </span>
               </TabsTrigger>
               <TabsTrigger
@@ -88,7 +121,14 @@ export default function MainContent() {
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
               >
                 <span className="block">
-                  Progression<br />Builder
+                  {t("nav.progression-builder")
+                    .split(' ')
+                    .map((word, index, arr) => (
+                      <span key={index}>
+                        {word}
+                        {index < arr.length - 1 && <br />}
+                      </span>
+                    ))}
                 </span>
               </TabsTrigger>
             </TabsList>

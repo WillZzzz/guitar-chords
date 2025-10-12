@@ -1,6 +1,22 @@
 // Guitar chord library using established Tonal.js chord dictionary + guitar fingerings
 import { Chord } from "tonal"
 
+// Translation function type
+type TranslationFunction = (key: string, params?: Record<string, string>) => string
+
+// Helper function to get translated description
+export function getTranslatedChordDescription(
+  variation: ChordVariation,
+  t: TranslationFunction,
+  chordName: string
+): string {
+  if (variation.descriptionKey) {
+    const note = chordName.replace(/[^A-G#b].*/, '') // Extract root note
+    return t(variation.descriptionKey, { note, chord: chordName })
+  }
+  return variation.description || ""
+}
+
 export interface ChordPosition {
   string: number // 1-6 (high E to low E)
   fret: number // -1 for muted, 0 for open, 1+ for fretted
@@ -13,6 +29,7 @@ export interface ChordVariation {
   difficulty: "Beginner" | "Intermediate" | "Advanced"
   startFret?: number
   description?: string
+  descriptionKey?: string // For dynamic translation
 }
 
 export interface ChordInfo {
@@ -41,6 +58,7 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       ],
       difficulty: "Beginner",
       description: "Classic open C major chord, great for beginners",
+      descriptionKey: "desc.classic-open-major",
     },
     {
       name: "C Major (Alternative)",
@@ -68,6 +86,7 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       difficulty: "Intermediate",
       startFret: 3,
       description: "Barre chord version, moveable shape",
+      descriptionKey: "desc.barre-chord-version",
     },
     {
       name: "C Major (8th Fret)",
@@ -869,6 +888,51 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
       description: "Jazzy Amaj7 chord",
     },
   ],
+  Bbmaj7: [
+    {
+      name: "Bbmaj7 (Barre 6th)",
+      positions: [
+        { string: 1, fret: 6, finger: 1 },
+        { string: 2, fret: 8, finger: 3 },
+        { string: 3, fret: 7, finger: 2 },
+        { string: 4, fret: 8, finger: 4 },
+        { string: 5, fret: 6, finger: 1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      startFret: 6,
+      description: "Bb major 7th barre chord - jazz essential",
+    },
+    {
+      name: "Bbmaj7 (Open)",
+      positions: [
+        { string: 1, fret: 1, finger: 1 },
+        { string: 2, fret: 3, finger: 3 },
+        { string: 3, fret: 2, finger: 2 },
+        { string: 4, fret: 3, finger: 4 },
+        { string: 5, fret: -1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Intermediate",
+      description: "Easier Bb major 7th fingering",
+    },
+  ],
+  Bmaj7: [
+    {
+      name: "Bmaj7 (Barre 7th)",
+      positions: [
+        { string: 1, fret: 7, finger: 1 },
+        { string: 2, fret: 9, finger: 3 },
+        { string: 3, fret: 8, finger: 2 },
+        { string: 4, fret: 9, finger: 4 },
+        { string: 5, fret: 7, finger: 1 },
+        { string: 6, fret: -1 },
+      ],
+      difficulty: "Advanced",
+      startFret: 7,
+      description: "B major 7th barre chord",
+    },
+  ],
 
   // MINOR 7TH CHORDS - Fixed positions
   Cm7: [
@@ -1451,7 +1515,14 @@ export function getChordInfo(chordSymbol: string): ChordInfo | null {
       intervals: tonalChord.intervals,
       quality: tonalChord.quality || "Unknown",
       variations: fingerings,
-      semitones: tonalChord.intervals?.map((interval, index) => index) || [],
+      semitones: tonalChord.intervals.map((interval) => {
+        // Convert interval to semitones - this is a simplified approach
+        const intervalMap: { [key: string]: number } = {
+          "1P": 0, "2M": 2, "3M": 4, "4P": 5, "5P": 7, "6M": 9, "7M": 11,
+          "2m": 1, "3m": 3, "6m": 8, "7m": 10
+        }
+        return intervalMap[interval] || 0
+      }),
     }
 
     return chordInfo

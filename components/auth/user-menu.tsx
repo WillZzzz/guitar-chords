@@ -31,7 +31,7 @@ export default function UserMenu() {
   if (!user) {
     return (
       <>
-        <Button variant="outline" onClick={() => setAuthModalOpen(true)} className="gap-2">
+        <Button variant="outline" size="icon" onClick={() => setAuthModalOpen(true)} className="h-9 w-9">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -46,7 +46,7 @@ export default function UserMenu() {
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          Sign In
+          <span className="sr-only">Sign In</span>
         </Button>
         <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       </>
