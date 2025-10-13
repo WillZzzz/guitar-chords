@@ -5,6 +5,9 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { toast } from "sonner"
 import { type UserProfile, createUser, authenticateUser, getCurrentUser, setCurrentUser } from "@/lib/local-storage"
 
+// TEMPORARILY REVERTED TO LOCALSTORAGE FOR PRODUCTION RELEASE
+// TODO: Re-enable Supabase after environment is properly configured
+
 interface AuthContextType {
   user: UserProfile | null
   loading: boolean

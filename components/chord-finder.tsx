@@ -16,8 +16,10 @@ import { useChordHistory } from "@/hooks/use-chord-history"
 import { toast } from "sonner"
 import ChordDiagram from "./chord-diagram"
 import MiniChordDiagram from "./mini-chord-diagram"
+import ScaleDisplay from "./scale-display"
 import { Chord } from "tonal"
 import { playChordHTML5 } from "@/lib/audio-html5-fallback"
+import { analyzeChordScale } from "@/lib/scale-analysis"
 
 interface ChordFinderProps {
   onChordSelect?: (chord: string) => void
@@ -482,7 +484,17 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
         </CardContent>
       </Card>
 
-      {/* Section 3: Music Theory */}
+      {/* Section 3: Primary Scale Analysis */}
+      {tonalChordData.notes && tonalChordData.notes.length > 0 && (
+        <ScaleDisplay 
+          analysis={analyzeChordScale(tonalChordData.notes, selectedChord)}
+          chordName={selectedChord}
+          showPrimary={true}
+          showAlternatives={false}
+        />
+      )}
+
+      {/* Section 4: Music Theory & Analysis */}
       <Card>
         <CardHeader>
           <CardTitle>{t("section.music-theory")}</CardTitle>
@@ -598,7 +610,17 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
         </CardContent>
       </Card>
 
-      {/* Section 4: Related Chords */}
+      {/* Section 5: Alternative Scales */}
+      {tonalChordData.notes && tonalChordData.notes.length > 0 && (
+        <ScaleDisplay 
+          analysis={analyzeChordScale(tonalChordData.notes, selectedChord)}
+          chordName={selectedChord}
+          showPrimary={false}
+          showAlternatives={true}
+        />
+      )}
+
+      {/* Section 6: Related Chords */}
       <Card>
         <CardHeader>
           <CardTitle>{t("section.related-chords")}</CardTitle>
