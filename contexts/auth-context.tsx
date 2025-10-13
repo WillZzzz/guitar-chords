@@ -3,76 +3,166 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { type UserProfile, createUser, authenticateUser, getCurrentUser, setCurrentUser } from "@/lib/local-storage"
+import { createClient } from "@/utils/supabase/client"
+import type { User } from "@supabase/supabase-js"
+
+interface AuthUser {
+  id: string
+  email: string
+  created_at: string
+  user_metadata?: {
+    display_name?: string
+    avatar_url?: string
+  }
+}
 
 interface AuthContextType {
-  user: UserProfile | null
+  user: AuthUser | null
   loading: boolean
-  signUp: (email: string, password: string) => Promise<boolean>
-  signIn: (email: string, password: string) => Promise<boolean>
-  signOut: () => void
+  signUp: (email: string, password: string, displayName?: string) => Promise<{ error?: any }>
+  signIn: (email: string, password: string) => Promise<{ error?: any }>
+  signInWithGoogle: () => Promise<{ error?: any }>
+  signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
   useEffect(() => {
-    // Check for existing session
-    const currentUser = getCurrentUser()
-    setUser(currentUser)
-    setLoading(false)
-  }, [])
+    // Get initial session
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user ? formatUser(session.user) : null)
+      setLoading(false)
+    }
 
-  const signUp = async (email: string, password: string): Promise<boolean> => {
+    getInitialSession()
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ? formatUser(session.user) : null)
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
+
+  const formatUser = (supabaseUser: User): AuthUser => ({
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    created_at: supabaseUser.created_at,
+    user_metadata: supabaseUser.user_metadata,
+  })
+
+  const signUp = async (email: string, password: string, displayName?: string) => {
     try {
-      // Check if user already exists
-      const existingUser = authenticateUser(email, password)
-      if (existingUser) {
-        toast.error("User already exists with this email")
-        return false
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: displayName,
+          },
+        },
+      })
+
+      if (error) {
+        toast.error(error.message)
+        return { error }
       }
 
-      const newUser = createUser(email, password)
-      setCurrentUser(newUser.id)
-      setUser(newUser)
-      toast.success("Account created successfully!")
-      return true
+      if (data.user) {
+        toast.success("Account created successfully!")
+      }
+
+      return { error: null }
     } catch (error) {
       console.error("Sign up error:", error)
       toast.error("Failed to create account")
-      return false
+      return { error }
     }
   }
 
-  const signIn = async (email: string, password: string): Promise<boolean> => {
+  const signIn = async (email: string, password: string) => {
     try {
-      const authenticatedUser = authenticateUser(email, password)
-      if (authenticatedUser) {
-        setCurrentUser(authenticatedUser.id)
-        setUser(authenticatedUser)
-        toast.success("Signed in successfully!")
-        return true
-      } else {
-        toast.error("Invalid email or password")
-        return false
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        toast.error(error.message)
+        return { error }
       }
+
+      if (data.user) {
+        toast.success("Signed in successfully!")
+      }
+
+      return { error: null }
     } catch (error) {
       console.error("Sign in error:", error)
       toast.error("Failed to sign in")
-      return false
+      return { error }
     }
   }
 
-  const signOut = () => {
-    setCurrentUser(null)
-    setUser(null)
-    toast.success("Signed out successfully!")
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (error) {
+        toast.error(error.message)
+        return { error }
+      }
+
+      return { error: null }
+    } catch (error) {
+      console.error("Google sign in error:", error)
+      toast.error("Failed to sign in with Google")
+      return { error }
+    }
   }
 
-  return <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>{children}</AuthContext.Provider>
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        toast.error(error.message)
+      } else {
+        toast.success("Signed out successfully!")
+      }
+    } catch (error) {
+      console.error("Sign out error:", error)
+      toast.error("Failed to sign out")
+    }
+  }
+
+  return (
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        loading, 
+        signUp, 
+        signIn, 
+        signInWithGoogle,
+        signOut 
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

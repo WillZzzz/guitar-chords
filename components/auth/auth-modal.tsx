@@ -41,9 +41,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       const { error } = await signIn(signInData.email, signInData.password)
 
-      if (error) {
-        toast.error(error.message)
-      } else {
+      if (!error) {
         toast.success(t("msg.welcome-back"))
         onOpenChange(false)
         setSignInData({ email: "", password: "" })
@@ -73,9 +71,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       const { error } = await signUp(signUpData.email, signUpData.password, signUpData.displayName)
 
-      if (error) {
-        toast.error(error.message)
-      } else {
+      if (!error) {
         toast.success(t("msg.account-created"))
         onOpenChange(false)
         setSignUpData({ email: "", password: "", confirmPassword: "", displayName: "" })

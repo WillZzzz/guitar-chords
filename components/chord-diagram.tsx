@@ -149,20 +149,36 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
           }
         })}
 
-        {/* Fret numbers on the side */}
-        {displayStartFret > 1 &&
-          Array.from({ length: fretCount }, (_, i) => (
-            <text
-              key={`fret-num-${i}`}
-              x={width - 15}
-              y={nutHeight + 20 + (i + 0.5) * fretHeight + 4}
-              fontSize="10"
-              textAnchor="middle"
-              fill="#666"
-            >
-              {displayStartFret + i}
-            </text>
-          ))}
+        {/* Fret numbers on both sides */}
+        {Array.from({ length: fretCount }, (_, i) => {
+          const fretNumber = displayStartFret + i
+          return (
+            <g key={`fret-numbers-${i}`}>
+              {/* Left side fret numbers */}
+              <text
+                x={15}
+                y={nutHeight + 20 + (i + 0.5) * fretHeight + 4}
+                fontSize="10"
+                textAnchor="middle"
+                fill="#666"
+                fontWeight="500"
+              >
+                {fretNumber}
+              </text>
+              {/* Right side fret numbers */}
+              <text
+                x={width - 15}
+                y={nutHeight + 20 + (i + 0.5) * fretHeight + 4}
+                fontSize="10"
+                textAnchor="middle"
+                fill="#666"
+                fontWeight="500"
+              >
+                {fretNumber}
+              </text>
+            </g>
+          )
+        })}
       </svg>
     </div>
   )

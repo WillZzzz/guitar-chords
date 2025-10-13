@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
-import ChordHistory from "@/components/chord-history"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -80,10 +79,6 @@ export default function MainContent() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
-          {/* Chord History Section */}
-          <div className="mb-8">
-            <ChordHistory onChordSelect={setSelectedChord} />
-          </div>
           <Tabs defaultValue="finder" className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
               <TabsTrigger

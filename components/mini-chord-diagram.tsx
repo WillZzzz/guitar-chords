@@ -60,8 +60,8 @@ export default function MiniChordDiagram({ positions, startFret = 1 }: MiniChord
       <svg width={width} height={height} className="mini-chord-diagram">
         {/* Fret position indicator */}
         {displayStartFret > 1 && (
-          <text x={5} y={nutHeight + 15 + fretHeight * 2} fontSize="8" textAnchor="middle" fill="#666">
-            {displayStartFret}
+          <text x={5} y={nutHeight + 15 + fretHeight * 2} fontSize="8" textAnchor="middle" fill="#666" fontWeight="500">
+            {displayStartFret}fr
           </text>
         )}
 
