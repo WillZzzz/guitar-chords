@@ -1,5 +1,45 @@
 import { Scale, Note, Interval } from 'tonal'
 
+/**
+ * Ensures a scale has complete notes by rebuilding it if necessary
+ */
+function ensureCompleteScale(rootNote: string, scaleType: string): { notes: string[], intervals: string[] } {
+  const scale = Scale.get(`${rootNote} ${scaleType}`)
+  
+  // If we get a valid scale with expected number of notes, return it
+  if (scale.notes && scale.notes.length >= 5) {
+    return { notes: scale.notes, intervals: scale.intervals || [] }
+  }
+  
+  // For some scales, try alternative names or manual construction
+  const scaleAliases: { [key: string]: string[] } = {
+    'minor': ['natural minor', 'aeolian'],
+    'major': ['ionian'],
+    'harmonic minor': ['harmonic minor'],
+    'melodic minor': ['melodic minor ascending'],
+    'dorian': ['dorian'],
+    'mixolydian': ['mixolydian'],
+    'lydian': ['lydian'],
+    'phrygian': ['phrygian'],
+    'locrian': ['locrian'],
+    'major pentatonic': ['major pentatonic'],
+    'minor pentatonic': ['minor pentatonic'],
+    'blues': ['blues', 'blues major']
+  }
+  
+  // Try alternative names
+  const aliases = scaleAliases[scaleType] || []
+  for (const alias of aliases) {
+    const altScale = Scale.get(`${rootNote} ${alias}`)
+    if (altScale.notes && altScale.notes.length >= 5) {
+      return { notes: altScale.notes, intervals: altScale.intervals || [] }
+    }
+  }
+  
+  // Return original even if incomplete (better than nothing)
+  return { notes: scale.notes || [], intervals: scale.intervals || [] }
+}
+
 export interface ScaleInfo {
   name: string
   notes: string[]
@@ -18,7 +58,7 @@ export interface ChordScaleAnalysis {
 // Common scales that chords are typically built from
 const COMMON_SCALES = [
   'major',
-  'natural minor',
+  'minor', // Use 'minor' instead of 'natural minor' for better Tonal.js compatibility
   'harmonic minor',
   'melodic minor',
   'dorian',
@@ -32,8 +72,8 @@ const COMMON_SCALES = [
 ]
 
 // Roman numeral notation for scale degrees
-const SCALE_DEGREES = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°']
-const MINOR_SCALE_DEGREES = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII']
+const SCALE_DEGREES = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°', 'I', 'ii', 'iii', 'IV', 'V']
+const MINOR_SCALE_DEGREES = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII', 'i', 'ii°', 'III', 'iv', 'v']
 
 /**
  * Analyzes a chord to determine what scale(s) it could come from
@@ -55,10 +95,11 @@ export function analyzeChordScale(chordNotes: string[], chordName: string): Chor
 
   // Check each common scale starting from the root note
   for (const scaleType of COMMON_SCALES) {
-    const scale = Scale.get(`${rootNote} ${scaleType}`)
+    const scaleData = ensureCompleteScale(rootNote, scaleType)
     
-    if (scale.notes && scale.notes.length > 0) {
-      const normalizedScaleNotes = scale.notes.map(note => Note.simplify(note))
+    if (scaleData.notes && scaleData.notes.length > 0) {
+      const normalizedScaleNotes = scaleData.notes.map(note => Note.simplify(note))
+      
       
       // Check if all chord notes are present in this scale
       const chordNotesInScale = normalizedChordNotes.every(chordNote => 
@@ -81,13 +122,20 @@ export function analyzeChordScale(chordNotes: string[], chordName: string): Chor
         const scaleDegrees = normalizedScaleNotes.map((_, index) => {
           const isMinorScale = scaleType.includes('minor') || scaleType === 'dorian' || scaleType === 'phrygian'
           const degrees = isMinorScale ? MINOR_SCALE_DEGREES : SCALE_DEGREES
-          return degrees[index] || `${index + 1}`
+          
+          // Handle scales with more than 7 notes
+          if (index < degrees.length) {
+            return degrees[index]
+          } else {
+            // For pentatonic scales (5 notes) or other scales, use numbers
+            return `${index + 1}`
+          }
         })
 
         scaleMatches.push({
           name: `${rootNote} ${scaleType}`,
-          notes: scale.notes,
-          intervals: scale.intervals || [],
+          notes: scaleData.notes,
+          intervals: scaleData.intervals || [],
           chordNotes: normalizedChordNotes,
           highlightedIndices,
           scaleDegrees
@@ -98,13 +146,13 @@ export function analyzeChordScale(chordNotes: string[], chordName: string): Chor
 
   // Also check if the chord might come from a different root
   // (e.g., Am chord from C major scale)
-  for (const scaleType of ['major', 'natural minor']) {
+  for (const scaleType of ['major', 'minor']) {
     for (let i = 0; i < 12; i++) {
       const testRoot = Note.fromMidi(Note.midi(rootNote)! + i)
-      const scale = Scale.get(`${testRoot} ${scaleType}`)
+      const scaleData = ensureCompleteScale(testRoot, scaleType)
       
-      if (scale.notes && scale.notes.length > 0) {
-        const normalizedScaleNotes = scale.notes.map(note => Note.simplify(note))
+      if (scaleData.notes && scaleData.notes.length > 0) {
+        const normalizedScaleNotes = scaleData.notes.map(note => Note.simplify(note))
         
         const chordNotesInScale = normalizedChordNotes.every(chordNote => 
           normalizedScaleNotes.some(scaleNote => 
@@ -124,7 +172,14 @@ export function analyzeChordScale(chordNotes: string[], chordName: string): Chor
           const scaleDegrees = normalizedScaleNotes.map((_, index) => {
             const isMinorScale = scaleType.includes('minor')
             const degrees = isMinorScale ? MINOR_SCALE_DEGREES : SCALE_DEGREES
-            return degrees[index] || `${index + 1}`
+            
+            // Handle scales with more than 7 notes
+            if (index < degrees.length) {
+              return degrees[index]
+            } else {
+              // For pentatonic scales (5 notes) or other scales, use numbers
+              return `${index + 1}`
+            }
           })
 
           // Don't add duplicates and don't add the same root we already checked
@@ -134,8 +189,8 @@ export function analyzeChordScale(chordNotes: string[], chordName: string): Chor
           if (!isDuplicate && testRoot !== rootNote) {
             scaleMatches.push({
               name: scaleName,
-              notes: scale.notes,
-              intervals: scale.intervals || [],
+              notes: scaleData.notes,
+              intervals: scaleData.intervals || [],
               chordNotes: normalizedChordNotes,
               highlightedIndices,
               scaleDegrees

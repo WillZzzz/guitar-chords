@@ -267,6 +267,14 @@
     "search": "Search",
     "play": "Play",
     "stop": "Stop",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "show-keyboard": "Show Keyboard",
+    "hide-keyboard": "Hide Keyboard"
+  },
+  "note-picker": {
+    "notes": "Notes",
+    "accidentals": "Accidentals",
+    "qualities": "Qualities",
+    "extensions": "Extensions"
   }
 }

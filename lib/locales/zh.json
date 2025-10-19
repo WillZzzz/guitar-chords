@@ -267,6 +267,14 @@
     "search": "搜索",
     "play": "播放",
     "stop": "停止",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "show-keyboard": "显示键盘",
+    "hide-keyboard": "隐藏键盘"
+  },
+  "note-picker": {
+    "notes": "音符",
+    "accidentals": "变音记号",
+    "qualities": "和弦性质",
+    "extensions": "扩展音"
   }
 }

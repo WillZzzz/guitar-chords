@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Music, Clock, Play, Volume2, Heart } from "lucide-react"
@@ -17,6 +16,7 @@ import { toast } from "sonner"
 import ChordDiagram from "./chord-diagram"
 import MiniChordDiagram from "./mini-chord-diagram"
 import ScaleDisplay from "./scale-display"
+import NotePicker from "./note-picker"
 import { Chord } from "tonal"
 import { playChordHTML5 } from "@/lib/audio-html5-fallback"
 import { analyzeChordScale } from "@/lib/scale-analysis"
@@ -66,7 +66,6 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const { user } = useAuth()
   const { addToHistory } = useChordHistory()
-  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null)
   const { t } = useLanguage()
 
   const chordData = getChordData(selectedChord)
@@ -156,24 +155,6 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
     }
   }
 
-  const insertAtCursor = (text: string) => {
-    if (!inputRef) return
-
-    const start = inputRef.selectionStart || 0
-    const end = inputRef.selectionEnd || 0
-    const currentValue = searchTerm
-    
-    const newValue = currentValue.slice(0, start) + text + currentValue.slice(end)
-    setSearchTerm(newValue)
-    
-    // Set cursor position after inserted text and refocus
-    setTimeout(() => {
-      if (inputRef) {
-        inputRef.focus()
-        inputRef.setSelectionRange(start + text.length, start + text.length)
-      }
-    }, 0)
-  }
 
   const getRelatedChords = (chordName: string) => {
     const root = chordName.charAt(0)
@@ -242,19 +223,12 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              ref={setInputRef}
-              placeholder={t("chord-finder.search-placeholder")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-              className="flex-1"
-            />
-            <Button onClick={handleSearch} className="bg-green-600 hover:bg-green-700">
-              {t("ui.search")}
-            </Button>
-          </div>
+          <NotePicker
+            value={searchTerm}
+            onChange={setSearchTerm}
+            onSearch={handleSearch}
+            placeholder={t("chord-finder.search-placeholder")}
+          />
 
           {/* Chord Helper Buttons */}
           <div className="space-y-3 border-t pt-3">
