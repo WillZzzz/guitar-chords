@@ -230,110 +230,6 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
             placeholder={t("chord-finder.search-placeholder")}
           />
 
-          {/* Chord Helper Buttons */}
-          <div className="space-y-3 border-t pt-3">
-            <h4 className="text-sm font-medium text-gray-700">Quick Insert:</h4>
-            
-            {/* Category 1: Accidentals */}
-            <div className="space-y-1">
-              <span className="text-xs text-gray-500 font-medium">Accidentals</span>
-              <div className="flex gap-1 overflow-x-auto pb-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => insertAtCursor("#")}
-                  className="h-10 px-3 text-sm shrink-0 hover:bg-blue-50 border-blue-200"
-                >
-                  #
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => insertAtCursor("b")}
-                  className="h-10 px-3 text-sm shrink-0 hover:bg-blue-50 border-blue-200"
-                >
-                  ♭
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => insertAtCursor("ø")}
-                  className="h-10 px-3 text-sm shrink-0 hover:bg-blue-50 border-blue-200"
-                >
-                  ø
-                </Button>
-              </div>
-            </div>
-
-            {/* Category 2: Numbers */}
-            <div className="space-y-1">
-              <span className="text-xs text-gray-500 font-medium">Numbers</span>
-              <div className="flex gap-1 overflow-x-auto pb-1">
-                {["5", "6", "7", "9", "11", "13"].map((num) => (
-                  <Button
-                    key={num}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => insertAtCursor(num)}
-                    className="h-10 px-3 text-sm shrink-0 hover:bg-green-50 border-green-200"
-                  >
-                    {num}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Category 3: Basic Types */}
-            <div className="space-y-1">
-              <span className="text-xs text-gray-500 font-medium">Basic Types</span>
-              <div className="flex gap-1 overflow-x-auto pb-1">
-                {["maj", "min", "dim", "aug", "sus", "add"].map((type) => (
-                  <Button
-                    key={type}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => insertAtCursor(type)}
-                    className="h-10 px-3 text-sm shrink-0 hover:bg-purple-50 border-purple-200"
-                  >
-                    {type}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Category 4: Common Combinations */}
-            <div className="space-y-1">
-              <span className="text-xs text-gray-500 font-medium">Combinations</span>
-              <div className="flex gap-1 overflow-x-auto pb-1">
-                {["maj7", "min7", "dim7", "sus2", "sus4", "add9"].map((combo) => (
-                  <Button
-                    key={combo}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => insertAtCursor(combo)}
-                    className="h-10 px-3 text-sm shrink-0 hover:bg-orange-50 border-orange-200"
-                  >
-                    {combo}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Clear Button */}
-            <div className="flex justify-center pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchTerm("")
-                  inputRef?.focus()
-                }}
-                className="h-10 px-4 text-sm hover:bg-red-50 border-red-200 text-red-600"
-              >
-                Clear Input
-              </Button>
-            </div>
-          </div>
 
           {/* Examples */}
           <div>
@@ -397,21 +293,21 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
         </CardHeader>
         <CardContent>
           {chordData.variations && chordData.variations.length > 0 ? (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {chordData.variations.map((variation, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-white">
-                  <div className="flex flex-col lg:flex-row gap-4">
+                <div key={index} className="border rounded-lg p-3 bg-white">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     {/* Chord Diagram */}
-                    <div className="flex justify-center lg:justify-start">
-                      <div className="bg-amber-50 rounded-lg p-4">
+                    <div className="flex justify-center sm:justify-start shrink-0">
+                      <div className="bg-amber-50 rounded p-2">
                         <ChordDiagram positions={variation.positions} />
                       </div>
                     </div>
 
                     {/* Chord Info */}
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold">{variation.name}</h3>
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <h3 className="font-semibold text-base">{variation.name}</h3>
                         <Badge
                           variant={
                             variation.difficulty === "Beginner"
@@ -420,21 +316,23 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
                                 ? "secondary"
                                 : "outline"
                           }
+                          className="text-xs"
                         >
                           {variation.difficulty}
                         </Badge>
                       </div>
 
                       {(variation.description || variation.descriptionKey) && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground leading-snug">
                           {getTranslatedChordDescription(variation, t, selectedChord)}
                         </p>
                       )}
 
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <Button
                           onClick={() => handlePlayChord(variation.positions)}
                           disabled={isPlaying}
+                          size="sm"
                           className="gap-2"
                         >
                           {isPlaying ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Play className="h-4 w-4" />}
