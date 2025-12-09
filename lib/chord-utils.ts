@@ -3,6 +3,7 @@
 import { getTonalRelatedChords, identifyChordFromTonal, findScalesContainingTonalChord } from "./tonal-integration"
 import { getChordInfo, type ChordInfo } from "./chord-libraries"
 import { getChordFromFingeringLibrary, isValidChordInFingeringLibrary } from "./chord-fingering-integration"
+import { getChordFromChordsDb, isValidChordInChordsDb } from "./chords-db-integration"
 
 export interface ChordPosition {
   string: number // 1-6, where 6 is the low E string and 1 is the high E string
@@ -1364,12 +1365,43 @@ const chordFingeringDatabase: Record<string, ChordVariation[]> = {
 
 // Get chord data function with enhanced fallback system
 export function getChordData(chordName: string): ChordInfo | null {
-  // First try our custom chord library
-  let chordInfo = getChordInfo(chordName)
+  console.log(`🎸 getChordData called for: ${chordName}`)
   
-  // If not found, try the chord-fingering library as fallback
+  // Priority 1: Try @tombatossals/chords-db library (curated, reliable data)
+  console.log(`🔄 Trying @tombatossals/chords-db library first for: ${chordName}`)
+  const chordsDbChord = getChordFromChordsDb(chordName)
+  console.log(`🎵 @tombatossals/chords-db result:`, chordsDbChord ? `Found with ${chordsDbChord.fingerings?.length || 0} fingerings` : 'Not found')
+  
+  if (chordsDbChord) {
+    // Convert chords-db format to our ChordInfo format
+    const chordInfo = {
+      name: chordsDbChord.fullName || chordsDbChord.symbol,
+      symbol: chordsDbChord.symbol,
+      notes: chordsDbChord.notes,
+      intervals: chordsDbChord.intervals,
+      quality: determineChordQualityFromNotes(chordsDbChord.symbol), // Determine quality from symbol
+      variations: chordsDbChord.fingerings,
+      semitones: chordsDbChord.intervals.map(intervalToSemitones), // Convert intervals to semitones
+    }
+    console.log(`✅ Converted @tombatossals/chords-db info:`, {
+      name: chordInfo.name,
+      variations: chordInfo.variations?.length || 0,
+      quality: chordInfo.quality
+    })
+    console.log(`🎯 Final result for ${chordName}:`, `Found with ${chordInfo.variations?.length || 0} variations from @tombatossals/chords-db`)
+    return chordInfo
+  }
+  
+  // Priority 2: Try our custom chord library
+  let chordInfo = getChordInfo(chordName)
+  console.log(`📚 Built-in library result:`, chordInfo ? `Found with ${chordInfo.variations?.length || 0} variations` : 'Not found')
+  
+  // Priority 3: If not found, try the chord-fingering library as last fallback
   if (!chordInfo) {
+    console.log(`🔄 Trying chord-fingering library fallback for: ${chordName}`)
     const fingeringChord = getChordFromFingeringLibrary(chordName)
+    console.log(`🎵 Chord-fingering library result:`, fingeringChord ? `Found with ${fingeringChord.fingerings?.length || 0} fingerings` : 'Not found')
+    
     if (fingeringChord) {
       // Convert fingering library format to our ChordInfo format
       chordInfo = {
@@ -1377,20 +1409,97 @@ export function getChordData(chordName: string): ChordInfo | null {
         symbol: fingeringChord.symbol,
         notes: fingeringChord.notes,
         intervals: fingeringChord.intervals,
-        quality: fingeringChord.intervals.includes('3m') ? 'Minor' : 'Major', // Simple quality detection
-        variations: fingeringChord.fingerings.map(f => ({
-          name: f.name || 'Position',
-          positions: f.positions,
-          startFret: f.startFret || 1,
-          difficulty: f.difficulty || 'Intermediate',
-          description: f.description || `${f.name} fingering`,
-        })),
-        semitones: [], // Not provided by fingering library
+        quality: determineChordQuality(fingeringChord), // Better quality detection
+        variations: fingeringChord.fingerings,
+        semitones: fingeringChord.intervals.map(intervalToSemitones), // Convert intervals to semitones
       }
+      console.log(`✅ Converted chord info from chord-fingering:`, {
+        name: chordInfo.name,
+        variations: chordInfo.variations?.length || 0,
+        quality: chordInfo.quality
+      })
     }
   }
   
+  console.log(`🎯 Final result for ${chordName}:`, chordInfo ? `Found with ${chordInfo.variations?.length || 0} variations` : 'null')
   return chordInfo
+}
+
+// Helper function to determine chord quality from chord symbol
+function determineChordQualityFromNotes(chordSymbol: string): string {
+  const symbol = chordSymbol.toLowerCase()
+  
+  if (symbol.includes('maj7')) return 'Major 7th'
+  if (symbol.includes('m7')) return 'Minor 7th' 
+  if (symbol.includes('7')) return 'Dominant 7th'
+  if (symbol.includes('maj')) return 'Major'
+  if (symbol.includes('min') || symbol.includes('m')) return 'Minor'
+  if (symbol.includes('sus4')) return 'Suspended 4th'
+  if (symbol.includes('sus2')) return 'Suspended 2nd'
+  if (symbol.includes('sus')) return 'Suspended'
+  if (symbol.includes('dim')) return 'Diminished'
+  if (symbol.includes('aug')) return 'Augmented'
+  if (symbol.includes('add9')) return 'Add 9th'
+  if (symbol.includes('9')) return '9th'
+  if (symbol.includes('6')) return '6th'
+  
+  // Default to major if no quality specified
+  return 'Major'
+}
+
+// Helper function to determine chord quality from intervals
+function determineChordQuality(fingeringChord: any): string {
+  const intervals = fingeringChord.intervals || []
+  
+  // Check for common chord qualities based on intervals
+  if (intervals.includes('3m')) {
+    if (intervals.includes('7m')) return 'Minor 7th'
+    if (intervals.includes('7M')) return 'Minor Major 7th'
+    return 'Minor'
+  }
+  
+  if (intervals.includes('3M')) {
+    if (intervals.includes('7M')) return 'Major 7th'
+    if (intervals.includes('7m')) return 'Dominant 7th'
+    if (intervals.includes('9M')) return 'Major 9th'
+    return 'Major'
+  }
+  
+  if (intervals.includes('4P') && !intervals.includes('3M') && !intervals.includes('3m')) {
+    return 'Suspended'
+  }
+  
+  if (intervals.includes('3A') || intervals.includes('5A')) return 'Augmented'
+  if (intervals.includes('3d') || intervals.includes('5d')) return 'Diminished'
+  
+  return 'Unknown'
+}
+
+// Helper function to convert interval notation to semitones
+function intervalToSemitones(interval: string): number {
+  const intervalMap: { [key: string]: number } = {
+    '1P': 0,   // Perfect unison
+    '2m': 1,   // Minor second
+    '2M': 2,   // Major second
+    '3m': 3,   // Minor third
+    '3M': 4,   // Major third
+    '4P': 5,   // Perfect fourth
+    '4A': 6,   // Augmented fourth
+    '5d': 6,   // Diminished fifth
+    '5P': 7,   // Perfect fifth
+    '5A': 8,   // Augmented fifth
+    '6m': 8,   // Minor sixth
+    '6M': 9,   // Major sixth
+    '7m': 10,  // Minor seventh
+    '7M': 11,  // Major seventh
+    '8P': 12,  // Perfect octave
+    '9m': 13,  // Minor ninth
+    '9M': 14,  // Major ninth
+    '11P': 17, // Perfect eleventh
+    '13M': 21, // Major thirteenth
+  }
+  
+  return intervalMap[interval] || 0
 }
 
 // Get chord variations from fingering database
@@ -1489,7 +1598,12 @@ export function getChordFunction(chord: string, key: string): string {
 
 // Check if chord exists in our library or fingering library
 export function isValidChord(chordName: string): boolean {
-  // Check our custom library first
+  // Check @tombatossals/chords-db library first
+  if (isValidChordInChordsDb(chordName)) {
+    return true
+  }
+  
+  // Check our custom library
   if (getChordInfo(chordName) !== null) {
     return true
   }

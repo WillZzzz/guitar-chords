@@ -51,8 +51,17 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
           {showKeyboard ? (
             <Input
               value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && onSearch()}
+              onChange={(e) => {
+                console.log(`🎹 NotePicker: Input changed to: "${e.target.value}"`)
+                onChange(e.target.value)
+              }}
+              onKeyDown={(e) => {
+                console.log(`🎹 NotePicker: Key pressed: ${e.key}, current value: "${value}"`)
+                if (e.key === 'Enter') {
+                  console.log(`🎹 NotePicker: Enter pressed, triggering search for: "${value}"`)
+                  onSearch()
+                }
+              }}
               placeholder={placeholder}
               className="pr-8"
               autoFocus
@@ -106,7 +115,10 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
           </span>
         </Button>
         
-        <Button onClick={onSearch} className="bg-green-600 hover:bg-green-700">
+        <Button onClick={() => {
+          console.log(`🎹 NotePicker: Search button clicked for: "${value}"`)
+          onSearch()
+        }} className="bg-green-600 hover:bg-green-700">
           {t("ui.search")}
         </Button>
       </div>
