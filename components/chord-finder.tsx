@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Music, Clock, Play, Volume2, Heart } from "lucide-react"
 import { getChordData } from "@/lib/chord-utils"
-import { getTranslatedChordDescription } from "@/lib/chord-libraries"
+import { getTranslatedChordDescription, ChordInfo } from "@/lib/chord-libraries"
 import { playChordFromPositionsSmart, stopAllAudio } from "@/lib/audio-utils-hybrid"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
@@ -68,7 +68,48 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const { addToHistory } = useChordHistory()
   const { t } = useLanguage()
 
-  const chordData = getChordData(selectedChord)
+  console.log(`🎵 ChordFinder: selectedChord = "${selectedChord}"`)
+  
+  // Use state for chord data to ensure proper re-rendering
+  const [currentChordData, setCurrentChordData] = useState<ChordInfo | null>(null)
+  
+  useEffect(() => {
+    console.log(`🎵 ChordFinder: useEffect triggered for selectedChord = "${selectedChord}"`)
+    
+    // Test chord-fingering library directly
+    if (selectedChord === 'Gbmaj7') {
+      console.log(`🧪 Direct test of chord-fingering library for Gbmaj7:`)
+      try {
+        const { findGuitarChord } = require('chord-fingering')
+        const directResult = findGuitarChord('Gbmaj7')
+        console.log(`🧪 Direct result:`, directResult ? {
+          symbol: directResult.symbol,
+          fingerings: directResult.fingerings?.length || 0,
+          notes: directResult.notes
+        } : 'null')
+      } catch (error) {
+        console.log(`🧪 Direct test error:`, error)
+      }
+    }
+    
+    const chordData = getChordData(selectedChord)
+    console.log(`🎵 ChordFinder: chordData result =`, chordData ? `Found with ${chordData.variations?.length || 0} variations` : 'null')
+    
+    if (chordData && selectedChord === 'Gbmaj7') {
+      console.log(`🎵 ChordFinder: Full chordData for Gbmaj7:`, {
+        name: chordData.name,
+        symbol: chordData.symbol,
+        variationsCount: chordData.variations?.length,
+        firstVariation: chordData.variations?.[0],
+        notes: chordData.notes,
+        quality: chordData.quality
+      })
+    }
+    
+    setCurrentChordData(chordData)
+  }, [selectedChord])
+  
+  const chordData = currentChordData
   const tonalChordData = Chord.get(selectedChord)
 
   useEffect(() => {
@@ -81,14 +122,16 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 
   useEffect(() => {
     if (user && selectedChord && chordData) {
-      const favorited = isChordFavorite(user.id, selectedChord, chordData.type || "major")
+      const favorited = isChordFavorite(user.id, selectedChord, chordData.quality || "major")
       setIsFavorited(favorited)
     }
   }, [user, selectedChord, chordData])
 
   const handleSearch = () => {
+    console.log(`🔍 handleSearch called with searchTerm: "${searchTerm}"`)
     if (searchTerm.trim()) {
       const chord = searchTerm.trim()
+      console.log(`🔍 Setting selectedChord to: "${chord}"`)
       setSelectedChord(chord)
       onChordSelect?.(chord)
       addToHistory(chord)
@@ -141,7 +184,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
       return
     }
 
-    const chordType = chordData.type || "major"
+    const chordType = chordData.quality || "major"
     const rootNote = selectedChord.charAt(0)
 
     if (isFavorited) {
@@ -158,7 +201,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 
   const getRelatedChords = (chordName: string) => {
     const root = chordName.charAt(0)
-    const related = []
+    const related: string[] = []
 
     // Add basic variations of the same root
     const variations = [`${root}`, `${root}m`, `${root}7`, `${root}maj7`]
@@ -421,7 +464,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 {t("analysis.semitones")}
                   </Badge>
                   <div>
-                    <p className="font-medium">{tonalChordData.semitones?.join(", ") || "0, 4, 7"}</p>
+                    <p className="font-medium">{chordData?.semitones?.join(", ") || tonalChordData.intervals?.join(", ") || "0, 4, 7"}</p>
                     <p className="text-sm text-muted-foreground">
                       {t("analysis.semitone-distances")}
                     </p>

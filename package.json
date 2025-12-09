@@ -40,6 +40,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
+    "@tombatossals/chords-db": "^0.5.1",
     "@tonaljs/tonal": "latest",
     "autoprefixer": "^10.4.20",
     "chord-fingering": "^1.0.2",

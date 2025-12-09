@@ -1497,15 +1497,30 @@ const guitarFingerings: { [key: string]: ChordVariation[] } = {
 // Function to get chord data using Tonal.js + guitar fingerings
 export function getChordInfo(chordSymbol: string): ChordInfo | null {
   try {
+    console.log(`📖 getChordInfo called for: ${chordSymbol}`)
+    
     // Get chord theory from Tonal.js
     const tonalChord = Chord.get(chordSymbol)
+    console.log(`📖 Tonal.js result:`, tonalChord ? {
+      name: tonalChord.name,
+      empty: tonalChord.empty,
+      symbol: tonalChord.symbol
+    } : 'null')
 
     if (!tonalChord.name || tonalChord.empty) {
+      console.log(`📖 Tonal.js chord is empty or unnamed, returning null`)
       return null
     }
 
     // Get guitar fingerings from our database
     const fingerings = guitarFingerings[chordSymbol] || []
+    console.log(`📖 Built-in fingerings for ${chordSymbol}:`, fingerings.length, 'variations')
+
+    // If no fingerings found in our database, return null to trigger fallback
+    if (fingerings.length === 0) {
+      console.log(`📖 No built-in fingerings found for ${chordSymbol}, returning null for fallback`)
+      return null
+    }
 
     // Create comprehensive chord info
     const chordInfo: ChordInfo = {
@@ -1525,6 +1540,7 @@ export function getChordInfo(chordSymbol: string): ChordInfo | null {
       }),
     }
 
+    console.log(`📖 Returning built-in chord info for ${chordSymbol} with ${fingerings.length} variations`)
     return chordInfo
   } catch (error) {
     console.error("Error getting chord info:", error)
