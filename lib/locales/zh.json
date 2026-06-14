@@ -98,7 +98,11 @@
     "possible-chords": "可能的和弦（按可信度排序）",
     "no-matching-chords": "未找到匹配所选音符的和弦。",
     "try-different-notes": "请尝试选择不同的音符或更少的音符。",
-    "select-min-notes": "请至少选择2个音符来查找可能的和弦。"
+    "select-min-notes": "请至少选择2个音符来查找可能的和弦。",
+    "open-position": "开放把位",
+    "barre": "横按",
+    "position": "把位",
+    "level": "级"
   },
   "section": {
     "music-theory": "音乐理论与分析",

@@ -13,19 +13,16 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/contexts/auth-context"
 import AuthModal from "./auth-modal"
-import { toast } from "sonner"
 
 export default function UserMenu() {
   const { user, signOut } = useAuth()
   const [authModalOpen, setAuthModalOpen] = useState(false)
 
+  // Debug logging
+  console.log("🔍 UserMenu render - user:", user ? "logged in" : "not logged in", "user object:", !!user)
+
   const handleSignOut = async () => {
-    const { error } = await signOut()
-    if (error) {
-      toast.error("Error signing out")
-    } else {
-      toast.success("Signed out successfully")
-    }
+    await signOut()
   }
 
   if (!user) {
@@ -66,7 +63,7 @@ export default function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-cookie-500 text-white">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-blue-500 text-white">{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

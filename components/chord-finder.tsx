@@ -58,6 +58,22 @@ const COMMON_CHORDS = [
 
 const EXAMPLE_CHORDS = ["C", "Am", "F", "G", "Em", "Dm", "A7", "E7", "Cmaj7", "Fmaj7"]
 
+// Helper function to translate variation names
+function translateVariationName(name: string, t: (key: string) => string): string {
+  if (name === "Open Position") {
+    return t("variations.open-position")
+  }
+  if (name.startsWith("Barre (") && name.endsWith("th fret)")) {
+    const fretNumber = name.match(/Barre \((\d+)th fret\)/)?.[1]
+    return `${t("variations.barre")} (${fretNumber}th fret)`
+  }
+  if (name.startsWith("Position (") && name.endsWith("th fret)")) {
+    const fretNumber = name.match(/Position \((\d+)th fret\)/)?.[1] 
+    return `${t("variations.position")} (${fretNumber}th fret)`
+  }
+  return name
+}
+
 export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedChord, setSelectedChord] = useState("C")
@@ -92,7 +108,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
       }
     }
     
-    const chordData = getChordData(selectedChord)
+    const chordData = getChordData(selectedChord, t)
     console.log(`🎵 ChordFinder: chordData result =`, chordData ? `Found with ${chordData.variations?.length || 0} variations` : 'null')
     
     if (chordData && selectedChord === 'Gbmaj7') {
@@ -206,7 +222,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
     // Add basic variations of the same root
     const variations = [`${root}`, `${root}m`, `${root}7`, `${root}maj7`]
     variations.forEach((chord) => {
-      if (chord !== chordName && getChordData(chord)) {
+      if (chord !== chordName && getChordData(chord, t)) {
         related.push(chord)
       }
     })
@@ -226,7 +242,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
 
     if (progressions[root]) {
       progressions[root].forEach((chord) => {
-        if (chord !== chordName && !related.includes(chord) && getChordData(chord)) {
+        if (chord !== chordName && !related.includes(chord) && getChordData(chord, t)) {
           related.push(chord)
         }
       })
@@ -343,14 +359,14 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
                     {/* Chord Diagram */}
                     <div className="flex justify-center sm:justify-start shrink-0">
                       <div className="bg-amber-50 rounded p-2">
-                        <ChordDiagram positions={variation.positions} />
+                        <ChordDiagram positions={variation.positions} startFret={variation.startFret} />
                       </div>
                     </div>
 
                     {/* Chord Info */}
                     <div className="flex-1 space-y-2 min-w-0">
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        <h3 className="font-semibold text-base">{variation.name}</h3>
+                        <h3 className="font-semibold text-base">{translateVariationName(variation.name, t)}</h3>
                         <Badge
                           variant={
                             variation.difficulty === "Beginner"
@@ -361,7 +377,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
                           }
                           className="text-xs"
                         >
-                          {variation.difficulty}
+                          {t(`chord.difficulty.${variation.difficulty.toLowerCase()}`)}
                         </Badge>
                       </div>
 
@@ -543,7 +559,7 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {getRelatedChords(selectedChord).map((relatedChord) => {
-              const relatedData = getChordData(relatedChord)
+              const relatedData = getChordData(relatedChord, t)
               const relatedTonal = Chord.get(relatedChord)
               return (
                 <div

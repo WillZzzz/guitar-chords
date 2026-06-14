@@ -1364,12 +1364,15 @@ const chordFingeringDatabase: Record<string, ChordVariation[]> = {
 }
 
 // Get chord data function with enhanced fallback system
-export function getChordData(chordName: string): ChordInfo | null {
+// Translation helper function type
+type TranslateFunction = (key: string) => string
+
+export function getChordData(chordName: string, t?: TranslateFunction): ChordInfo | null {
   console.log(`🎸 getChordData called for: ${chordName}`)
   
   // Priority 1: Try @tombatossals/chords-db library (curated, reliable data)
   console.log(`🔄 Trying @tombatossals/chords-db library first for: ${chordName}`)
-  const chordsDbChord = getChordFromChordsDb(chordName)
+  const chordsDbChord = getChordFromChordsDb(chordName, t)
   console.log(`🎵 @tombatossals/chords-db result:`, chordsDbChord ? `Found with ${chordsDbChord.fingerings?.length || 0} fingerings` : 'Not found')
   
   if (chordsDbChord) {

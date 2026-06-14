@@ -5,6 +5,46 @@ import { Chord } from "tonal"
 type TranslationFunction = (key: string, params?: Record<string, string>) => string
 
 // Helper function to get translated description
+// Helper function to translate variation descriptions  
+function translateVariationDescription(description: string, t: TranslationFunction): string {
+  // Handle pattern: "Open Position - Beginner level"
+  if (description.includes(" - ") && description.includes(" level")) {
+    const [namePart, difficultyPart] = description.split(" - ")
+    const translatedName = translateDescriptionName(namePart, t)
+    const translatedDifficulty = translateDescriptionDifficulty(difficultyPart, t)
+    return `${translatedName} - ${translatedDifficulty}`
+  }
+  return description
+}
+
+function translateDescriptionName(name: string, t: TranslationFunction): string {
+  if (name === "Open Position") {
+    return t("variations.open-position")
+  }
+  if (name.startsWith("Barre (") && name.endsWith("th fret)")) {
+    const fretNumber = name.match(/Barre \((\d+)th fret\)/)?.[1]
+    return `${t("variations.barre")} (${fretNumber}th fret)`
+  }
+  if (name.startsWith("Position (") && name.endsWith("th fret)")) {
+    const fretNumber = name.match(/Position \((\d+)th fret\)/)?.[1] 
+    return `${t("variations.position")} (${fretNumber}th fret)`
+  }
+  return name
+}
+
+function translateDescriptionDifficulty(difficultyPart: string, t: TranslationFunction): string {
+  if (difficultyPart === "Beginner level") {
+    return `${t("chord.difficulty.beginner")} ${t("variations.level")}`
+  }
+  if (difficultyPart === "Intermediate level") {
+    return `${t("chord.difficulty.intermediate")} ${t("variations.level")}`
+  }
+  if (difficultyPart === "Advanced level") {
+    return `${t("chord.difficulty.advanced")} ${t("variations.level")}`
+  }
+  return difficultyPart
+}
+
 export function getTranslatedChordDescription(
   variation: ChordVariation,
   t: TranslationFunction,
@@ -14,7 +54,12 @@ export function getTranslatedChordDescription(
     const note = chordName.replace(/[^A-G#b].*/, '') // Extract root note
     return t(variation.descriptionKey, { note, chord: chordName })
   }
-  return variation.description || ""
+  
+  if (variation.description) {
+    return translateVariationDescription(variation.description, t)
+  }
+  
+  return ""
 }
 
 export interface ChordPosition {

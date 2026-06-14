@@ -55,23 +55,30 @@ function normalizeSuffix(suffix: string): string {
   return normalized
 }
 
+// Translation helper function type
+type TranslateFunction = (key: string) => string
+
 // Convert chords-db fingering format to our internal format
-function convertChordsDbFingering(chordData: any, fingeringIndex: number): ChordsDbVariation {
+function convertChordsDbFingering(chordData: any, fingeringIndex: number, t?: TranslateFunction): ChordsDbVariation {
   const fingering = chordData.positions[fingeringIndex]
   
   // Convert frets array to our position format
   const positions: ChordsDbPosition[] = []
   
   for (let stringIndex = 0; stringIndex < fingering.frets.length; stringIndex++) {
-    const fret = fingering.frets[stringIndex]
+    const relativeFret = fingering.frets[stringIndex]
     const finger = fingering.fingers[stringIndex]
     
     // Skip strings that are not played (-1 fret)
-    if (fret === -1) continue
+    if (relativeFret === -1) continue
+    
+    // Convert relative fret to absolute fret position
+    const baseFret = fingering.baseFret || 1
+    const absoluteFret = relativeFret === 0 ? 0 : relativeFret + baseFret - 1
     
     positions.push({
-      string: stringIndex + 1, // Convert from 0-based to 1-based string numbering
-      fret: fret,
+      string: 6 - stringIndex, // Convert from Low E (index 0) to High E (index 5) → string 6 to 1
+      fret: absoluteFret,
       finger: finger
     })
   }
@@ -104,25 +111,33 @@ function convertChordsDbFingering(chordData: any, fingeringIndex: number): Chord
   let name: string
   if (hasBarre) {
     const barreInfo = fingering.barres[0]
-    name = `Barre (${barreInfo.fret}th fret)`
+    const barreText = t ? t("variations.barre") : "Barre"
+    // Use baseFret from fingering data, fallback to barreInfo.fret, then 1
+    const fretNumber = fingering.baseFret || barreInfo.fret || 1
+    name = `${barreText} (${fretNumber}th fret)`
   } else if (hasOpenStrings && maxFret <= 3) {
-    name = `Open Position`
+    name = t ? t("variations.open-position") : "Open Position"
   } else {
-    name = `Position (${minFret}th fret)`
+    const positionText = t ? t("variations.position") : "Position"
+    name = `${positionText} (${minFret}th fret)`
   }
+  
+  const difficultyText = t ? t(`chord.difficulty.${difficulty.toLowerCase()}`) : difficulty
+  const levelText = t ? t("variations.level") : "level"
+  
   
   return {
     positionString,
     positions,
     difficulty,
     name,
-    description: `${name} - ${difficulty} level`,
-    startFret: minFret || 1
+    description: `${name} - ${difficultyText} ${levelText}`,
+    startFret: fingering.baseFret || minFret || 1
   }
 }
 
 // Get chord information from chords-db
-export function getChordFromChordsDb(chordSymbol: string): ChordsDbInfo | null {
+export function getChordFromChordsDb(chordSymbol: string, t?: TranslateFunction): ChordsDbInfo | null {
   try {
     console.log(`🔍 chords-db: searching for "${chordSymbol}"`)
     
@@ -210,7 +225,7 @@ export function getChordFromChordsDb(chordSymbol: string): ChordsDbInfo | null {
       console.log(`\n🔍 Converting fingering ${index + 1} for ${usedSymbol}:`)
       console.log(`📊 Raw fingering:`, fingering)
       
-      const converted = convertChordsDbFingering(matchingChord, index)
+      const converted = convertChordsDbFingering(matchingChord, index, t)
       console.log(`📊 Converted fingering:`, converted)
       
       return converted
