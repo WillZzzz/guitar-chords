@@ -68,7 +68,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setIsLoading(true)
 
     try {
-      const success = await signUp(signUpData.email, signUpData.password)
+      const success = await signUp(signUpData.email, signUpData.password, signUpData.displayName)
 
       if (success) {
         onOpenChange(false)

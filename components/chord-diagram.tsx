@@ -23,15 +23,19 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
   const minFret = frettedPositions.length > 0 ? Math.min(...frettedPositions.map((p) => p.fret)) : 1
   const maxFret = frettedPositions.length > 0 ? Math.max(...frettedPositions.map((p) => p.fret)) : 1
 
-  // Determine display start fret - ensure all frets fit within the 5-fret window
-  let displayStartFret = 1
-  if (minFret > 3) {
-    displayStartFret = Math.max(1, minFret - 1)
-  }
+  // Use the provided startFret prop, or calculate if not provided
+  let displayStartFret = startFret || 1
+  
+  // Only calculate displayStartFret if startFret wasn't provided
+  if (!startFret) {
+    if (minFret > 3) {
+      displayStartFret = Math.max(1, minFret - 1)
+    }
 
-  // If the chord spans more than 5 frets, adjust to fit
-  if (maxFret - displayStartFret >= fretCount) {
-    displayStartFret = Math.max(1, maxFret - fretCount + 1)
+    // If the chord spans more than 5 frets, adjust to fit
+    if (maxFret - displayStartFret >= fretCount) {
+      displayStartFret = Math.max(1, maxFret - fretCount + 1)
+    }
   }
 
   // Get string X position (string 1 = high E on the right, string 6 = low E on the left)
@@ -56,12 +60,6 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
   return (
     <div className="flex flex-col items-center">
       <svg width={width} height={height} className="chord-diagram">
-        {/* Fret position indicator */}
-        {displayStartFret > 1 && (
-          <text x={10} y={nutHeight + 20 + fretHeight * 2.5} fontSize="12" textAnchor="middle" fill="#666">
-            {displayStartFret}fr
-          </text>
-        )}
 
         {/* Nut (thick horizontal line at top for open position) */}
         {displayStartFret === 1 && (
@@ -130,8 +128,11 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
               </g>
             )
           } else {
-            // Fretted note - position between frets, only if within display range
+            // Fretted note - position between frets
             const relativeFret = pos.fret - displayStartFret + 1
+            
+            // Always render fingering positions if they are within reasonable range
+            // The display window should accommodate the actual chord data
             if (relativeFret >= 1 && relativeFret <= fretCount) {
               const fretY = nutHeight + 20 + (relativeFret - 0.5) * fretHeight
               return (
@@ -144,8 +145,9 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
                   )}
                 </g>
               )
+            } else {
+              return null
             }
-            return null // Don't render if outside display range
           }
         })}
 

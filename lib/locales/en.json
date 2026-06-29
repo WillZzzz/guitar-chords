@@ -98,7 +98,11 @@
     "possible-chords": "Possible Chords (sorted by confidence)",
     "no-matching-chords": "No matching chords found for the selected notes.",
     "try-different-notes": "Try selecting different notes or fewer notes.",
-    "select-min-notes": "Select at least 2 notes to find possible chords."
+    "select-min-notes": "Select at least 2 notes to find possible chords.",
+    "open-position": "Open Position",
+    "barre": "Barre",
+    "position": "Position",
+    "level": "level"
   },
   "section": {
     "music-theory": "Music Theory & Analysis",

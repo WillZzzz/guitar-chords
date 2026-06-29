@@ -3,7 +3,20 @@ import { createClient } from "@supabase/supabase-js"
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Debug environment variables
+console.log("Supabase setup - URL:", supabaseUrl)
+console.log("Supabase setup - Key:", supabaseAnonKey ? "present" : "missing")
+
+// Check if we have real Supabase credentials
+const isSupabaseConfigured = supabaseUrl !== "https://placeholder.supabase.co" && supabaseAnonKey !== "placeholder_key"
+
+console.log("Supabase configured:", isSupabaseConfigured)
+
+export const supabase = isSupabaseConfigured 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
+
+console.log("Supabase client:", !!supabase)
 
 // Types for our database tables
 export interface UserProfile {
@@ -46,6 +59,9 @@ export interface ChordProgression {
 
 // Auth helper functions
 export const getCurrentUser = async () => {
+  if (!supabase) {
+    throw new Error("Supabase is not configured. Please set up your environment variables.")
+  }
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -53,6 +69,12 @@ export const getCurrentUser = async () => {
 }
 
 export const signUp = async (email: string, password: string, displayName?: string) => {
+  if (!supabase) {
+    return { 
+      data: null, 
+      error: { message: "Supabase is not configured. Please set up your environment variables." } 
+    }
+  }
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -66,6 +88,12 @@ export const signUp = async (email: string, password: string, displayName?: stri
 }
 
 export const signIn = async (email: string, password: string) => {
+  if (!supabase) {
+    return { 
+      data: null, 
+      error: { message: "Supabase is not configured. Please set up your environment variables." } 
+    }
+  }
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -74,6 +102,9 @@ export const signIn = async (email: string, password: string) => {
 }
 
 export const signOut = async () => {
+  if (!supabase) {
+    return { error: { message: "Supabase is not configured. Please set up your environment variables." } }
+  }
   const { error } = await supabase.auth.signOut()
   return { error }
 }
