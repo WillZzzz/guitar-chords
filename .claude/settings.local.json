@@ -3,7 +3,16 @@
     "allow": [
       "WebSearch",
       "Bash(npm run dev)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Skill(loop)",
+      "Bash(curl *)",
+      "Skill(fewer-permission-prompts)",
+      "Bash(SCRATCHPAD=/private/tmp/claude-501/-Users-tianhang-Documents-Projects-guitar-chord-theory/e27ee58c-de1d-4f76-b1ab-590e0c6d38ec/scratchpad npx playwright test --version)",
+      "Bash(node --input-type=module)",
+      "Bash(node screenshot.mjs)",
+      "Bash(cat)",
+      "Bash(node screenshot2.mjs)",
+      "Bash(node screenshot4.mjs)"
     ],
     "deny": [],
     "ask": []

@@ -8,7 +8,11 @@ console.log("Supabase setup - URL:", supabaseUrl)
 console.log("Supabase setup - Key:", supabaseAnonKey ? "present" : "missing")
 
 // Check if we have real Supabase credentials
-const isSupabaseConfigured = supabaseUrl !== "https://placeholder.supabase.co" && supabaseAnonKey !== "placeholder_key"
+const isSupabaseConfigured =
+  !!supabaseUrl &&
+  !!supabaseAnonKey &&
+  supabaseUrl !== "https://placeholder.supabase.co" &&
+  supabaseAnonKey !== "placeholder_key"
 
 console.log("Supabase configured:", isSupabaseConfigured)
 

@@ -58,11 +58,11 @@ export default function MainContent() {
                 </div>
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-pulse" />
               </div>
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+              <div className="min-w-0">
+                <h1 className="text-base font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent truncate">
                   {t("header.title")}
                 </h1>
-                <p className="text-xs text-gray-600 font-medium">{t("header.subtitle")}</p>
+                <p className="text-xs text-gray-500 font-medium truncate">{t("header.subtitle")}</p>
               </div>
             </div>
             

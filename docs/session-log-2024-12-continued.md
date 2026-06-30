@@ -135,3 +135,38 @@
 
 ---
 *Session ended for day. Resume with chord diagram testing and evaluation.*
+
+---
+
+## Session Date: June 29, 2026
+
+### Tasks Completed ✅
+
+#### 1. Auto-scroll to Fingering Section After Search
+- Added `useRef` + `scrollIntoView({ behavior: 'smooth' })` on `handleSearch` and `handleChordClick`
+- 100ms setTimeout ensures DOM has updated before scroll
+- Fingering section uses `scroll-mt-[140px]` to account for sticky header (80px) + anchor nav (~60px)
+- **Files**: `components/chord-finder.tsx`
+
+#### 2. Compact Popular Chords Row
+- Desktop: "Popular Chords:" label now inline as prefix on same flex row as buttons
+- Mobile: label hidden, buttons in horizontally scrollable row (`overflow-x-auto`, `flex-nowrap`, `scrollbar-hide`)
+- Same treatment applied to Recent Searches row
+- **Files**: `components/chord-finder.tsx`, `app/globals.css` (added `.scrollbar-hide` utility)
+
+#### 3. Sticky In-Page Anchor Navigation
+- Added sticky pill bar below search card, sticks at `top-[80px]` (below main header)
+- Three pills: "Fingering Options", "Music Theory & Analysis", "Related Chords"
+- Each pill scrolls smoothly to its section via refs
+- On mobile: pills are in a horizontal scrollable row
+- **Files**: `components/chord-finder.tsx`
+
+#### 4. Mobile Layout Audit & Fixes
+- Fixed mobile header title wrapping ("Guitar Chord Theory" was breaking to 2 lines)
+- Applied `min-w-0` + `truncate` + `text-base` to mobile header title
+- Overall layout verified at 390x844 (iPhone) — chord diagrams, theory, related chords all proportioned correctly
+
+### Outstanding / Flagged for Review
+- Mobile header: verify the UserMenu (account icon) is still visible after header fix — it may have been pushed off on very narrow screens
+- Anchor nav on mobile shows 2 of 3 pills by default ("Related Chords" requires horizontal scroll) — acceptable behavior
+- Pre-existing TypeScript errors in `audio-test-panel.tsx`, `chord-display.tsx`, `chord-related.tsx` — not introduced by this session
