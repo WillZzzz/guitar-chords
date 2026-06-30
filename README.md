@@ -110,3 +110,9 @@ This project is deployed on Vercel and can be accessed at:
 ## License
 
 This project is private and not open for public use.
+
+
+postgresql://postgres.gmesnmjmeruarucptjnk:WQLxkAidebd5++6@aws-1-us-west-2.pooler.supabase.com:5432/postgres
+
+
+psql -d postgresql://postgres.gmesnmjmeruarucptjnk:WQLxkAidebd5++6@aws-1-us-west-2.pooler.supabase.com:5432/postgres -f ../Chord-Theory/db_cluster-16-12-2025@07-45-10.backup
