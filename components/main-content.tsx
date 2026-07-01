@@ -13,7 +13,13 @@ import { Music } from "lucide-react"
 
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
+  const [activeTab, setActiveTab] = useState("finder")
   const { t } = useLanguage()
+
+  const handleChordSelectFromReverse = (chord: string) => {
+    setSelectedChord(chord)
+    setActiveTab("finder")
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900">
@@ -41,7 +47,7 @@ export default function MainContent() {
               </div>
             </div>
 
-            {/* Right side controls - positioned absolutely on mobile */}
+            {/* Right side controls */}
             <div className="hidden sm:flex items-center justify-end space-x-4">
               <ThemeToggle />
               <LanguageToggle />
@@ -51,8 +57,8 @@ export default function MainContent() {
 
           {/* Mobile Layout */}
           <div className="sm:hidden flex items-center justify-between h-20 px-2">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
+            <div className="flex items-center space-x-2 min-w-0 flex-1 mr-2">
+              <div className="relative shrink-0">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                   <Music className="h-5 w-5 text-white" />
                 </div>
@@ -65,8 +71,8 @@ export default function MainContent() {
                 <p className="text-xs text-gray-500 font-medium truncate">{t("header.subtitle")}</p>
               </div>
             </div>
-            
-            {/* Mobile User Menu and Language Toggle with Theme Toggle */}
+
+            {/* Mobile controls */}
             <div className="flex-shrink-0 flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
@@ -79,7 +85,7 @@ export default function MainContent() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
-          <Tabs defaultValue="finder" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
               <TabsTrigger
                 value="finder"
@@ -130,13 +136,13 @@ export default function MainContent() {
 
             <TabsContent value="finder" className="space-y-6">
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
-                <ChordFinder onChordSelect={setSelectedChord} />
+                <ChordFinder onChordSelect={setSelectedChord} initialChord={selectedChord} />
               </div>
             </TabsContent>
 
-            <TabsContent value="reverse" className="space-y-6">
+            <TabsContent value="reverse" forceMount className="space-y-6 data-[state=inactive]:hidden">
               <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-6">
-                <ChordFinderReverse onChordSelect={setSelectedChord} />
+                <ChordFinderReverse onChordSelect={handleChordSelectFromReverse} />
               </div>
             </TabsContent>
 
