@@ -23,6 +23,7 @@ import { analyzeChordScale } from "@/lib/scale-analysis"
 
 interface ChordFinderProps {
   onChordSelect?: (chord: string) => void
+  initialChord?: string
 }
 
 const COMMON_CHORDS = [
@@ -74,9 +75,9 @@ function translateVariationName(name: string, t: (key: string) => string): strin
   return name
 }
 
-export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
+export default function ChordFinder({ onChordSelect, initialChord }: ChordFinderProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedChord, setSelectedChord] = useState("C")
+  const [selectedChord, setSelectedChord] = useState(initialChord || "C")
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFavorited, setIsFavorited] = useState(false)
@@ -135,6 +136,12 @@ export default function ChordFinder({ onChordSelect }: ChordFinderProps) {
   
   const chordData = currentChordData
   const tonalChordData = Chord.get(selectedChord)
+
+  useEffect(() => {
+    if (initialChord && initialChord !== selectedChord) {
+      setSelectedChord(initialChord)
+    }
+  }, [initialChord])
 
   useEffect(() => {
     // Load recent searches from localStorage
