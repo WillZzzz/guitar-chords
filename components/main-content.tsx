@@ -146,9 +146,9 @@ export default function MainContent() {
               </div>
             </TabsContent>
 
-            <TabsContent value="progression" className="space-y-6">
+            <TabsContent value="progression" forceMount className="space-y-6 data-[state=inactive]:hidden">
               <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6">
-                <ChordProgressionBuilder />
+                <ChordProgressionBuilder onChordSelect={handleChordSelectFromReverse} />
               </div>
             </TabsContent>
           </Tabs>

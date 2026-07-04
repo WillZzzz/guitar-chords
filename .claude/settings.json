@@ -11,6 +11,7 @@
       "Bash(brew list *)",
       "Bash(nvm list *)",
       "Bash(nvm use *)",
+      "Bash(node *)",
       "Bash(node --version)",
       "Bash(npm --version)",
       "Bash(npm install *)",
@@ -18,6 +19,8 @@
       "Bash(kill *)",
       "Bash(lsof *)",
       "Bash(pkill *)",
+      "Bash(pgrep *)",
+      "Bash(git *)",
       "Edit",
       "Write",
       "Read"

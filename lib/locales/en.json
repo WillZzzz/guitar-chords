@@ -247,7 +247,17 @@
     "toast-audio-error": "Could not play chord audio",
     "toast-fingering-unavailable": "Chord fingering not available",
     "toast-audio-failed": "Audio playback failed",
-    "toast-progression-failed": "Progression playback failed"
+    "toast-progression-failed": "Progression playback failed",
+    "transpose": "Transpose",
+    "key-filter": "Key",
+    "all-keys": "All",
+    "major-mode": "Major",
+    "minor-mode": "Minor",
+    "bpm": "BPM",
+    "share-link": "Share",
+    "share-copied": "Link copied to clipboard!",
+    "share-failed": "Could not copy link",
+    "diatonic-chords": "Chords in {key} {mode}"
   },
   "saved-progressions": {
     "title": "Saved Progressions",

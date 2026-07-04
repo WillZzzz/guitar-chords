@@ -247,7 +247,17 @@
     "toast-audio-error": "无法播放和弦音频",
     "toast-fingering-unavailable": "和弦指法不可用",
     "toast-audio-failed": "音频播放失败",
-    "toast-progression-failed": "进行播放失败"
+    "toast-progression-failed": "进行播放失败",
+    "transpose": "移调",
+    "key-filter": "调",
+    "all-keys": "全部",
+    "major-mode": "大调",
+    "minor-mode": "小调",
+    "bpm": "BPM",
+    "share-link": "分享",
+    "share-copied": "链接已复制！",
+    "share-failed": "无法复制链接",
+    "diatonic-chords": "{key} {mode}的和弦"
   },
   "saved-progressions": {
     "title": "已保存进行",
