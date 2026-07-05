@@ -9,6 +9,7 @@ import ChordProgressionBuilder from "@/components/chord-progression-builder"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
+import UserLibraryPanel from "@/components/user-features/user-library-panel"
 import UserLibrarySheet from "@/components/user-features/user-library-sheet"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
@@ -17,40 +18,36 @@ import { Music, BookOpen } from "lucide-react"
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
   const [activeTab, setActiveTab] = useState("finder")
-  const [libraryOpen, setLibraryOpen] = useState(false)
+  const [mobileLibraryOpen, setMobileLibraryOpen] = useState(false)
+  const [pendingProgression, setPendingProgression] = useState<string[] | undefined>()
   const { user } = useAuth()
   const { t } = useLanguage()
 
-  const handleChordSelectFromReverse = (chord: string) => {
+  const handleChordSelectFromLibrary = (chord: string) => {
     setSelectedChord(chord)
     setActiveTab("finder")
   }
 
-  const LibraryButton = user ? (
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-9 w-9"
-      onClick={() => setLibraryOpen(true)}
-      title="My Library"
-    >
-      <BookOpen className="h-4 w-4" />
-      <span className="sr-only">My Library</span>
-    </Button>
-  ) : null
+  const handleProgressionSelect = (chords: string[]) => {
+    setPendingProgression(chords)
+    setActiveTab("progression")
+    setMobileLibraryOpen(false)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900">
+      {/* Mobile-only library sheet */}
       {user && (
         <UserLibrarySheet
-          open={libraryOpen}
-          onOpenChange={setLibraryOpen}
-          onChordSelect={handleChordSelectFromReverse}
+          open={mobileLibraryOpen}
+          onOpenChange={setMobileLibraryOpen}
+          onChordSelect={handleChordSelectFromLibrary}
+          onProgressionSelect={handleProgressionSelect}
         />
       )}
 
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Desktop Layout */}
           <div className="hidden sm:grid sm:grid-cols-3 items-center h-20 gap-4">
             <div></div>
@@ -75,7 +72,6 @@ export default function MainContent() {
             <div className="hidden sm:flex items-center justify-end space-x-2">
               <ThemeToggle />
               <LanguageToggle />
-              {LibraryButton}
               <UserMenu />
             </div>
           </div>
@@ -97,86 +93,94 @@ export default function MainContent() {
               </div>
             </div>
 
-            {/* Mobile controls */}
+            {/* Mobile controls — library icon only shown when logged in */}
             <div className="flex-shrink-0 flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
-              {LibraryButton}
+              {user && (
+                <Button variant="outline" size="icon" className="h-9 w-9"
+                  onClick={() => setMobileLibraryOpen(true)} title="My Library">
+                  <BookOpen className="h-4 w-4" />
+                  <span className="sr-only">My Library</span>
+                </Button>
+              )}
               <UserMenu />
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-6xl mx-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
-              <TabsTrigger
-                value="finder"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
-              >
-                <span className="block">
-                  {t("nav.chord-finder")
-                    .split(' ')
-                    .map((word, index, arr) => (
-                      <span key={index}>
-                        {word}
-                        {index < arr.length - 1 && <br />}
-                      </span>
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-6 items-start">
+          {/* Main content area */}
+          <div className="flex-1 min-w-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
+                <TabsTrigger
+                  value="finder"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
+                >
+                  <span className="block">
+                    {t("nav.chord-finder").split(' ').map((word, i, arr) => (
+                      <span key={i}>{word}{i < arr.length - 1 && <br />}</span>
                     ))}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="reverse"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
-              >
-                <span className="block">
-                  {t("nav.reverse-lookup")
-                    .split(' ')
-                    .map((word, index, arr) => (
-                      <span key={index}>
-                        {word}
-                        {index < arr.length - 1 && <br />}
-                      </span>
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="reverse"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
+                >
+                  <span className="block">
+                    {t("nav.reverse-lookup").split(' ').map((word, i, arr) => (
+                      <span key={i}>{word}{i < arr.length - 1 && <br />}</span>
                     ))}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="progression"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
-              >
-                <span className="block">
-                  {t("nav.progression-builder")
-                    .split(' ')
-                    .map((word, index, arr) => (
-                      <span key={index}>
-                        {word}
-                        {index < arr.length - 1 && <br />}
-                      </span>
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="progression"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
+                >
+                  <span className="block">
+                    {t("nav.progression-builder").split(' ').map((word, i, arr) => (
+                      <span key={i}>{word}{i < arr.length - 1 && <br />}</span>
                     ))}
-                </span>
-              </TabsTrigger>
-            </TabsList>
+                  </span>
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="finder" className="space-y-6">
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
-                <ChordFinder onChordSelect={setSelectedChord} initialChord={selectedChord} />
-              </div>
-            </TabsContent>
+              <TabsContent value="finder" className="space-y-6">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                  <ChordFinder onChordSelect={setSelectedChord} initialChord={selectedChord} />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="reverse" forceMount className="space-y-6 data-[state=inactive]:hidden">
-              <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-6">
-                <ChordFinderReverse onChordSelect={handleChordSelectFromReverse} />
-              </div>
-            </TabsContent>
+              <TabsContent value="reverse" forceMount className="space-y-6 data-[state=inactive]:hidden">
+                <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-6">
+                  <ChordFinderReverse onChordSelect={handleChordSelectFromLibrary} />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="progression" forceMount className="space-y-6 data-[state=inactive]:hidden">
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6">
-                <ChordProgressionBuilder onChordSelect={handleChordSelectFromReverse} />
-              </div>
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="progression" forceMount className="space-y-6 data-[state=inactive]:hidden">
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6">
+                  <ChordProgressionBuilder
+                    onChordSelect={handleChordSelectFromLibrary}
+                    externalProgression={pendingProgression}
+                    onExternalProgressionConsumed={() => setPendingProgression(undefined)}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Permanent library sidebar — desktop only (lg+) */}
+          {user && (
+            <aside className="hidden lg:flex flex-col w-72 xl:w-80 shrink-0 sticky top-28 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-sm overflow-hidden">
+              <UserLibraryPanel
+                onChordSelect={handleChordSelectFromLibrary}
+                onProgressionSelect={handleProgressionSelect}
+              />
+            </aside>
+          )}
         </div>
       </main>
     </div>

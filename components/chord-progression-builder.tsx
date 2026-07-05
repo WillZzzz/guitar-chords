@@ -88,9 +88,11 @@ function isValidChord(name: string): boolean {
 
 interface ChordProgressionBuilderProps {
   onChordSelect?: (chord: string) => void
+  externalProgression?: string[]
+  onExternalProgressionConsumed?: () => void
 }
 
-export default function ChordProgressionBuilder({ onChordSelect }: ChordProgressionBuilderProps) {
+export default function ChordProgressionBuilder({ onChordSelect, externalProgression, onExternalProgressionConsumed }: ChordProgressionBuilderProps) {
   const { user } = useAuth()
   const { t } = useLanguage()
   const [progression, setProgression] = useState<string[]>([])
@@ -118,6 +120,14 @@ export default function ChordProgressionBuilder({ onChordSelect }: ChordProgress
       if (valid.length > 0) setProgression(valid)
     }
   }, [])
+
+  // Load progression injected from the library panel
+  useEffect(() => {
+    if (externalProgression && externalProgression.length > 0) {
+      setProgression(externalProgression)
+      onExternalProgressionConsumed?.()
+    }
+  }, [externalProgression])
 
   // Diatonic chords for selected key — memoized
   const diatonicChords = useMemo(() => {
