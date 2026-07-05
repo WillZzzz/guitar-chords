@@ -25,7 +25,7 @@ export default function ChordNotebook({ onChordSelect }: ChordNotebookProps) {
 
   const handleChordClick = (lookup: ChordLookup) => {
     if (onChordSelect) {
-      onChordSelect(`${lookup.root_note}${lookup.chord_type}`)
+      onChordSelect(lookup.chord_name)
     }
   }
 

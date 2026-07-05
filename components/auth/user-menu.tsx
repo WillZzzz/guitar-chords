@@ -11,20 +11,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Heart, ListMusic, Clock, LogOut } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import AuthModal from "./auth-modal"
+import UserLibrarySheet, { type LibraryTab } from "@/components/user-features/user-library-sheet"
 
-export default function UserMenu() {
+interface UserMenuProps {
+  onChordSelect?: (chord: string) => void
+}
+
+export default function UserMenu({ onChordSelect }: UserMenuProps) {
   const { user, signOut, passwordRecovery } = useAuth()
   const { t } = useLanguage()
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [libraryOpen, setLibraryOpen] = useState(false)
+  const [libraryTab, setLibraryTab] = useState<LibraryTab>("favorites")
 
   useEffect(() => {
     if (passwordRecovery) {
       setAuthModalOpen(true)
     }
   }, [passwordRecovery])
+
+  const openLibrary = (tab: LibraryTab) => {
+    setLibraryTab(tab)
+    setLibraryOpen(true)
+  }
 
   const handleSignOut = async () => {
     await signOut()
@@ -41,6 +54,15 @@ export default function UserMenu() {
     <>
       {/* Always mounted so passwordRecovery can open it even when logged in */}
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
+
+      {user && (
+        <UserLibrarySheet
+          open={libraryOpen}
+          onOpenChange={setLibraryOpen}
+          defaultTab={libraryTab}
+          onChordSelect={onChordSelect}
+        />
+      )}
 
       {!user ? (
         <Button variant="outline" size="icon" onClick={() => setAuthModalOpen(true)} className="h-9 w-9">
@@ -69,31 +91,29 @@ export default function UserMenu() {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuContent className="w-52" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-0.5">
                 <p className="text-sm font-medium leading-none">{displayName}</p>
                 <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => openLibrary("favorites")}>
+              <Heart className="mr-2 h-4 w-4" />
+              Favorite Chords
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openLibrary("progressions")}>
+              <ListMusic className="mr-2 h-4 w-4" />
+              Saved Progressions
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openLibrary("history")}>
+              <Clock className="mr-2 h-4 w-4" />
+              Search History
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2"
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16,17 21,12 16,7"></polyline>
-                <line x1="21" x2="9" y1="12" y2="12"></line>
-              </svg>
+              <LogOut className="mr-2 h-4 w-4" />
               {t("auth.sign-out")}
             </DropdownMenuItem>
           </DropdownMenuContent>

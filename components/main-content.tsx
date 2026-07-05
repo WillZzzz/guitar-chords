@@ -51,7 +51,7 @@ export default function MainContent() {
             <div className="hidden sm:flex items-center justify-end space-x-4">
               <ThemeToggle />
               <LanguageToggle />
-              <UserMenu />
+              <UserMenu onChordSelect={handleChordSelectFromReverse} />
             </div>
           </div>
 
@@ -76,7 +76,7 @@ export default function MainContent() {
             <div className="flex-shrink-0 flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
-              <UserMenu />
+              <UserMenu onChordSelect={handleChordSelectFromReverse} />
             </div>
           </div>
         </div>
