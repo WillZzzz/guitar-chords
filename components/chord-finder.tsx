@@ -10,7 +10,7 @@ import { getTranslatedChordDescription, ChordInfo } from "@/lib/chord-libraries"
 import { playChordFromPositionsSmart, stopAllAudio } from "@/lib/audio-utils-hybrid"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { addFavoriteChord, removeFavoriteChord, isChordFavorite } from "@/lib/local-storage"
+import { addFavoriteChord, removeFavoriteChord, isChordFavorite, addChordLookup } from "@/lib/local-storage"
 import { useChordHistory } from "@/hooks/use-chord-history"
 import { toast } from "sonner"
 import ChordDiagram from "./chord-diagram"
@@ -158,16 +158,21 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
     }
   }, [user, selectedChord, chordData])
 
+  const recordLookup = (chord: string) => {
+    addToHistory(chord)
+    if (user) {
+      const info = Chord.get(chord)
+      addChordLookup(user.id, chord, info.aliases[0] ?? "", info.tonic ?? chord)
+    }
+  }
+
   const handleSearch = () => {
-    console.log(`🔍 handleSearch called with searchTerm: "${searchTerm}"`)
     if (searchTerm.trim()) {
       const chord = searchTerm.trim()
-      console.log(`🔍 Setting selectedChord to: "${chord}"`)
       setSelectedChord(chord)
       onChordSelect?.(chord)
-      addToHistory(chord)
+      recordLookup(chord)
 
-      // Add to recent searches
       const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
       setRecentSearches(newRecent)
       localStorage.setItem("recentChordSearches", JSON.stringify(newRecent))
@@ -180,9 +185,8 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
   const handleChordClick = (chord: string) => {
     setSelectedChord(chord)
     onChordSelect?.(chord)
-    addToHistory(chord)
+    recordLookup(chord)
 
-    // Add to recent searches
     const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
     setRecentSearches(newRecent)
     localStorage.setItem("recentChordSearches", JSON.stringify(newRecent))
