@@ -3,24 +3,15 @@ import { createClient } from "@supabase/supabase-js"
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Debug environment variables
-console.log("Supabase setup - URL:", supabaseUrl)
-console.log("Supabase setup - Key:", supabaseAnonKey ? "present" : "missing")
-
-// Check if we have real Supabase credentials
 const isSupabaseConfigured =
   !!supabaseUrl &&
   !!supabaseAnonKey &&
   supabaseUrl !== "https://placeholder.supabase.co" &&
   supabaseAnonKey !== "placeholder_key"
 
-console.log("Supabase configured:", isSupabaseConfigured)
-
-export const supabase = isSupabaseConfigured 
+export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
-
-console.log("Supabase client:", !!supabase)
 
 // Types for our database tables
 export interface UserProfile {

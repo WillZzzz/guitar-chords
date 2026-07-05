@@ -28,7 +28,7 @@ export default function FavoriteChords({ onChordSelect }: FavoriteChordsProps) {
 
   const handleChordClick = (favorite: FavoriteChord) => {
     if (onChordSelect) {
-      onChordSelect(`${favorite.root_note}${favorite.chord_type}`)
+      onChordSelect(favorite.chord_name)
     }
   }
 

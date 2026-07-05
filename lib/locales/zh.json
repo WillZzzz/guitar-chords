@@ -290,5 +290,10 @@
     "accidentals": "变音记号",
     "qualities": "和弦性质",
     "extensions": "扩展音"
+  },
+  "msg": {
+    "error-unexpected": "发生了意外错误，请重试。",
+    "passwords-no-match": "两次输入的密码不一致",
+    "password-min-length": "密码至少需要6个字符"
   }
 }

@@ -108,18 +108,18 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signin-password">Password</Label>
+                <Label htmlFor="signin-password">{t("auth.password")}</Label>
                 <Input
                   id="signin-password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("auth.password-placeholder")}
                   value={signInData.password}
                   onChange={(e) => setSignInData((prev) => ({ ...prev, password: e.target.value }))}
                   required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? t("auth.signing-in") : t("auth.sign-in")}
               </Button>
             </form>
           </TabsContent>
@@ -127,50 +127,50 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
           <TabsContent value="signup" className="space-y-4">
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signup-name">Display Name (Optional)</Label>
+                <Label htmlFor="signup-name">{t("auth.display-name")}</Label>
                 <Input
                   id="signup-name"
                   type="text"
-                  placeholder="How should we call you?"
+                  placeholder={t("auth.display-name-help")}
                   value={signUpData.displayName}
                   onChange={(e) => setSignUpData((prev) => ({ ...prev, displayName: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
+                <Label htmlFor="signup-email">{t("auth.email")}</Label>
                 <Input
                   id="signup-email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t("auth.email-placeholder")}
                   value={signUpData.email}
                   onChange={(e) => setSignUpData((prev) => ({ ...prev, email: e.target.value }))}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-password">Password</Label>
+                <Label htmlFor="signup-password">{t("auth.password")}</Label>
                 <Input
                   id="signup-password"
                   type="password"
-                  placeholder="Create a password (min 6 characters)"
+                  placeholder={t("auth.password-create-placeholder")}
                   value={signUpData.password}
                   onChange={(e) => setSignUpData((prev) => ({ ...prev, password: e.target.value }))}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-confirm">Confirm Password</Label>
+                <Label htmlFor="signup-confirm">{t("auth.confirm-password")}</Label>
                 <Input
                   id="signup-confirm"
                   type="password"
-                  placeholder="Confirm your password"
+                  placeholder={t("auth.password-confirm-placeholder")}
                   value={signUpData.confirmPassword}
                   onChange={(e) => setSignUpData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                   required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating account..." : "Create Account"}
+                {isLoading ? t("auth.creating-account") : t("auth.create-account")}
               </Button>
             </form>
           </TabsContent>

@@ -290,5 +290,10 @@
     "accidentals": "Accidentals",
     "qualities": "Qualities",
     "extensions": "Extensions"
+  },
+  "msg": {
+    "error-unexpected": "An unexpected error occurred. Please try again.",
+    "passwords-no-match": "Passwords do not match",
+    "password-min-length": "Password must be at least 6 characters"
   }
 }
