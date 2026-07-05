@@ -2,18 +2,23 @@
 
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import ChordFinder from "@/components/chord-finder"
 import ChordFinderReverse from "@/components/chord-finder-reverse"
 import ChordProgressionBuilder from "@/components/chord-progression-builder"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
+import UserLibrarySheet from "@/components/user-features/user-library-sheet"
+import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { Music } from "lucide-react"
+import { Music, BookOpen } from "lucide-react"
 
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
   const [activeTab, setActiveTab] = useState("finder")
+  const [libraryOpen, setLibraryOpen] = useState(false)
+  const { user } = useAuth()
   const { t } = useLanguage()
 
   const handleChordSelectFromReverse = (chord: string) => {
@@ -21,14 +26,33 @@ export default function MainContent() {
     setActiveTab("finder")
   }
 
+  const LibraryButton = user ? (
+    <Button
+      variant="outline"
+      size="icon"
+      className="h-9 w-9"
+      onClick={() => setLibraryOpen(true)}
+      title="My Library"
+    >
+      <BookOpen className="h-4 w-4" />
+      <span className="sr-only">My Library</span>
+    </Button>
+  ) : null
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900">
-      {/* Enhanced Header with Fixed Button Spacing */}
+      {user && (
+        <UserLibrarySheet
+          open={libraryOpen}
+          onOpenChange={setLibraryOpen}
+          onChordSelect={handleChordSelectFromReverse}
+        />
+      )}
+
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Desktop Layout */}
           <div className="hidden sm:grid sm:grid-cols-3 items-center h-20 gap-4">
-            {/* Left spacer */}
             <div></div>
 
             {/* Centered Logo/Title */}
@@ -48,10 +72,11 @@ export default function MainContent() {
             </div>
 
             {/* Right side controls */}
-            <div className="hidden sm:flex items-center justify-end space-x-4">
+            <div className="hidden sm:flex items-center justify-end space-x-2">
               <ThemeToggle />
               <LanguageToggle />
-              <UserMenu onChordSelect={handleChordSelectFromReverse} />
+              {LibraryButton}
+              <UserMenu />
             </div>
           </div>
 
@@ -76,13 +101,13 @@ export default function MainContent() {
             <div className="flex-shrink-0 flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
-              <UserMenu onChordSelect={handleChordSelectFromReverse} />
+              {LibraryButton}
+              <UserMenu />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

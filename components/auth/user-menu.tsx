@@ -11,37 +11,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Heart, ListMusic, Clock, LogOut } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import AuthModal from "./auth-modal"
-import UserLibrarySheet, { type LibraryTab } from "@/components/user-features/user-library-sheet"
 
-interface UserMenuProps {
-  onChordSelect?: (chord: string) => void
-}
-
-export default function UserMenu({ onChordSelect }: UserMenuProps) {
+export default function UserMenu() {
   const { user, signOut, passwordRecovery } = useAuth()
   const { t } = useLanguage()
   const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [libraryOpen, setLibraryOpen] = useState(false)
-  const [libraryTab, setLibraryTab] = useState<LibraryTab>("favorites")
 
   useEffect(() => {
     if (passwordRecovery) {
       setAuthModalOpen(true)
     }
   }, [passwordRecovery])
-
-  const openLibrary = (tab: LibraryTab) => {
-    setLibraryTab(tab)
-    setLibraryOpen(true)
-  }
-
-  const handleSignOut = async () => {
-    await signOut()
-  }
 
   const displayName = user
     ? (user.user_metadata?.display_name || user.email?.split("@")[0] || "User")
@@ -54,15 +38,6 @@ export default function UserMenu({ onChordSelect }: UserMenuProps) {
     <>
       {/* Always mounted so passwordRecovery can open it even when logged in */}
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
-
-      {user && (
-        <UserLibrarySheet
-          open={libraryOpen}
-          onOpenChange={setLibraryOpen}
-          defaultTab={libraryTab}
-          onChordSelect={onChordSelect}
-        />
-      )}
 
       {!user ? (
         <Button variant="outline" size="icon" onClick={() => setAuthModalOpen(true)} className="h-9 w-9">
@@ -99,20 +74,7 @@ export default function UserMenu({ onChordSelect }: UserMenuProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => openLibrary("favorites")}>
-              <Heart className="mr-2 h-4 w-4" />
-              Favorite Chords
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openLibrary("progressions")}>
-              <ListMusic className="mr-2 h-4 w-4" />
-              Saved Progressions
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openLibrary("history")}>
-              <Clock className="mr-2 h-4 w-4" />
-              Search History
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
+            <DropdownMenuItem onClick={() => signOut()}>
               <LogOut className="mr-2 h-4 w-4" />
               {t("auth.sign-out")}
             </DropdownMenuItem>
