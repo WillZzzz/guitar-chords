@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -16,9 +16,15 @@ import { useLanguage } from "@/contexts/language-context"
 import AuthModal from "./auth-modal"
 
 export default function UserMenu() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, passwordRecovery } = useAuth()
   const { t } = useLanguage()
   const [authModalOpen, setAuthModalOpen] = useState(false)
+
+  useEffect(() => {
+    if (passwordRecovery) {
+      setAuthModalOpen(true)
+    }
+  }, [passwordRecovery])
 
   const handleSignOut = async () => {
     await signOut()

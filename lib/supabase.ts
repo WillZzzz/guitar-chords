@@ -104,6 +104,24 @@ export const signOut = async () => {
   return { error }
 }
 
+export const resetPasswordForEmail = async (email: string) => {
+  if (!supabase) {
+    return { error: { message: "Supabase is not configured. Please set up your environment variables." } }
+  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+  })
+  return { error }
+}
+
+export const updatePassword = async (newPassword: string) => {
+  if (!supabase) {
+    return { error: { message: "Supabase is not configured. Please set up your environment variables." } }
+  }
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  return { error }
+}
+
 // Chord lookup functions
 export const saveChordLookup = async (chordName: string, chordData: any) => {
   const user = await getCurrentUser()

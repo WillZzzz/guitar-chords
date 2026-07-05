@@ -155,7 +155,21 @@
     "error-contact-support": "Contact support if the problem persists",
     "profile": "Profile",
     "settings": "Settings",
-    "sign-out": "Sign out"
+    "sign-out": "Sign out",
+    "forgot-password": "Forgot password?",
+    "reset-password": "Reset Password",
+    "reset-password-description": "Enter your email and we'll send you a link to reset your password.",
+    "send-reset-link": "Send Reset Link",
+    "sending": "Sending...",
+    "reset-email-sent": "Check your email for a password reset link.",
+    "back-to-sign-in": "Back to Sign In",
+    "set-new-password": "Set New Password",
+    "set-new-password-description": "Enter your new password below.",
+    "new-password": "New Password",
+    "new-password-placeholder": "Enter your new password",
+    "update-password": "Update Password",
+    "updating": "Updating...",
+    "password-updated": "Password updated successfully!"
   },
   "common": {
     "chord": "chord",
