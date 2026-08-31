@@ -58,12 +58,20 @@ export default function MiniChordDiagram({ positions, startFret = 1 }: MiniChord
   return (
     <div className="flex flex-col items-center">
       <svg width={width} height={height} className="mini-chord-diagram">
-        {/* Fret position indicator */}
-        {displayStartFret > 1 && (
-          <text x={5} y={nutHeight + 15 + fretHeight * 2} fontSize="8" textAnchor="middle" fill="#666" fontWeight="500">
-            {displayStartFret}fr
+        {/* Fret numbers (left side, one per row) */}
+        {Array.from({ length: fretCount }, (_, i) => (
+          <text
+            key={`fret-number-${i}`}
+            x={8}
+            y={nutHeight + 15 + (i + 0.5) * fretHeight + 3}
+            fontSize="7"
+            textAnchor="middle"
+            fill="#666"
+            fontWeight="500"
+          >
+            {displayStartFret + i}
           </text>
-        )}
+        ))}
 
         {/* Nut (thick horizontal line at top for open position) */}
         {displayStartFret === 1 && (

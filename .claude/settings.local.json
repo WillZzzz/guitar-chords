@@ -14,7 +14,10 @@
       "Bash(node screenshot2.mjs)",
       "Bash(node screenshot4.mjs)",
       "Bash(node verify_fixes.mjs)",
-      "Bash(node verify_fix3b.mjs)"
+      "Bash(node verify_fix3b.mjs)",
+      "Bash(node *)",
+      "Bash(git stash *)",
+      "Bash(git pull *)"
     ],
     "deny": [],
     "ask": []

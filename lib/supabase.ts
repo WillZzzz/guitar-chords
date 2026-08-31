@@ -53,16 +53,6 @@ export interface ChordProgression {
 }
 
 // Auth helper functions
-export const getCurrentUser = async () => {
-  if (!supabase) {
-    throw new Error("Supabase is not configured. Please set up your environment variables.")
-  }
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  return user
-}
-
 export const signUp = async (email: string, password: string, displayName?: string) => {
   if (!supabase) {
     return { 
@@ -123,15 +113,14 @@ export const updatePassword = async (newPassword: string) => {
 }
 
 // Chord lookup functions
-export const saveChordLookup = async (chordName: string, chordData: any) => {
-  const user = await getCurrentUser()
-  if (!user) return { error: "Not authenticated" }
+export const saveChordLookup = async (userId: string, chordName: string, chordData: any) => {
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
 
   // Check if chord was already looked up recently
   const { data: existing } = await supabase
     .from("chord_lookups")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("chord_name", chordName)
     .gte("looked_up_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
     .single()
@@ -149,7 +138,7 @@ export const saveChordLookup = async (chordName: string, chordData: any) => {
   } else {
     // Create new lookup record
     const { error } = await supabase.from("chord_lookups").insert({
-      user_id: user.id,
+      user_id: userId,
       chord_name: chordName,
       chord_data: chordData,
       looked_up_at: new Date().toISOString(),
@@ -158,14 +147,13 @@ export const saveChordLookup = async (chordName: string, chordData: any) => {
   }
 }
 
-export const getRecentChordLookups = async (limit = 50) => {
-  const user = await getCurrentUser()
-  if (!user) return { data: null, error: "Not authenticated" }
+export const getRecentChordLookups = async (userId: string, limit = 50) => {
+  if (!supabase) return { data: null, error: { message: "Supabase is not configured." } }
 
   const { data, error } = await supabase
     .from("chord_lookups")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .gte("looked_up_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Last 30 days
     .order("looked_up_at", { ascending: false })
     .limit(limit)
@@ -173,13 +161,55 @@ export const getRecentChordLookups = async (limit = 50) => {
   return { data, error }
 }
 
+export const deleteChordLookup = async (userId: string, id: string) => {
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
+
+  const { error } = await supabase.from("chord_lookups").delete().eq("id", id).eq("user_id", userId)
+
+  return { error }
+}
+
+// Like saveChordLookup, but with no time-window on the dedup check — used for
+// progression lookups, where the "chord_name" column holds a stable progression
+// id rather than a chord symbol, so the same id should always update the same
+// row regardless of how long ago it was last touched.
+export const upsertProgressionLookup = async (userId: string, progressionId: string, chordData: any) => {
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
+
+  const { data: existing } = await supabase
+    .from("chord_lookups")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("chord_name", progressionId)
+    .single()
+
+  if (existing) {
+    const { error } = await supabase
+      .from("chord_lookups")
+      .update({
+        chord_data: chordData,
+        lookup_count: existing.lookup_count + 1,
+        looked_up_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id)
+    return { error }
+  } else {
+    const { error } = await supabase.from("chord_lookups").insert({
+      user_id: userId,
+      chord_name: progressionId,
+      chord_data: chordData,
+      looked_up_at: new Date().toISOString(),
+    })
+    return { error }
+  }
+}
+
 // Favorite chords functions
-export const addToFavorites = async (chordName: string, chordData: any, notes?: string) => {
-  const user = await getCurrentUser()
-  if (!user) return { error: "Not authenticated" }
+export const addToFavorites = async (userId: string, chordName: string, chordData: any, notes?: string) => {
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
 
   const { error } = await supabase.from("favorite_chords").insert({
-    user_id: user.id,
+    user_id: userId,
     chord_name: chordName,
     chord_data: chordData,
     notes: notes || null,
@@ -188,36 +218,33 @@ export const addToFavorites = async (chordName: string, chordData: any, notes?: 
   return { error }
 }
 
-export const removeFromFavorites = async (chordName: string) => {
-  const user = await getCurrentUser()
-  if (!user) return { error: "Not authenticated" }
+export const removeFromFavorites = async (userId: string, chordName: string) => {
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
 
-  const { error } = await supabase.from("favorite_chords").delete().eq("user_id", user.id).eq("chord_name", chordName)
+  const { error } = await supabase.from("favorite_chords").delete().eq("user_id", userId).eq("chord_name", chordName)
 
   return { error }
 }
 
-export const getFavoriteChords = async () => {
-  const user = await getCurrentUser()
-  if (!user) return { data: null, error: "Not authenticated" }
+export const getFavoriteChords = async (userId: string) => {
+  if (!supabase) return { data: null, error: { message: "Supabase is not configured." } }
 
   const { data, error } = await supabase
     .from("favorite_chords")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false })
 
   return { data, error }
 }
 
-export const isChordFavorited = async (chordName: string) => {
-  const user = await getCurrentUser()
-  if (!user) return false
+export const isChordFavorited = async (userId: string, chordName: string) => {
+  if (!supabase) return false
 
   const { data } = await supabase
     .from("favorite_chords")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("chord_name", chordName)
     .single()
 
@@ -226,19 +253,19 @@ export const isChordFavorited = async (chordName: string) => {
 
 // Chord progressions functions
 export const saveChordProgression = async (
+  userId: string,
   name: string,
   chords: any[],
   description?: string,
   tags?: string[],
   isPublic = false,
 ) => {
-  const user = await getCurrentUser()
-  if (!user) return { error: "Not authenticated" }
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
 
   const { data, error } = await supabase
     .from("chord_progressions")
     .insert({
-      user_id: user.id,
+      user_id: userId,
       name,
       description: description || null,
       chords,
@@ -252,11 +279,11 @@ export const saveChordProgression = async (
 }
 
 export const updateChordProgression = async (
+  userId: string,
   id: string,
   updates: Partial<Pick<ChordProgression, "name" | "description" | "chords" | "tags" | "is_public">>,
 ) => {
-  const user = await getCurrentUser()
-  if (!user) return { error: "Not authenticated" }
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
 
   const { data, error } = await supabase
     .from("chord_progressions")
@@ -265,45 +292,58 @@ export const updateChordProgression = async (
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .select()
     .single()
 
   return { data, error }
 }
 
-export const deleteChordProgression = async (id: string) => {
-  const user = await getCurrentUser()
-  if (!user) return { error: "Not authenticated" }
+export const deleteChordProgression = async (userId: string, id: string) => {
+  if (!supabase) return { error: { message: "Supabase is not configured." } }
 
-  const { error } = await supabase.from("chord_progressions").delete().eq("id", id).eq("user_id", user.id)
+  const { error } = await supabase.from("chord_progressions").delete().eq("id", id).eq("user_id", userId)
 
   return { error }
 }
 
-export const getUserChordProgressions = async () => {
-  const user = await getCurrentUser()
-  if (!user) return { data: null, error: "Not authenticated" }
+export const getUserChordProgressions = async (userId: string) => {
+  if (!supabase) return { data: null, error: { message: "Supabase is not configured." } }
 
   const { data, error } = await supabase
     .from("chord_progressions")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .order("updated_at", { ascending: false })
 
   return { data, error }
 }
 
 export const getPublicChordProgressions = async (limit = 20) => {
+  if (!supabase) return { data: null, error: { message: "Supabase is not configured." } }
+
+  // No embedded user_profiles join here: chord_progressions.user_id and
+  // user_profiles.id both reference auth.users independently, but there is no
+  // foreign key *between* the two tables, so PostgREST can't traverse an
+  // embed for it. Author names are resolved separately via getUserProfilesByIds.
   const { data, error } = await supabase
     .from("chord_progressions")
-    .select(`
-      *,
-      user_profiles!chord_progressions_user_id_fkey(display_name)
-    `)
+    .select("*")
     .eq("is_public", true)
     .order("created_at", { ascending: false })
     .limit(limit)
+
+  return { data, error }
+}
+
+export const getUserProfilesByIds = async (userIds: string[]) => {
+  if (!supabase) return { data: null, error: { message: "Supabase is not configured." } }
+  if (userIds.length === 0) return { data: [], error: null }
+
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .select("id, display_name")
+    .in("id", userIds)
 
   return { data, error }
 }

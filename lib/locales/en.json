@@ -7,7 +7,10 @@
     "chord-finder": "Chord Finder",
     "reverse-lookup": "Reverse Lookup",
     "progression-builder": "Progression Builder",
-    "back-to-app": "Back to App"
+    "back-to-app": "Back to App",
+    "my-chords": "My Chords",
+    "my-progressions": "My Progressions",
+    "history": "History"
   },
   "chord-finder": {
     "title": "Chord Finder",
@@ -271,7 +274,28 @@
     "share-link": "Share",
     "share-copied": "Link copied to clipboard!",
     "share-failed": "Could not copy link",
-    "diatonic-chords": "Chords in {key} {mode}"
+    "diatonic-chords": "Chords in {key} {mode}",
+    "toast-updated": "Progression updated!",
+    "update-button": "Update Progression",
+    "editing-banner": "Editing: {name}",
+    "cancel-edit": "Cancel edit",
+    "publish-button": "Publish",
+    "unpublish-button": "Unpublish",
+    "toast-published": "Progression published — visible in Community",
+    "toast-unpublished": "Progression unpublished",
+    "toast-publish-failed": "Failed to update publish status",
+    "tab-mine": "My Progressions",
+    "tab-community": "Community",
+    "caption-mine": "Chord progressions you've saved",
+    "caption-community": "Public progressions shared by other users",
+    "empty-mine": "Save a progression above to see it here",
+    "sign-in-mine": "Sign in to view your saved progressions",
+    "empty-community": "No public progressions yet — be the first to publish one!",
+    "save-copy-button": "Save a copy",
+    "toast-copy-saved": "Saved a copy to your library",
+    "toast-copy-failed": "Failed to save a copy",
+    "by-author": "by {author}",
+    "toast-community-load-failed": "Failed to load community progressions"
   },
   "saved-progressions": {
     "title": "Saved Progressions",
@@ -282,6 +306,24 @@
     "create-progressions": "Create chord progressions in the builder and save them here",
     "saved-ago": "Saved {time}",
     "toast-deleted": "Progression deleted"
+  },
+  "user-library": {
+    "title-my-chords": "My Chords",
+    "title-my-progressions": "My Progressions",
+    "title-history": "History",
+    "caption-my-chords": "Chords you've favorited",
+    "caption-history": "Chords and progressions you've recently looked up",
+    "sign-in-my-chords": "Sign in to view your favorites",
+    "empty-my-chords": "Heart a chord in the Chord Finder to save it here",
+    "sign-in-history": "Sign in to track your search history",
+    "empty-history": "Start looking up chords or saving progressions to build your history",
+    "toast-favorite-removed": "Removed from favorites",
+    "toast-favorite-remove-failed": "Failed to remove favorite",
+    "toast-progression-deleted": "Progression deleted",
+    "toast-progression-delete-failed": "Failed to delete progression",
+    "toast-load-failed": "Failed to load your library",
+    "toast-history-deleted": "Removed from history",
+    "toast-history-delete-failed": "Failed to remove from history"
   },
   "ui": {
     "save": "Save",
@@ -308,6 +350,9 @@
   "msg": {
     "error-unexpected": "An unexpected error occurred. Please try again.",
     "passwords-no-match": "Passwords do not match",
-    "password-min-length": "Password must be at least 6 characters"
+    "password-min-length": "Password must be at least 6 characters",
+    "added-to-favorites": "Added to favorites",
+    "removed-from-favorites": "Removed from favorites",
+    "sign-in-to-save": "Please sign in to save favorites"
   }
 }

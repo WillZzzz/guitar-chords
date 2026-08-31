@@ -4,9 +4,12 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { Music2, RotateCcw, ChevronRight } from "lucide-react"
+import { addFavoriteChord, removeFavoriteChord, isChordFavorite } from "@/lib/user-data"
+import { Music2, RotateCcw, ChevronRight, Heart } from "lucide-react"
 import { Chord } from "tonal"
+import { toast } from "sonner"
 
 interface ChordFinderReverseProps {
   onChordSelect?: (chord: string) => void
@@ -24,6 +27,9 @@ interface ChordMatch {
 export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverseProps) {
   const [selectedNotes, setSelectedNotes] = useState<string[]>([])
   const [possibleChords, setPossibleChords] = useState<ChordMatch[]>([])
+  const [favoritedNames, setFavoritedNames] = useState<Set<string>>(new Set())
+  const [favoriteBusy, setFavoriteBusy] = useState<string | null>(null)
+  const { user } = useAuth()
   const { t } = useLanguage()
 
   useEffect(() => {
@@ -34,6 +40,53 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
       setPossibleChords([])
     }
   }, [selectedNotes])
+
+  useEffect(() => {
+    if (!user || possibleChords.length === 0) {
+      setFavoritedNames(new Set())
+      return
+    }
+    let cancelled = false
+    Promise.all(possibleChords.map((chord) => isChordFavorite(user.id, chord.name)))
+      .then((results) => {
+        if (cancelled) return
+        const favorited = new Set<string>()
+        possibleChords.forEach((chord, i) => {
+          if (results[i]) favorited.add(chord.name)
+        })
+        setFavoritedNames(favorited)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [user, possibleChords])
+
+  const toggleFavorite = async (chord: ChordMatch, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!user || favoriteBusy) return
+    const isFavorited = favoritedNames.has(chord.name)
+    setFavoriteBusy(chord.name)
+    try {
+      if (isFavorited) {
+        await removeFavoriteChord(user.id, chord.name)
+        setFavoritedNames((prev) => {
+          const next = new Set(prev)
+          next.delete(chord.name)
+          return next
+        })
+        toast.success(t("msg.removed-from-favorites"))
+      } else {
+        await addFavoriteChord(user.id, chord.name, chord.type, chord.name.charAt(0))
+        setFavoritedNames((prev) => new Set(prev).add(chord.name))
+        toast.success(t("msg.added-to-favorites"))
+      }
+    } catch {
+      toast.error(t("msg.error-unexpected"))
+    } finally {
+      setFavoriteBusy(null)
+    }
+  }
 
   const toggleNote = (note: string) => {
     setSelectedNotes((prev) => (prev.includes(note) ? prev.filter((n) => n !== note) : [...prev, note]))
@@ -123,6 +176,17 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                       </div>
                       <p className="text-sm text-muted-foreground mt-0.5">{chord.notes.join(" · ")}</p>
                     </div>
+                    {user && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-gray-400 hover:text-red-500"
+                        disabled={favoriteBusy === chord.name}
+                        onClick={(e) => toggleFavorite(chord, e)}
+                      >
+                        <Heart className={`h-4 w-4 ${favoritedNames.has(chord.name) ? "fill-current text-red-500" : ""}`} />
+                      </Button>
+                    )}
                     <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 transition-colors shrink-0" />
                   </div>
                 ))}

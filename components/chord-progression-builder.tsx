@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { saveProgression } from "@/lib/local-storage"
+import { saveProgression, updateProgression, addProgressionLookup, type EditableProgression } from "@/lib/user-data"
 import { playChordFromPositionsSmart } from "@/lib/audio-utils-hybrid"
 import { getChordData } from "@/lib/chord-utils"
 import { Chord, Key, Interval, Note } from "tonal"
@@ -90,21 +91,31 @@ interface ChordProgressionBuilderProps {
   onChordSelect?: (chord: string) => void
   externalProgression?: string[]
   onExternalProgressionConsumed?: () => void
+  editingProgression?: EditableProgression
+  onEditingProgressionConsumed?: () => void
 }
 
-export default function ChordProgressionBuilder({ onChordSelect, externalProgression, onExternalProgressionConsumed }: ChordProgressionBuilderProps) {
+export default function ChordProgressionBuilder({
+  onChordSelect,
+  externalProgression,
+  onExternalProgressionConsumed,
+  editingProgression,
+  onEditingProgressionConsumed,
+}: ChordProgressionBuilderProps) {
   const { user } = useAuth()
   const { t } = useLanguage()
   const [progression, setProgression] = useState<string[]>([])
   const [progressionName, setProgressionName] = useState("")
   const [progressionDescription, setProgressionDescription] = useState("")
   const [tags, setTags] = useState("")
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showCommonProgressions, setShowCommonProgressions] = useState(false)
   const [playingChord, setPlayingChord] = useState<string | null>(null)
   const [playingProgression, setPlayingProgression] = useState(false)
   const [customChord, setCustomChord] = useState("")
   const [selectedNotes, setSelectedNotes] = useState<string[]>([])
   const [bpm, setBpm] = useState(80)
-  const [selectedKey, setSelectedKey] = useState("")
+  const [selectedKey, setSelectedKey] = useState("C")
   const [keyMode, setKeyMode] = useState<"major" | "minor">("major")
   const [showFingering, setShowFingering] = useState(false)
   const [altFingering, setAltFingering] = useState<Record<string, number>>({})
@@ -128,6 +139,24 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
       onExternalProgressionConsumed?.()
     }
   }, [externalProgression])
+
+  // Load a saved progression for in-place editing
+  useEffect(() => {
+    if (!editingProgression) return
+    setProgression(editingProgression.chords)
+    setProgressionName(editingProgression.name)
+    setProgressionDescription(editingProgression.description ?? "")
+    setTags((editingProgression.tags ?? []).join(", "))
+    setEditingId(editingProgression.id)
+    onEditingProgressionConsumed?.()
+  }, [editingProgression])
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setProgressionName("")
+    setProgressionDescription("")
+    setTags("")
+  }
 
   // Diatonic chords for selected key — memoized
   const diatonicChords = useMemo(() => {
@@ -227,7 +256,7 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
     setPlayingChord(null)
   }
 
-  const saveCurrentProgression = () => {
+  const saveCurrentProgression = async () => {
     if (!progressionName.trim()) {
       toast.error(t("progression-builder.toast-name-required"))
       return
@@ -236,13 +265,31 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
       toast.error(t("progression-builder.toast-chords-required"))
       return
     }
-    const userId = user?.id || "guest"
+    if (!user) {
+      toast.error(t("progression-builder.toast-sign-in-required"))
+      return
+    }
     const tagArray = tags.split(",").map((tag) => tag.trim()).filter(Boolean)
-    saveProgression(userId, progressionName.trim(), progression, progressionDescription.trim() || undefined, tagArray.length > 0 ? tagArray : undefined)
-    toast.success(t("progression-builder.toast-saved"))
-    setProgressionName("")
-    setProgressionDescription("")
-    setTags("")
+    const name = progressionName.trim()
+    const description = progressionDescription.trim() || undefined
+    const tagsOrUndef = tagArray.length > 0 ? tagArray : undefined
+    try {
+      if (editingId) {
+        await updateProgression(user.id, editingId, name, progression, description, tagsOrUndef)
+        addProgressionLookup(user.id, editingId, name, progression).catch(() => {})
+        toast.success(t("progression-builder.toast-updated"))
+        // stay in edit mode — repeated tweaks keep updating the same row until cancelled
+      } else {
+        const saved = await saveProgression(user.id, name, progression, description, tagsOrUndef)
+        addProgressionLookup(user.id, saved.id, name, progression).catch(() => {})
+        toast.success(t("progression-builder.toast-saved"))
+        setProgressionName("")
+        setProgressionDescription("")
+        setTags("")
+      }
+    } catch {
+      toast.error(t("msg.error-unexpected"))
+    }
   }
 
   const shareProgression = () => {
@@ -269,13 +316,14 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
         <CardContent className="space-y-6">
 
           {/* Key Filter */}
-          <div>
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="text-sm font-medium">{t("progression-builder.key-filter")}:</span>
+          <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-900 rounded-lg">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="flex items-center justify-center h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-bold shrink-0">1</span>
+              <span className="text-sm font-semibold">{t("progression-builder.key-filter")}</span>
               <Button
                 variant={selectedKey === "" ? "default" : "outline"}
                 size="sm"
-                className="h-7 px-2 text-xs"
+                className="h-8 px-3 text-xs ml-auto"
                 onClick={() => setSelectedKey("")}
               >
                 {t("progression-builder.all-keys")}
@@ -285,7 +333,7 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
                   <Button
                     variant={keyMode === "major" ? "default" : "outline"}
                     size="sm"
-                    className="h-7 px-2 text-xs"
+                    className="h-8 px-3 text-xs"
                     onClick={() => setKeyMode("major")}
                   >
                     {t("progression-builder.major-mode")}
@@ -293,7 +341,7 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
                   <Button
                     variant={keyMode === "minor" ? "default" : "outline"}
                     size="sm"
-                    className="h-7 px-2 text-xs"
+                    className="h-8 px-3 text-xs"
                     onClick={() => setKeyMode("minor")}
                   >
                     {t("progression-builder.minor-mode")}
@@ -301,13 +349,13 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
                 </>
               )}
             </div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {ALL_KEYS.map((key) => (
                 <Button
                   key={key}
                   variant={selectedKey === key ? "default" : "outline"}
                   size="sm"
-                  className={`h-7 px-2 text-xs ${selectedKey === key ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+                  className={`h-8 px-3 text-sm font-semibold ${selectedKey === key ? "bg-blue-600 hover:bg-blue-700" : "bg-white dark:bg-transparent"}`}
                   onClick={() => setSelectedKey(selectedKey === key ? "" : key)}
                 >
                   {key}
@@ -315,7 +363,7 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
               ))}
             </div>
             {selectedKey && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 {t("progression-builder.diatonic-chords")
                   .replace("{key}", selectedKey)
                   .replace("{mode}", keyMode === "major" ? t("progression-builder.major-mode") : t("progression-builder.minor-mode"))}
@@ -451,40 +499,49 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
           </div>
 
           {/* Common Progressions */}
-          <div>
-            <h3 className="text-sm font-semibold mb-3">{t("progression-builder.common-progressions")}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {COMMON_PROGRESSIONS.map((prog, index) => {
-                const semitones = KEY_SEMITONES[selectedKey] ?? 0
-                const chords = transposeChords(prog.chords, semitones)
-                return (
-                  <Card
-                    key={index}
-                    className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
-                    onClick={() => setProgression(chords)}
-                  >
-                    <CardContent className="p-3">
-                      <h4 className="font-semibold text-sm mb-1">{prog.name}</h4>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {prog.displayKey ? t(prog.displayKey) : prog.displayName}
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {chords.slice(0, 8).map((chord, ci) => (
-                          <Badge key={ci} variant="outline" className="text-xs">{chord}</Badge>
-                        ))}
-                        {chords.length > 8 && <Badge variant="outline" className="text-xs">+{chords.length - 8}</Badge>}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
+          <Collapsible open={showCommonProgressions} onOpenChange={setShowCommonProgressions}>
+            <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold mb-3 hover:text-foreground/80">
+              {showCommonProgressions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {t("progression-builder.common-progressions")}
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {COMMON_PROGRESSIONS.map((prog, index) => {
+                  const semitones = KEY_SEMITONES[selectedKey] ?? 0
+                  const chords = transposeChords(prog.chords, semitones)
+                  return (
+                    <Card
+                      key={index}
+                      className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
+                      onClick={() => setProgression(chords)}
+                    >
+                      <CardContent className="p-3">
+                        <h4 className="font-semibold text-sm mb-1">{prog.name}</h4>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {prog.displayKey ? t(prog.displayKey) : prog.displayName}
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {chords.slice(0, 8).map((chord, ci) => (
+                            <Badge key={ci} variant="outline" className="text-xs">{chord}</Badge>
+                          ))}
+                          {chords.length > 8 && <Badge variant="outline" className="text-xs">+{chords.length - 8}</Badge>}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </CardContent>
       </Card>
 
-      {/* Your Progression Card */}
-      <Card className="chord-card">
+      {/* Your Progression Card — deliberately NOT using the shared "chord-card" class:
+          its :hover rule applies a CSS transform, which becomes the positioning
+          reference for the drag-and-drop library's position:fixed dragged item
+          (since hovering this card is unavoidable while dragging inside it),
+          causing the dragged chord block to jump to the wrong place on screen. */}
+      <Card className="border shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center justify-between flex-wrap gap-2">
             <span>{t("progression-builder.your-progression")}</span>
@@ -699,6 +756,16 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
             <CardTitle>{t("progression-builder.save-progression")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {editingId && (
+              <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md bg-orange-50 border border-orange-200 text-sm">
+                <span className="text-orange-800">
+                  {t("progression-builder.editing-banner").replace("{name}", progressionName)}
+                </span>
+                <Button variant="ghost" size="sm" onClick={cancelEdit}>
+                  {t("progression-builder.cancel-edit")}
+                </Button>
+              </div>
+            )}
             <div>
               <label className="text-sm font-medium mb-2 block">{t("progression-builder.name-required")}</label>
               <Input
@@ -726,7 +793,7 @@ export default function ChordProgressionBuilder({ onChordSelect, externalProgres
             </div>
             <Button onClick={saveCurrentProgression} className="w-full">
               <Save className="h-4 w-4 mr-2" />
-              {t("progression-builder.save-button")}
+              {editingId ? t("progression-builder.update-button") : t("progression-builder.save-button")}
             </Button>
           </CardContent>
         </Card>

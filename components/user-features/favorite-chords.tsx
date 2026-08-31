@@ -5,8 +5,9 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/contexts/auth-context"
-import { getFavoriteChords, removeFavoriteChord, type FavoriteChord } from "@/lib/local-storage"
+import { getFavoriteChords, removeFavoriteChord, type FavoriteChord } from "@/lib/user-data"
 import { formatDistanceToNow } from "date-fns"
 import { Heart, Music, Trash2 } from "lucide-react"
 import { toast } from "sonner"
@@ -18,11 +19,28 @@ interface FavoriteChordsProps {
 export default function FavoriteChords({ onChordSelect }: FavoriteChordsProps) {
   const { user } = useAuth()
   const [favorites, setFavorites] = useState<FavoriteChord[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
-      const userFavorites = getFavoriteChords(user.id)
-      setFavorites(userFavorites)
+    if (!user) {
+      setFavorites([])
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    getFavoriteChords(user.id)
+      .then((data) => {
+        if (!cancelled) setFavorites(data)
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Failed to load favorite chords")
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
     }
   }, [user])
 
@@ -32,12 +50,15 @@ export default function FavoriteChords({ onChordSelect }: FavoriteChordsProps) {
     }
   }
 
-  const handleRemoveFavorite = (favorite: FavoriteChord, e: React.MouseEvent) => {
+  const handleRemoveFavorite = async (favorite: FavoriteChord, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (user) {
-      removeFavoriteChord(user.id, favorite.chord_name, favorite.chord_type)
-      setFavorites(getFavoriteChords(user.id))
+    if (!user) return
+    try {
+      await removeFavoriteChord(user.id, favorite.chord_name)
+      setFavorites((prev) => prev.filter((f) => f.id !== favorite.id))
       toast.success("Removed from favorites")
+    } catch {
+      toast.error("Failed to remove favorite")
     }
   }
 
@@ -50,6 +71,16 @@ export default function FavoriteChords({ onChordSelect }: FavoriteChordsProps) {
           <p className="text-muted-foreground">Save your favorite chords for quick access</p>
         </CardContent>
       </Card>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="grid gap-4">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-20 w-full rounded-lg" />
+        ))}
+      </div>
     )
   }
 

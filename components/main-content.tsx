@@ -9,17 +9,23 @@ import ChordProgressionBuilder from "@/components/chord-progression-builder"
 import UserMenu from "@/components/auth/user-menu"
 import LanguageToggle from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
-import UserLibraryPanel from "@/components/user-features/user-library-panel"
-import UserLibrarySheet from "@/components/user-features/user-library-sheet"
+import MyChordsPanel from "@/components/user-features/my-chords-panel"
+import MyProgressionsPanel from "@/components/user-features/my-progressions-panel"
+import HistoryPanel from "@/components/user-features/history-panel"
+import LibrarySheet from "@/components/user-features/library-sheet"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { Music, BookOpen } from "lucide-react"
+import type { EditableProgression } from "@/lib/user-data"
+import { Music, Heart, ListMusic, Clock } from "lucide-react"
 
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
   const [activeTab, setActiveTab] = useState("finder")
-  const [mobileLibraryOpen, setMobileLibraryOpen] = useState(false)
+  const [chordsSheetOpen, setChordsSheetOpen] = useState(false)
+  const [progressionsSheetOpen, setProgressionsSheetOpen] = useState(false)
+  const [historySheetOpen, setHistorySheetOpen] = useState(false)
   const [pendingProgression, setPendingProgression] = useState<string[] | undefined>()
+  const [editingProgression, setEditingProgression] = useState<EditableProgression | undefined>()
   const { user } = useAuth()
   const { t } = useLanguage()
 
@@ -30,20 +36,38 @@ export default function MainContent() {
 
   const handleProgressionSelect = (chords: string[]) => {
     setPendingProgression(chords)
+    setEditingProgression(undefined)
     setActiveTab("progression")
-    setMobileLibraryOpen(false)
+  }
+
+  const handleProgressionEdit = (progression: EditableProgression) => {
+    setEditingProgression(progression)
+    setPendingProgression(undefined)
+    setActiveTab("progression")
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900">
-      {/* Mobile-only library sheet */}
+      {/* Mobile bottom sheets */}
       {user && (
-        <UserLibrarySheet
-          open={mobileLibraryOpen}
-          onOpenChange={setMobileLibraryOpen}
-          onChordSelect={handleChordSelectFromLibrary}
-          onProgressionSelect={handleProgressionSelect}
-        />
+        <>
+          <LibrarySheet open={chordsSheetOpen} onOpenChange={setChordsSheetOpen} title={t("nav.my-chords")}>
+            <MyChordsPanel
+              onChordSelect={(chord) => { handleChordSelectFromLibrary(chord); setChordsSheetOpen(false) }}
+            />
+          </LibrarySheet>
+          <LibrarySheet open={progressionsSheetOpen} onOpenChange={setProgressionsSheetOpen} title={t("nav.my-progressions")}>
+            <MyProgressionsPanel
+              onProgressionEdit={(progression) => { handleProgressionEdit(progression); setProgressionsSheetOpen(false) }}
+            />
+          </LibrarySheet>
+          <LibrarySheet open={historySheetOpen} onOpenChange={setHistorySheetOpen} title={t("nav.history")}>
+            <HistoryPanel
+              onChordSelect={(chord) => { handleChordSelectFromLibrary(chord); setHistorySheetOpen(false) }}
+              onProgressionSelect={(chords) => { handleProgressionSelect(chords); setHistorySheetOpen(false) }}
+            />
+          </LibrarySheet>
+        </>
       )}
 
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
@@ -72,6 +96,12 @@ export default function MainContent() {
             <div className="hidden sm:flex items-center justify-end space-x-2">
               <ThemeToggle />
               <LanguageToggle />
+              {user && (
+                <Button variant="outline" size="icon" onClick={() => setHistorySheetOpen(true)} title={t("nav.history")}>
+                  <Clock className="h-4 w-4" />
+                  <span className="sr-only">{t("nav.history")}</span>
+                </Button>
+              )}
               <UserMenu />
             </div>
           </div>
@@ -93,15 +123,29 @@ export default function MainContent() {
               </div>
             </div>
 
-            {/* Mobile controls — library icon only shown when logged in */}
+            {/* Mobile controls — contextual library icon + always-visible history, both only when logged in */}
             <div className="flex-shrink-0 flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
+              {user && activeTab === "finder" && (
+                <Button variant="outline" size="icon" className="h-9 w-9"
+                  onClick={() => setChordsSheetOpen(true)} title={t("nav.my-chords")}>
+                  <Heart className="h-4 w-4" />
+                  <span className="sr-only">{t("nav.my-chords")}</span>
+                </Button>
+              )}
+              {user && activeTab === "progression" && (
+                <Button variant="outline" size="icon" className="h-9 w-9"
+                  onClick={() => setProgressionsSheetOpen(true)} title={t("nav.my-progressions")}>
+                  <ListMusic className="h-4 w-4" />
+                  <span className="sr-only">{t("nav.my-progressions")}</span>
+                </Button>
+              )}
               {user && (
                 <Button variant="outline" size="icon" className="h-9 w-9"
-                  onClick={() => setMobileLibraryOpen(true)} title="My Library">
-                  <BookOpen className="h-4 w-4" />
-                  <span className="sr-only">My Library</span>
+                  onClick={() => setHistorySheetOpen(true)} title={t("nav.history")}>
+                  <Clock className="h-4 w-4" />
+                  <span className="sr-only">{t("nav.history")}</span>
                 </Button>
               )}
               <UserMenu />
@@ -166,19 +210,23 @@ export default function MainContent() {
                     onChordSelect={handleChordSelectFromLibrary}
                     externalProgression={pendingProgression}
                     onExternalProgressionConsumed={() => setPendingProgression(undefined)}
+                    editingProgression={editingProgression}
+                    onEditingProgressionConsumed={() => setEditingProgression(undefined)}
                   />
                 </div>
               </TabsContent>
             </Tabs>
           </div>
 
-          {/* Permanent library sidebar — desktop only (lg+) */}
-          {user && (
+          {/* Contextual permanent sidebar — desktop only (lg+), varies with active tab */}
+          {user && activeTab === "finder" && (
             <aside className="hidden lg:flex flex-col w-72 xl:w-80 shrink-0 sticky top-28 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-sm overflow-hidden">
-              <UserLibraryPanel
-                onChordSelect={handleChordSelectFromLibrary}
-                onProgressionSelect={handleProgressionSelect}
-              />
+              <MyChordsPanel onChordSelect={handleChordSelectFromLibrary} />
+            </aside>
+          )}
+          {user && activeTab === "progression" && (
+            <aside className="hidden lg:flex flex-col w-72 xl:w-80 shrink-0 sticky top-28 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-sm overflow-hidden">
+              <MyProgressionsPanel onProgressionEdit={handleProgressionEdit} />
             </aside>
           )}
         </div>
