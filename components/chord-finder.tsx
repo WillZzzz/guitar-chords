@@ -10,7 +10,7 @@ import { getTranslatedChordDescription, ChordInfo } from "@/lib/chord-libraries"
 import { playChordFromPositionsSmart, stopAllAudio } from "@/lib/audio-utils-hybrid"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { addFavoriteChord, removeFavoriteChord, isChordFavorite } from "@/lib/local-storage"
+import { addFavoriteChord, removeFavoriteChord, isChordFavorite, addChordLookup } from "@/lib/user-data"
 import { useChordHistory } from "@/hooks/use-chord-history"
 import { toast } from "sonner"
 import ChordDiagram from "./chord-diagram"
@@ -81,6 +81,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFavorited, setIsFavorited] = useState(false)
+  const [favoriteBusy, setFavoriteBusy] = useState(false)
   const { user } = useAuth()
   const { addToHistory } = useChordHistory()
   const { t } = useLanguage()
@@ -152,22 +153,36 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
   }, [])
 
   useEffect(() => {
+    let cancelled = false
     if (user && selectedChord && chordData) {
-      const favorited = isChordFavorite(user.id, selectedChord, chordData.quality || "major")
-      setIsFavorited(favorited)
+      isChordFavorite(user.id, selectedChord)
+        .then((favorited) => {
+          if (!cancelled) setIsFavorited(favorited)
+        })
+        .catch(() => {})
+    } else {
+      setIsFavorited(false)
+    }
+    return () => {
+      cancelled = true
     }
   }, [user, selectedChord, chordData])
 
+  const recordLookup = (chord: string) => {
+    addToHistory(chord)
+    if (user) {
+      const info = Chord.get(chord)
+      addChordLookup(user.id, chord, info.aliases[0] ?? "", info.tonic ?? chord).catch(() => {})
+    }
+  }
+
   const handleSearch = () => {
-    console.log(`🔍 handleSearch called with searchTerm: "${searchTerm}"`)
     if (searchTerm.trim()) {
       const chord = searchTerm.trim()
-      console.log(`🔍 Setting selectedChord to: "${chord}"`)
       setSelectedChord(chord)
       onChordSelect?.(chord)
-      addToHistory(chord)
+      recordLookup(chord)
 
-      // Add to recent searches
       const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
       setRecentSearches(newRecent)
       localStorage.setItem("recentChordSearches", JSON.stringify(newRecent))
@@ -180,9 +195,8 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
   const handleChordClick = (chord: string) => {
     setSelectedChord(chord)
     onChordSelect?.(chord)
-    addToHistory(chord)
+    recordLookup(chord)
 
-    // Add to recent searches
     const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
     setRecentSearches(newRecent)
     localStorage.setItem("recentChordSearches", JSON.stringify(newRecent))
@@ -211,23 +225,31 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
     setTimeout(() => setIsPlaying(false), 2000)
   }
 
-  const toggleFavorite = () => {
+  const toggleFavorite = async () => {
     if (!user || !chordData) {
       toast.error(t("msg.sign-in-to-save"))
       return
     }
+    if (favoriteBusy) return
 
     const chordType = chordData.quality || "major"
     const rootNote = selectedChord.charAt(0)
 
-    if (isFavorited) {
-      removeFavoriteChord(user.id, selectedChord, chordType)
-      setIsFavorited(false)
-      toast.success(t("msg.removed-from-favorites"))
-    } else {
-      addFavoriteChord(user.id, selectedChord, chordType, rootNote)
-      setIsFavorited(true)
-      toast.success(t("msg.added-to-favorites"))
+    setFavoriteBusy(true)
+    try {
+      if (isFavorited) {
+        await removeFavoriteChord(user.id, selectedChord)
+        setIsFavorited(false)
+        toast.success(t("msg.removed-from-favorites"))
+      } else {
+        await addFavoriteChord(user.id, selectedChord, chordType, rootNote)
+        setIsFavorited(true)
+        toast.success(t("msg.added-to-favorites"))
+      }
+    } catch {
+      toast.error(t("msg.error-unexpected"))
+    } finally {
+      setFavoriteBusy(false)
     }
   }
 
@@ -386,8 +408,21 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
             </div>
             <div className="flex items-center gap-2">
               {user && (
-                <Button onClick={toggleFavorite} variant="ghost" size="sm" className="text-gray-600 hover:text-red-500">
-                  <Heart className={`h-4 w-4 ${isFavorited ? "fill-current text-red-500" : ""}`} />
+                <Button
+                  onClick={toggleFavorite}
+                  disabled={favoriteBusy}
+                  variant="outline"
+                  size="sm"
+                  className={`gap-2 transition-colors ${
+                    isFavorited
+                      ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400"
+                      : "text-gray-600 hover:border-red-300 hover:text-red-600"
+                  }`}
+                >
+                  <Heart className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`} />
+                  <span className="hidden sm:inline">
+                    {isFavorited ? t("chord-finder.remove-favorite") : t("chord-finder.add-favorite")}
+                  </span>
                 </Button>
               )}
             </div>

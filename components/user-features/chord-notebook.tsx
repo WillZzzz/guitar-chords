@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/contexts/auth-context"
-import { getChordLookups, type ChordLookup } from "@/lib/local-storage"
+import { getChordLookups, type ChordLookup } from "@/lib/user-data"
+import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
 import { Music, Clock, BarChart3 } from "lucide-react"
 
@@ -15,17 +17,34 @@ interface ChordNotebookProps {
 export default function ChordNotebook({ onChordSelect }: ChordNotebookProps) {
   const { user } = useAuth()
   const [lookups, setLookups] = useState<ChordLookup[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
-      const userLookups = getChordLookups(user.id)
-      setLookups(userLookups)
+    if (!user) {
+      setLookups([])
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    getChordLookups(user.id)
+      .then((data) => {
+        if (!cancelled) setLookups(data)
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Failed to load chord history")
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
     }
   }, [user])
 
   const handleChordClick = (lookup: ChordLookup) => {
     if (onChordSelect) {
-      onChordSelect(`${lookup.root_note}${lookup.chord_type}`)
+      onChordSelect(lookup.chord_name)
     }
   }
 
@@ -38,6 +57,16 @@ export default function ChordNotebook({ onChordSelect }: ChordNotebookProps) {
           <p className="text-muted-foreground">Your chord lookup history will be automatically saved here</p>
         </CardContent>
       </Card>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="grid gap-4">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-20 w-full rounded-lg" />
+        ))}
+      </div>
     )
   }
 

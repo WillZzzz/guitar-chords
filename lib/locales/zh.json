@@ -7,7 +7,10 @@
     "chord-finder": "和弦查找",
     "reverse-lookup": "反向查找",
     "progression-builder": "和弦进行构建器",
-    "back-to-app": "返回应用"
+    "back-to-app": "返回应用",
+    "my-chords": "我的和弦",
+    "my-progressions": "我的进行",
+    "history": "历史"
   },
   "chord-finder": {
     "title": "和弦查找器",
@@ -155,7 +158,21 @@
     "error-contact-support": "如果问题仍然存在，请联系支持",
     "profile": "个人资料",
     "settings": "设置",
-    "sign-out": "退出登录"
+    "sign-out": "退出登录",
+    "forgot-password": "忘记密码？",
+    "reset-password": "重置密码",
+    "reset-password-description": "输入您的邮箱，我们将发送重置链接。",
+    "send-reset-link": "发送重置链接",
+    "sending": "发送中...",
+    "reset-email-sent": "请查看您的邮箱以获取密码重置链接。",
+    "back-to-sign-in": "返回登录",
+    "set-new-password": "设置新密码",
+    "set-new-password-description": "请在下方输入您的新密码。",
+    "new-password": "新密码",
+    "new-password-placeholder": "输入您的新密码",
+    "update-password": "更新密码",
+    "updating": "更新中...",
+    "password-updated": "密码更新成功！"
   },
   "common": {
     "chord": "和弦",
@@ -247,7 +264,38 @@
     "toast-audio-error": "无法播放和弦音频",
     "toast-fingering-unavailable": "和弦指法不可用",
     "toast-audio-failed": "音频播放失败",
-    "toast-progression-failed": "进行播放失败"
+    "toast-progression-failed": "进行播放失败",
+    "transpose": "移调",
+    "key-filter": "调",
+    "all-keys": "全部",
+    "major-mode": "大调",
+    "minor-mode": "小调",
+    "bpm": "BPM",
+    "share-link": "分享",
+    "share-copied": "链接已复制！",
+    "share-failed": "无法复制链接",
+    "diatonic-chords": "{key} {mode}的和弦",
+    "toast-updated": "进行已更新！",
+    "update-button": "更新进行",
+    "editing-banner": "正在编辑：{name}",
+    "cancel-edit": "取消编辑",
+    "publish-button": "发布",
+    "unpublish-button": "取消发布",
+    "toast-published": "进行已发布 — 可在社区中查看",
+    "toast-unpublished": "进行已取消发布",
+    "toast-publish-failed": "更新发布状态失败",
+    "tab-mine": "我的进行",
+    "tab-community": "社区",
+    "caption-mine": "您保存的和弦进行",
+    "caption-community": "其他用户分享的公开进行",
+    "empty-mine": "在上方保存一个进行即可在此查看",
+    "sign-in-mine": "登录以查看您保存的进行",
+    "empty-community": "还没有公开的进行 — 成为第一个发布的人！",
+    "save-copy-button": "保存副本",
+    "toast-copy-saved": "副本已保存到您的库",
+    "toast-copy-failed": "保存副本失败",
+    "by-author": "由 {author} 创建",
+    "toast-community-load-failed": "加载社区进行失败"
   },
   "saved-progressions": {
     "title": "已保存进行",
@@ -258,6 +306,24 @@
     "create-progressions": "在构建器中创建和弦进行并保存在此",
     "saved-ago": "于 {time} 保存",
     "toast-deleted": "进行已删除"
+  },
+  "user-library": {
+    "title-my-chords": "我的和弦",
+    "title-my-progressions": "我的进行",
+    "title-history": "历史",
+    "caption-my-chords": "您收藏的和弦",
+    "caption-history": "您最近查找的和弦与和弦进行",
+    "sign-in-my-chords": "登录以查看您的收藏",
+    "empty-my-chords": "在和弦查找器中点击爱心即可保存到此处",
+    "sign-in-history": "登录以记录您的查找历史",
+    "empty-history": "开始查找和弦或保存和弦进行以建立历史记录",
+    "toast-favorite-removed": "已从收藏中移除",
+    "toast-favorite-remove-failed": "移除收藏失败",
+    "toast-progression-deleted": "进行已删除",
+    "toast-progression-delete-failed": "删除进行失败",
+    "toast-load-failed": "加载您的库失败",
+    "toast-history-deleted": "已从历史记录中移除",
+    "toast-history-delete-failed": "从历史记录中移除失败"
   },
   "ui": {
     "save": "保存",
@@ -280,5 +346,13 @@
     "accidentals": "变音记号",
     "qualities": "和弦性质",
     "extensions": "扩展音"
+  },
+  "msg": {
+    "error-unexpected": "发生了意外错误，请重试。",
+    "passwords-no-match": "两次输入的密码不一致",
+    "password-min-length": "密码至少需要6个字符",
+    "added-to-favorites": "已添加到收藏",
+    "removed-from-favorites": "已从收藏中移除",
+    "sign-in-to-save": "请登录以保存收藏"
   }
 }

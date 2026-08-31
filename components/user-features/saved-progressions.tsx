@@ -6,9 +6,10 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import { getSavedProgressions, deleteSavedProgression, type SavedProgression } from "@/lib/local-storage"
+import { getSavedProgressions, deleteSavedProgression, type SavedProgression } from "@/lib/user-data"
 import { formatDistanceToNow } from "date-fns"
 import { ListMusic, Trash2 } from "lucide-react"
 import { toast } from "sonner"
@@ -17,20 +18,40 @@ export default function SavedProgressions() {
   const { user } = useAuth()
   const { t } = useLanguage()
   const [progressions, setProgressions] = useState<SavedProgression[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
-      const userProgressions = getSavedProgressions(user.id)
-      setProgressions(userProgressions)
+    if (!user) {
+      setProgressions([])
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    getSavedProgressions(user.id)
+      .then((data) => {
+        if (!cancelled) setProgressions(data)
+      })
+      .catch(() => {
+        if (!cancelled) toast.error(t("msg.error-unexpected"))
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
     }
   }, [user])
 
-  const handleDeleteProgression = (progressionId: string, e: React.MouseEvent) => {
+  const handleDeleteProgression = async (progressionId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (user) {
-      deleteSavedProgression(user.id, progressionId)
-      setProgressions(getSavedProgressions(user.id))
+    if (!user) return
+    try {
+      await deleteSavedProgression(user.id, progressionId)
+      setProgressions((prev) => prev.filter((p) => p.id !== progressionId))
       toast.success(t("saved-progressions.toast-deleted"))
+    } catch {
+      toast.error(t("msg.error-unexpected"))
     }
   }
 
@@ -43,6 +64,16 @@ export default function SavedProgressions() {
           <p className="text-muted-foreground">{t("saved-progressions.sign-in-subtitle")}</p>
         </CardContent>
       </Card>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="grid gap-4">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-28 w-full rounded-lg" />
+        ))}
+      </div>
     )
   }
 
