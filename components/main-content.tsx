@@ -199,13 +199,13 @@ export default function MainContent() {
               </TabsContent>
 
               <TabsContent value="reverse" forceMount className="space-y-6 data-[state=inactive]:hidden">
-                <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-6">
+                <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-3 sm:p-6">
                   <ChordFinderReverse onChordSelect={handleChordSelectFromLibrary} />
                 </div>
               </TabsContent>
 
               <TabsContent value="progression" forceMount className="space-y-6 data-[state=inactive]:hidden">
-                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6">
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 sm:p-6">
                   <ChordProgressionBuilder
                     onChordSelect={handleChordSelectFromLibrary}
                     externalProgression={pendingProgression}

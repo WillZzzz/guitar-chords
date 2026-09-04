@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
@@ -117,9 +118,21 @@ export default function ChordProgressionBuilder({
   const [bpm, setBpm] = useState(80)
   const [selectedKey, setSelectedKey] = useState("C")
   const [keyMode, setKeyMode] = useState<"major" | "minor">("major")
-  const [showFingering, setShowFingering] = useState(false)
+  const [showFingering, setShowFingering] = useState(true)
   const [altFingering, setAltFingering] = useState<Record<string, number>>({})
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
   const stopRef = useRef(false)
+
+  // Drives the "Your Progression" chip list orientation — @hello-pangea/dnd's
+  // Droppable direction is a JS prop, not CSS, so it can't follow a Tailwind
+  // breakpoint on its own; this mirrors Tailwind's default `sm` cutoff (640px).
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)")
+    const update = () => setIsMobileLayout(mq.matches)
+    update()
+    mq.addEventListener("change", update)
+    return () => mq.removeEventListener("change", update)
+  }, [])
 
   // Load and validate progression from URL on mount
   useEffect(() => {
@@ -190,6 +203,25 @@ export default function ChordProgressionBuilder({
     )
   }
 
+  // Treats the first chord's root as the progression's current key and shifts
+  // by whatever semitone distance gets it to the picked key.
+  const transposeToKey = (targetRoot: string) => {
+    if (progression.length === 0) return
+    const currentTonic = Chord.get(progression[0]).tonic
+    if (!currentTonic) return
+    const currentPitch = Note.chroma(currentTonic)
+    const targetPitch = Note.chroma(targetRoot)
+    if (currentPitch == null || targetPitch == null) return
+    const diff = (targetPitch - currentPitch + 12) % 12
+    if (diff === 0) return
+    transposeProgression(diff)
+  }
+
+  const currentProgressionKey = useMemo(() => {
+    if (progression.length === 0) return null
+    return Chord.get(progression[0]).tonic ?? null
+  }, [progression])
+
   const handleAddCustomChord = () => {
     const chord = customChord.trim()
     if (!chord) return
@@ -205,6 +237,15 @@ export default function ChordProgressionBuilder({
 
   const toggleNote = (note: string) => {
     setSelectedNotes((prev) => (prev.includes(note) ? prev.filter((n) => n !== note) : [...prev, note]))
+  }
+
+  // Shared by both the inline (mobile) and standalone (desktop) fingering displays
+  const getFingeringInfo = (chord: string, idx: number) => {
+    const chordData = getChordData(chord)
+    const varIndex = altFingering[`${chord}-${idx}`] ?? 0
+    const variation = chordData?.variations?.[varIndex]
+    const hasAlt = chordData?.variations && chordData.variations.length > 1
+    return { chordData, variation, hasAlt }
   }
 
   const playChord = async (chordName: string) => {
@@ -306,17 +347,17 @@ export default function ChordProgressionBuilder({
     <div className="space-y-6">
       {/* Add Chords Card */}
       <Card className="chord-card">
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2">
             <ListMusic className="h-5 w-5" />
             {t("progression-builder.title")}
           </CardTitle>
           <p className="text-sm text-muted-foreground">{t("progression-builder.description")}</p>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-4 sm:p-6 pt-0">
 
           {/* Key Filter */}
-          <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-900 rounded-lg">
+          <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-900 rounded-lg">
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               <span className="flex items-center justify-center h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-bold shrink-0">1</span>
               <span className="text-sm font-semibold">{t("progression-builder.key-filter")}</span>
@@ -355,7 +396,7 @@ export default function ChordProgressionBuilder({
                   key={key}
                   variant={selectedKey === key ? "default" : "outline"}
                   size="sm"
-                  className={`h-8 px-3 text-sm font-semibold ${selectedKey === key ? "bg-blue-600 hover:bg-blue-700" : "bg-white dark:bg-transparent"}`}
+                  className={`h-8 px-2 sm:px-3 text-sm font-semibold ${selectedKey === key ? "bg-blue-600 hover:bg-blue-700" : "bg-white dark:bg-transparent"}`}
                   onClick={() => setSelectedKey(selectedKey === key ? "" : key)}
                 >
                   {key}
@@ -374,7 +415,7 @@ export default function ChordProgressionBuilder({
           {/* Chord Buttons */}
           <div>
             <h3 className="text-sm font-semibold mb-3">{t("progression-builder.add-chords")}</h3>
-            <div className={`grid gap-2 ${selectedKey ? "grid-cols-4 sm:grid-cols-7" : "grid-cols-3 sm:grid-cols-4 lg:grid-cols-6"}`}>
+            <div className={`grid gap-2 ${selectedKey ? "grid-cols-2 sm:grid-cols-4 lg:grid-cols-7" : "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6"}`}>
               {diatonicChords.map((chord, i) => (
                 <Button
                   key={`${chord}-${i}`}
@@ -542,8 +583,8 @@ export default function ChordProgressionBuilder({
           (since hovering this card is unavoidable while dragging inside it),
           causing the dragged chord block to jump to the wrong place on screen. */}
       <Card className="border shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span>{t("progression-builder.your-progression")}</span>
             <div className="flex flex-wrap items-center gap-2">
               {/* BPM Control */}
@@ -568,23 +609,32 @@ export default function ChordProgressionBuilder({
 
               {/* Transpose */}
               {progression.length > 0 && (
-                <div className="flex items-center gap-1 border rounded-md px-2 py-1">
-                  <button
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={() => transposeProgression(-1)}
-                    title="-1 semitone"
-                  >
-                    <ChevronDown className="h-3 w-3" />
-                  </button>
-                  <span className="text-xs text-muted-foreground px-1">{t("progression-builder.transpose")}</span>
-                  <button
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={() => transposeProgression(1)}
-                    title="+1 semitone"
-                  >
-                    <ChevronUp className="h-3 w-3" />
-                  </button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      {t("progression-builder.transpose")}
+                      {currentProgressionKey && (
+                        <span className="text-muted-foreground">({currentProgressionKey})</span>
+                      )}
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {ALL_KEYS.map((key) => {
+                      const isCurrent =
+                        currentProgressionKey != null && Note.chroma(key) === Note.chroma(currentProgressionKey)
+                      return (
+                        <DropdownMenuItem
+                          key={key}
+                          onClick={() => transposeToKey(key)}
+                          className={isCurrent ? "font-semibold bg-accent" : ""}
+                        >
+                          {key}
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
 
               {/* Play / Stop / Share / Clear */}
@@ -592,15 +642,15 @@ export default function ChordProgressionBuilder({
                 <>
                   {playingProgression ? (
                     <Button variant="outline" size="sm" onClick={stopProgression} className="gap-1">
-                      <Square className="h-4 w-4" />Stop
+                      <Square className="h-4 w-4" /><span className="hidden sm:inline">Stop</span>
                     </Button>
                   ) : (
                     <Button variant="outline" size="sm" onClick={playProgressionAll} className="gap-1">
-                      <Play className="h-4 w-4" />{t("progression-builder.play-all")}
+                      <Play className="h-4 w-4" /><span className="hidden sm:inline">{t("progression-builder.play-all")}</span>
                     </Button>
                   )}
                   <Button variant="outline" size="sm" onClick={shareProgression} className="gap-1">
-                    <Share2 className="h-4 w-4" />{t("progression-builder.share-link")}
+                    <Share2 className="h-4 w-4" /><span className="hidden sm:inline">{t("progression-builder.share-link")}</span>
                   </Button>
                 </>
               )}
@@ -610,7 +660,18 @@ export default function ChordProgressionBuilder({
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 p-4 sm:p-6 pt-0">
+          {/* Fingering reference toggle — shared control, sits above the chord list on both platforms */}
+          {progression.length > 0 && (
+            <button
+              onClick={() => setShowFingering((v) => !v)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronDown className={`h-3 w-3 transition-transform ${showFingering ? "rotate-180" : ""}`} />
+              {showFingering ? "Hide" : "Show"} fingering reference
+            </button>
+          )}
+
           {/* Unique chord links row */}
           {progression.length > 0 && (() => {
             const unique = Array.from(new Set(progression))
@@ -637,76 +698,108 @@ export default function ChordProgressionBuilder({
               <p>{t("progression-builder.no-chords-yet")}</p>
             </div>
           ) : (
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="progression" direction="horizontal">
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="flex flex-nowrap overflow-x-auto gap-2 min-h-[60px] p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg scrollbar-hide"
-                  >
-                    {progression.map((chord, index) => (
-                      <Draggable key={`${chord}-${index}`} draggableId={`${chord}-${index}`} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all shrink-0 ${
-                              playingChord === chord
-                                ? "bg-blue-600 text-white shadow-lg animate-pulse"
-                                : "bg-primary text-primary-foreground hover:bg-primary/90"
-                            } ${snapshot.isDragging ? "shadow-lg rotate-2" : ""}`}
-                          >
-                            <div {...provided.dragHandleProps}>
-                              <GripVertical className="h-4 w-4" />
+            <div className="flex gap-2 items-start">
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="progression" direction={isMobileLayout ? "vertical" : "horizontal"}>
+                  {(provided) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className={`flex flex-1 min-w-0 gap-1.5 sm:gap-2 min-h-[60px] p-3 sm:p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg scrollbar-hide ${
+                        isMobileLayout ? "flex-col items-start" : "flex-row flex-nowrap overflow-x-auto"
+                      }`}
+                    >
+                      {progression.map((chord, index) => (
+                        <Draggable key={`${chord}-${index}`} draggableId={`${chord}-${index}`} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`flex items-center shrink-0 ${isMobileLayout && showFingering ? "min-h-[156px]" : ""} ${snapshot.isDragging ? "shadow-lg rotate-2" : ""}`}
+                            >
+                              <div
+                                className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-3 sm:py-2 rounded-lg transition-all shrink-0 ${
+                                  playingChord === chord
+                                    ? "bg-blue-600 text-white shadow-lg animate-pulse"
+                                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                                }`}
+                              >
+                                <div {...provided.dragHandleProps}>
+                                  <GripVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                </div>
+                                <span className="font-semibold text-sm sm:text-base">{chord}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => playChord(chord)}
+                                  disabled={playingChord === chord}
+                                  className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-primary-foreground/20"
+                                >
+                                  {playingChord === chord ? <Volume2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 animate-pulse" /> : <Play className="h-2.5 w-2.5 sm:h-3 sm:w-3" />}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeChord(index)}
+                                  className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-primary-foreground/20"
+                                >
+                                  <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                                </Button>
+                              </div>
                             </div>
-                            <span className="font-semibold">{chord}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => playChord(chord)}
-                              disabled={playingChord === chord}
-                              className="h-6 w-6 p-0 hover:bg-primary-foreground/20"
-                            >
-                              {playingChord === chord ? <Volume2 className="h-3 w-3 animate-pulse" /> : <Play className="h-3 w-3" />}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeChord(index)}
-                              className="h-6 w-6 p-0 hover:bg-primary-foreground/20"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+
+              {/* Fingering diagrams — mobile only, deliberately outside the dashed chord box, one column beside it.
+                  Each row reserves the same min-height as the chip rows above so the two columns stay aligned. */}
+              {isMobileLayout && showFingering && (
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  {progression.map((chord, idx) => {
+                    const { chordData, variation, hasAlt } = getFingeringInfo(chord, idx)
+                    return (
+                      <div key={`${chord}-${idx}-fingering`} className="min-h-[156px] flex flex-col items-center justify-center gap-0.5">
+                        {variation ? (
+                          <MiniChordDiagram positions={variation.positions} startFret={variation.startFret} />
+                        ) : (
+                          <div className="w-16 h-20 border rounded flex items-center justify-center text-xs text-muted-foreground text-center px-1">
+                            No data
                           </div>
                         )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                        {hasAlt && (
+                          <button
+                            onClick={() =>
+                              setAltFingering((prev) => {
+                                const key = `${chord}-${idx}`
+                                const next = ((prev[key] ?? 0) + 1) % (chordData!.variations!.length)
+                                return { ...prev, [key]: next }
+                              })
+                            }
+                            className="text-[10px] text-muted-foreground hover:text-foreground"
+                          >
+                            alt {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Fingering Reference */}
+          {/* Fingering Reference — desktop only; mobile shows this beside the chord box above */}
           {progression.length > 0 && (
             <div>
-              <button
-                onClick={() => setShowFingering((v) => !v)}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ChevronDown className={`h-3 w-3 transition-transform ${showFingering ? "rotate-180" : ""}`} />
-                {showFingering ? "Hide" : "Show"} fingering reference
-              </button>
-
-              {showFingering && (
+              {showFingering && !isMobileLayout && (
                 <div className="flex gap-4 overflow-x-auto pt-3 pb-1 scrollbar-hide">
                   {progression.map((chord, idx) => {
-                    const chordData = getChordData(chord)
-                    const varIndex = altFingering[`${chord}-${idx}`] ?? 0
-                    const variation = chordData?.variations?.[varIndex]
-                    const hasAlt = chordData?.variations && chordData.variations.length > 1
+                    const { chordData, variation, hasAlt } = getFingeringInfo(chord, idx)
                     return (
                       <div key={`${chord}-${idx}`} className="flex flex-col items-center gap-1 shrink-0">
                         <button
@@ -752,10 +845,10 @@ export default function ChordProgressionBuilder({
       {/* Save Card */}
       {progression.length > 0 && (
         <Card className="chord-card">
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle>{t("progression-builder.save-progression")}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
             {editingId && (
               <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md bg-orange-50 border border-orange-200 text-sm">
                 <span className="text-orange-800">
