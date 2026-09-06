@@ -100,8 +100,8 @@ export default function HistoryPanel({ onChordSelect, onProgressionSelect }: His
                   <div
                     className={`rounded-md p-1.5 shrink-0 text-white ${
                       lookup.kind === "progression"
-                        ? "bg-gradient-to-br from-orange-400 to-red-500"
-                        : "bg-gradient-to-br from-blue-400 to-indigo-500"
+                        ? "bg-gradient-to-br from-[#597399] to-[#415a80]"
+                        : "bg-gradient-to-br from-[#a05537] to-[#bf6f4a]"
                     }`}
                   >
                     {lookup.kind === "progression" ? (

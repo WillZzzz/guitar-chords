@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -86,13 +86,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
   const { addToHistory } = useChordHistory()
   const { t } = useLanguage()
 
-  const fingeringRef = useRef<HTMLDivElement>(null)
-  const theoryRef = useRef<HTMLDivElement>(null)
-  const relatedRef = useRef<HTMLDivElement>(null)
-
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-  }
+  const [activeSection, setActiveSection] = useState<"fingering" | "theory" | "related">("fingering")
 
   console.log(`🎵 ChordFinder: selectedChord = "${selectedChord}"`)
   
@@ -188,7 +182,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
       localStorage.setItem("recentChordSearches", JSON.stringify(newRecent))
 
       setSearchTerm("")
-      setTimeout(() => scrollToSection(fingeringRef), 100)
+      setActiveSection("fingering")
     }
   }
 
@@ -200,7 +194,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
     const newRecent = [chord, ...recentSearches.filter((c) => c !== chord)].slice(0, 5)
     setRecentSearches(newRecent)
     localStorage.setItem("recentChordSearches", JSON.stringify(newRecent))
-    setTimeout(() => scrollToSection(fingeringRef), 100)
+    setActiveSection("fingering")
   }
 
   const handlePlayChord = async (positions: any[]) => {
@@ -373,32 +367,50 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
         </CardContent>
       </Card>
 
-      {/* Sticky section anchor nav */}
-      <div className="sticky top-[80px] z-40 -mx-6 py-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 overflow-hidden">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide px-6">
-          <button
-            onClick={() => scrollToSection(fingeringRef)}
-            className="px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors shrink-0"
-          >
-            {t("variations.fingering-options")}
-          </button>
-          <button
-            onClick={() => scrollToSection(theoryRef)}
-            className="px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors shrink-0"
-          >
-            {t("section.music-theory")}
-          </button>
-          <button
-            onClick={() => scrollToSection(relatedRef)}
-            className="px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors shrink-0"
-          >
-            {t("section.related-chords")}
-          </button>
+      {/* Section tabs — mutually exclusive: only the active section's content renders below */}
+      <div className="rounded-xl border border-[#e6dcd2] dark:border-slate-700 bg-[#fffdfa] dark:bg-slate-900 overflow-hidden">
+        <div className="grid grid-cols-3">
+          {(
+            [
+              { key: "fingering", label: t("variations.fingering-options") },
+              { key: "theory", label: t("section.music-theory") },
+              { key: "related", label: t("section.related-chords") },
+            ] as const
+          ).map((tab, i) => {
+            const isActive = activeSection === tab.key
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveSection(tab.key)}
+                className={`px-4 py-3 text-sm text-center transition-colors ${
+                  i < 2 ? "border-r border-[#e6dcd2] dark:border-slate-700" : ""
+                } ${
+                  isActive
+                    ? "bg-[#f2e1d6] dark:bg-slate-800 text-[#bf6f4a] dark:text-orange-300 font-semibold"
+                    : "bg-[#faf7f3] dark:bg-slate-900 text-[#37302a] dark:text-slate-200 font-medium hover:bg-[#f2e1d6]/40 dark:hover:bg-slate-800/60"
+                }`}
+              >
+                <span className={isActive ? "inline-block border-b-2 border-[#bf6f4a] pb-0.5" : ""}>
+                  {tab.label}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Section 2: Chord Fingering */}
-      <div ref={fingeringRef} className="scroll-mt-[140px]">
+      {/* Primary Scale — shown alongside Fingering Options and Music Theory, hidden on Related Chords */}
+      {activeSection !== "related" && tonalChordData.notes && tonalChordData.notes.length > 0 && (
+        <ScaleDisplay
+          analysis={analyzeChordScale(tonalChordData.notes, selectedChord)}
+          chordName={selectedChord}
+          showPrimary={true}
+          showAlternatives={false}
+        />
+      )}
+
+      {/* Fingering Options */}
+      {activeSection === "fingering" && (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -436,7 +448,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
                   <div className="flex flex-col sm:flex-row gap-3">
                     {/* Chord Diagram */}
                     <div className="flex justify-center sm:justify-start shrink-0">
-                      <div className="bg-amber-50 rounded p-2">
+                      <div className="bg-[#fbf4ef] dark:bg-slate-800 rounded p-2">
                         <ChordDiagram positions={variation.positions} startFret={variation.startFret} />
                       </div>
                     </div>
@@ -492,21 +504,11 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
           )}
         </CardContent>
       </Card>
-
-      </div>
-
-      {/* Section 3: Primary Scale Analysis */}
-      {tonalChordData.notes && tonalChordData.notes.length > 0 && (
-        <ScaleDisplay 
-          analysis={analyzeChordScale(tonalChordData.notes, selectedChord)}
-          chordName={selectedChord}
-          showPrimary={true}
-          showAlternatives={false}
-        />
       )}
 
-      {/* Section 4: Music Theory & Analysis */}
-      <div ref={theoryRef} className="scroll-mt-[140px]">
+      {/* Music Theory & Analysis */}
+      {activeSection === "theory" && (
+      <>
       <Card>
         <CardHeader>
           <CardTitle>{t("section.music-theory")}</CardTitle>
@@ -518,7 +520,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
               <h4 className="font-medium mb-3">{t("section.chord-notes")}</h4>
               <div className="flex flex-wrap gap-2">
                 {tonalChordData.notes?.map((note: string, index: number) => (
-                  <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Badge key={index} variant="outline" className="bg-[#fbf4ef] dark:bg-slate-800 text-[#bf6f4a] dark:text-orange-300 border-[#e6dcd2] dark:border-slate-700">
                     {note}
                   </Badge>
                 ))}
@@ -607,11 +609,11 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
             {/* Playing Tips */}
             <div>
               <h4 className="font-medium mb-3">{t("section.playing-tips")}</h4>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="bg-[#fbf4ef] dark:bg-slate-800 border border-amber-200 dark:border-amber-800/50 rounded-lg p-4">
                 <ul className="space-y-2 text-sm">
                   {getPlayingTips(selectedChord, chordData, t).map((tip, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <span className="text-amber-600 mt-1">•</span>
+                      <span className="text-[#bf6f4a] mt-1">•</span>
                       <span>{tip}</span>
                     </li>
                   ))}
@@ -622,20 +624,20 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
         </CardContent>
       </Card>
 
-      </div>
-
-      {/* Section 5: Alternative Scales */}
+      {/* Alternative Scales */}
       {tonalChordData.notes && tonalChordData.notes.length > 0 && (
-        <ScaleDisplay 
+        <ScaleDisplay
           analysis={analyzeChordScale(tonalChordData.notes, selectedChord)}
           chordName={selectedChord}
           showPrimary={false}
           showAlternatives={true}
         />
       )}
+      </>
+      )}
 
-      {/* Section 6: Related Chords */}
-      <div ref={relatedRef} className="scroll-mt-[140px]">
+      {/* Related Chords */}
+      {activeSection === "related" && (
       <Card>
         <CardHeader>
           <CardTitle>{t("section.related-chords")}</CardTitle>
@@ -674,7 +676,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
           </div>
         </CardContent>
       </Card>
-      </div>
+      )}
     </div>
   )
 }

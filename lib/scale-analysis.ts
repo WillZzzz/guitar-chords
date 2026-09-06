@@ -276,16 +276,11 @@ export function getChordNoteColor(index: number, isHighlighted: boolean): string
   if (!isHighlighted) {
     return 'text-gray-400 bg-gray-100 dark:text-gray-500 dark:bg-gray-800'
   }
-  
-  // Different colors for different chord tones
-  const colors = [
-    'text-red-700 bg-red-100 border-red-300 dark:text-red-300 dark:bg-red-900 dark:border-red-700', // Root
-    'text-blue-700 bg-blue-100 border-blue-300 dark:text-blue-300 dark:bg-blue-900 dark:border-blue-700', // 3rd
-    'text-green-700 bg-green-100 border-green-300 dark:text-green-300 dark:bg-green-900 dark:border-green-700', // 5th
-    'text-purple-700 bg-purple-100 border-purple-300 dark:text-purple-300 dark:bg-purple-900 dark:border-purple-700', // 7th
-    'text-yellow-700 bg-yellow-100 border-yellow-300 dark:text-yellow-300 dark:bg-yellow-900 dark:border-yellow-700', // Extensions
-    'text-pink-700 bg-pink-100 border-pink-300 dark:text-pink-300 dark:bg-pink-900 dark:border-pink-700', // More extensions
-  ]
-  
-  return colors[index % colors.length]
+
+  // Root note keeps a distinct color; every other chord tone (3rd/5th/7th/extensions)
+  // shares the Chord Finder page's terracotta accent.
+  if (index === 0) {
+    return 'text-red-700 bg-red-100 border-red-300 dark:text-red-300 dark:bg-red-900 dark:border-red-700'
+  }
+  return 'text-[#a05537] bg-[#fbf4ef] border-[#e6c9b8] dark:text-orange-300 dark:bg-slate-800 dark:border-slate-700'
 }

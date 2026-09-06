@@ -34,7 +34,7 @@ export default function ScaleDisplay({
         <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-green-600" />
+            <Target className="h-5 w-5 text-[#bf6f4a]" />
             {t('theory.primary-scale')}
           </CardTitle>
           <CardDescription>
@@ -60,7 +60,7 @@ export default function ScaleDisplay({
                   <div
                     key={index}
                     className={`relative px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all ${colorClass} ${
-                      isHighlighted ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''
+                      isHighlighted ? 'ring-2 ring-offset-2 ring-[#bf6f4a] scale-110' : ''
                     }`}
                   >
                     <div className="text-center">
@@ -70,7 +70,7 @@ export default function ScaleDisplay({
                       </div>
                     </div>
                     {isHighlighted && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#bf6f4a] rounded-full animate-pulse" />
                     )}
                   </div>
                 )
@@ -79,14 +79,14 @@ export default function ScaleDisplay({
           </div>
 
           {/* Chord Function */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+          <div className="bg-[#fbf4ef] dark:bg-slate-800/60 p-4 rounded-lg">
             <div className="flex items-start gap-2">
-              <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+              <Info className="h-4 w-4 text-[#bf6f4a] mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                <h4 className="text-sm font-medium text-[#37302a] dark:text-slate-100 mb-1">
                   {t('theory.chord-function')}:
                 </h4>
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+                <p className="text-sm text-[#6b5f55] dark:text-slate-300">
                   {chordFunction}
                 </p>
               </div>
@@ -98,23 +98,23 @@ export default function ScaleDisplay({
             <h4 className="text-sm font-medium mb-2">{t('theory.legend')}:</h4>
             <div className="flex flex-wrap gap-2 text-xs">
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-[#c0392b]"></div>
                 <span>{t('theory.root-note')}</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <div className="w-3 h-3 rounded-full bg-[#bf6f4a]"></div>
                 <span>{t('theory.third')}</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <div className="w-3 h-3 rounded-full bg-[#bf6f4a]"></div>
                 <span>{t('theory.fifth')}</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                <div className="w-3 h-3 rounded-full bg-[#bf6f4a]"></div>
                 <span>{t('theory.seventh')}</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+                <div className="w-3 h-3 rounded-full bg-[#9c9187]"></div>
                 <span>{t('theory.scale-note')}</span>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default function ScaleDisplay({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Music className="h-5 w-5 text-purple-600" />
+              <Music className="h-5 w-5 text-[#bf6f4a]" />
               {t('theory.alternative-scales')}
             </CardTitle>
             <CardDescription>
@@ -147,8 +147,8 @@ export default function ScaleDisplay({
                         key={noteIndex}
                         variant={isHighlighted ? "default" : "outline"}
                         className={`text-xs ${
-                          isHighlighted 
-                            ? 'bg-purple-600 hover:bg-purple-700' 
+                          isHighlighted
+                            ? 'bg-[#bf6f4a] hover:bg-[#a05537]'
                             : 'text-gray-500'
                         }`}
                       >

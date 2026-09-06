@@ -123,7 +123,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                   onClick={() => toggleNote(note)}
                   variant={selectedNotes.includes(note) ? "default" : "outline"}
                   className={`h-12 ${
-                    selectedNotes.includes(note) ? "bg-purple-600 hover:bg-purple-700" : "hover:bg-purple-50"
+                    selectedNotes.includes(note) ? "bg-[#6b8e70] hover:bg-[#507355]" : "hover:bg-[#eef3ec] dark:hover:bg-slate-800"
                   }`}
                 >
                   {note}
@@ -138,7 +138,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
               <h3 className="text-sm font-medium mb-2">{t("variations.selected-notes")}:</h3>
               <div className="flex flex-wrap gap-2">
                 {selectedNotes.map((note) => (
-                  <Badge key={note} variant="secondary" className="bg-purple-100">
+                  <Badge key={note} variant="secondary" className="bg-[#eef3ec] dark:bg-slate-800">
                     {note}
                   </Badge>
                 ))}
@@ -154,7 +154,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                 {possibleChords.map((chord, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-purple-50 cursor-pointer transition-colors group"
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-[#eef3ec] dark:hover:bg-slate-800 cursor-pointer transition-colors group"
                     onClick={() => onChordSelect?.(chord.name)}
                   >
                     <div className="flex-1">
@@ -187,7 +187,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                         <Heart className={`h-4 w-4 ${favoritedNames.has(chord.name) ? "fill-current text-red-500" : ""}`} />
                       </Button>
                     )}
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 transition-colors shrink-0" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-[#6b8e70] transition-colors shrink-0" />
                   </div>
                 ))}
               </div>
