@@ -16,16 +16,80 @@ import LibrarySheet from "@/components/user-features/library-sheet"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import type { EditableProgression } from "@/lib/user-data"
-import { Music, Heart, ListMusic, Clock } from "lucide-react"
+import { Music, Heart, ListMusic, Clock, ChevronLeft, ChevronRight } from "lucide-react"
+import { TAB_THEME as TAB_ACCENTS } from "@/lib/tab-theme"
+
+const TAB_THEME = {
+  finder: {
+    accent: TAB_ACCENTS.finder.accent,
+    logoGradient: `linear-gradient(135deg, ${TAB_ACCENTS.finder.accentDark}, ${TAB_ACCENTS.finder.accent})`,
+    badgeGradient: `linear-gradient(135deg, ${TAB_ACCENTS.finder.accentDark}, #f97316)`,
+    headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.finder.accent} 50%, ${TAB_ACCENTS.finder.accentDark})`,
+  },
+  reverse: {
+    accent: TAB_ACCENTS.reverse.accent,
+    logoGradient: `linear-gradient(135deg, ${TAB_ACCENTS.reverse.accent}, ${TAB_ACCENTS.reverse.accent})`,
+    badgeGradient: `linear-gradient(135deg, ${TAB_ACCENTS.reverse.accent}, ${TAB_ACCENTS.reverse.accentDark})`,
+    headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.reverse.accent} 50%, ${TAB_ACCENTS.reverse.accentDark})`,
+  },
+  progression: {
+    accent: TAB_ACCENTS.progression.accent,
+    logoGradient: TAB_ACCENTS.progression.accent,
+    badgeGradient: TAB_ACCENTS.progression.accent,
+    headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.progression.accent} 50%, ${TAB_ACCENTS.progression.accentDark})`,
+  },
+} as const
+
+function CollapsedSidebarRail({
+  label,
+  count,
+  accent,
+  onExpand,
+}: {
+  label: string
+  count: number
+  accent: string
+  onExpand: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onExpand}
+      className="flex flex-col items-center gap-3 w-full py-4 rounded-xl border border-[#e6dcd2] dark:border-slate-700 bg-[#fffdfa] dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow"
+      title={label}
+    >
+      <ChevronLeft className="h-4 w-4" style={{ color: accent }} />
+      <span
+        className="text-xs font-medium text-muted-foreground"
+        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+      >
+        {label}
+      </span>
+      {count > 0 && (
+        <span
+          className="flex items-center justify-center text-[10px] font-semibold text-white rounded-full h-5 w-5"
+          style={{ backgroundColor: accent }}
+        >
+          {count}
+        </span>
+      )}
+    </button>
+  )
+}
 
 export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
   const [activeTab, setActiveTab] = useState("finder")
+  const theme = TAB_THEME[activeTab as keyof typeof TAB_THEME] ?? TAB_THEME.finder
   const [chordsSheetOpen, setChordsSheetOpen] = useState(false)
   const [progressionsSheetOpen, setProgressionsSheetOpen] = useState(false)
   const [historySheetOpen, setHistorySheetOpen] = useState(false)
   const [pendingProgression, setPendingProgression] = useState<string[] | undefined>()
   const [editingProgression, setEditingProgression] = useState<EditableProgression | undefined>()
+  const [chordsSidebarCollapsed, setChordsSidebarCollapsed] = useState(true)
+  const [progressionsSidebarCollapsed, setProgressionsSidebarCollapsed] = useState(true)
+  const [chordsCount, setChordsCount] = useState(0)
+  const [progressionsCount, setProgressionsCount] = useState(0)
   const { user } = useAuth()
   const { t } = useLanguage()
 
@@ -47,7 +111,7 @@ export default function MainContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900">
+    <div className="min-h-screen bg-[#faf7f3] dark:bg-slate-900">
       {/* Mobile bottom sheets */}
       {user && (
         <>
@@ -79,13 +143,22 @@ export default function MainContent() {
             {/* Centered Logo/Title */}
             <div className="flex items-center justify-center space-x-3">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-[background] duration-300"
+                  style={{ background: theme.logoGradient }}
+                >
                   <Music className="h-6 w-6 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-pulse" />
+                <div
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full animate-pulse transition-[background] duration-300"
+                  style={{ background: theme.badgeGradient }}
+                />
               </div>
               <div className="space-y-1 text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-gray-100 dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent leading-tight">
+                <h1
+                  className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent leading-tight transition-[background] duration-300"
+                  style={{ backgroundImage: theme.headingGradient }}
+                >
                   {t("header.title")}
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">{t("header.subtitle")}</p>
@@ -110,13 +183,22 @@ export default function MainContent() {
           <div className="sm:hidden flex items-center justify-between h-20 px-2">
             <div className="flex items-center space-x-2 min-w-0 flex-1 mr-2">
               <div className="relative shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-[background] duration-300"
+                  style={{ background: theme.logoGradient }}
+                >
                   <Music className="h-5 w-5 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-pulse" />
+                <div
+                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse transition-[background] duration-300"
+                  style={{ background: theme.badgeGradient }}
+                />
               </div>
               <div className="min-w-0">
-                <h1 className="text-base font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent truncate">
+                <h1
+                  className="text-base font-bold bg-clip-text text-transparent truncate transition-[background] duration-300"
+                  style={{ backgroundImage: theme.headingGradient }}
+                >
                   {t("header.title")}
                 </h1>
                 <p className="text-xs text-gray-500 font-medium truncate">{t("header.subtitle")}</p>
@@ -159,10 +241,10 @@ export default function MainContent() {
           {/* Main content area */}
           <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
+              <TabsList className="grid w-full grid-cols-3 gap-1 mb-8 h-auto p-1 bg-[#faf7f3] dark:bg-slate-800 border border-[#e6dcd2] dark:border-slate-700 rounded-xl">
                 <TabsTrigger
                   value="finder"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
+                  className="border border-[#e6dcd2] dark:border-slate-700 rounded-lg data-[state=active]:border-[#e6dcd2] data-[state=active]:bg-[#fffdfa] dark:data-[state=active]:bg-slate-900 data-[state=active]:text-[#bf6f4a] data-[state=active]:shadow-none text-[#9c9187] dark:text-slate-400 h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
                 >
                   <span className="block">
                     {t("nav.chord-finder").split(' ').map((word, i, arr) => (
@@ -172,7 +254,7 @@ export default function MainContent() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="reverse"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
+                  className="border border-[#e6dcd2] dark:border-slate-700 rounded-lg data-[state=active]:border-[#e6dcd2] data-[state=active]:bg-[#fffdfa] dark:data-[state=active]:bg-slate-900 data-[state=active]:text-[#6b8e70] data-[state=active]:shadow-none text-[#9c9187] dark:text-slate-400 h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
                 >
                   <span className="block">
                     {t("nav.reverse-lookup").split(' ').map((word, i, arr) => (
@@ -182,7 +264,7 @@ export default function MainContent() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="progression"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white h-auto py-3 px-2 whitespace-normal text-center leading-tight"
+                  className="border border-[#e6dcd2] dark:border-slate-700 rounded-lg data-[state=active]:border-[#597399] data-[state=active]:bg-[#597399] data-[state=active]:text-white data-[state=active]:shadow-none text-[#9c9187] dark:text-slate-400 h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
                 >
                   <span className="block">
                     {t("nav.progression-builder").split(' ').map((word, i, arr) => (
@@ -193,19 +275,17 @@ export default function MainContent() {
               </TabsList>
 
               <TabsContent value="finder" className="space-y-6">
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
-                  <ChordFinder onChordSelect={setSelectedChord} initialChord={selectedChord} />
-                </div>
+                <ChordFinder onChordSelect={setSelectedChord} initialChord={selectedChord} />
               </TabsContent>
 
               <TabsContent value="reverse" forceMount className="space-y-6 data-[state=inactive]:hidden">
-                <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-3 sm:p-6">
+                <div className="p-3 sm:p-6">
                   <ChordFinderReverse onChordSelect={handleChordSelectFromLibrary} />
                 </div>
               </TabsContent>
 
               <TabsContent value="progression" forceMount className="space-y-6 data-[state=inactive]:hidden">
-                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 sm:p-6">
+                <div className="p-3 sm:p-6">
                   <ChordProgressionBuilder
                     onChordSelect={handleChordSelectFromLibrary}
                     externalProgression={pendingProgression}
@@ -218,16 +298,59 @@ export default function MainContent() {
             </Tabs>
           </div>
 
-          {/* Contextual permanent sidebar — desktop only (lg+), varies with active tab */}
+          {/* Contextual sidebar — desktop only (lg+), varies with active tab, collapsible to a slim rail.
+              The wrapper is a fixed 48px-wide sticky column so the main content's width never changes;
+              the expanded panel is absolutely positioned inside it and overlaps the main content instead
+              of pushing/shrinking it. */}
           {user && activeTab === "finder" && (
-            <aside className="hidden lg:flex flex-col w-72 xl:w-80 shrink-0 sticky top-28 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-sm overflow-hidden">
-              <MyChordsPanel onChordSelect={handleChordSelectFromLibrary} />
-            </aside>
+            <div className="hidden lg:block w-12 shrink-0 sticky top-28">
+              {chordsSidebarCollapsed ? (
+                <CollapsedSidebarRail
+                  label={t("nav.my-chords")}
+                  count={chordsCount}
+                  accent={theme.accent}
+                  onExpand={() => setChordsSidebarCollapsed(false)}
+                />
+              ) : (
+                <aside className="absolute right-0 top-0 z-[60] flex flex-col w-72 xl:w-80 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-7 w-7 z-10"
+                    onClick={() => setChordsSidebarCollapsed(true)}
+                    title={t("nav.my-chords")}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <MyChordsPanel onChordSelect={handleChordSelectFromLibrary} onCountChange={setChordsCount} />
+                </aside>
+              )}
+            </div>
           )}
           {user && activeTab === "progression" && (
-            <aside className="hidden lg:flex flex-col w-72 xl:w-80 shrink-0 sticky top-28 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-sm overflow-hidden">
-              <MyProgressionsPanel onProgressionEdit={handleProgressionEdit} />
-            </aside>
+            <div className="hidden lg:block w-12 shrink-0 sticky top-28">
+              {progressionsSidebarCollapsed ? (
+                <CollapsedSidebarRail
+                  label={t("nav.my-progressions")}
+                  count={progressionsCount}
+                  accent={theme.accent}
+                  onExpand={() => setProgressionsSidebarCollapsed(false)}
+                />
+              ) : (
+                <aside className="absolute right-0 top-0 z-[60] flex flex-col w-72 xl:w-80 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-7 w-7 z-10"
+                    onClick={() => setProgressionsSidebarCollapsed(true)}
+                    title={t("nav.my-progressions")}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <MyProgressionsPanel onProgressionEdit={handleProgressionEdit} onCountChange={setProgressionsCount} />
+                </aside>
+              )}
+            </div>
           )}
         </div>
       </main>

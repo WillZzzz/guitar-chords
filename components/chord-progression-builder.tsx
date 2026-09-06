@@ -357,14 +357,14 @@ export default function ChordProgressionBuilder({
         <CardContent className="space-y-6 p-4 sm:p-6 pt-0">
 
           {/* Key Filter */}
-          <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-900 rounded-lg">
+          <div className="p-3 sm:p-4 bg-[#faf7f3] dark:bg-slate-800/50 border-2 border-[#e6dcd2] dark:border-slate-700 rounded-lg">
             <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <span className="flex items-center justify-center h-6 w-6 rounded-full bg-blue-600 text-white text-xs font-bold shrink-0">1</span>
+              <span className="flex items-center justify-center h-6 w-6 rounded-full bg-[#597399] text-white text-xs font-bold shrink-0">1</span>
               <span className="text-sm font-semibold">{t("progression-builder.key-filter")}</span>
               <Button
-                variant={selectedKey === "" ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                className="h-8 px-3 text-xs ml-auto"
+                className={`h-8 px-3 text-xs ml-auto ${selectedKey === "" ? "bg-[#597399] hover:bg-[#415a80] text-white border-[#597399]" : ""}`}
                 onClick={() => setSelectedKey("")}
               >
                 {t("progression-builder.all-keys")}
@@ -372,17 +372,17 @@ export default function ChordProgressionBuilder({
               {selectedKey !== "" && (
                 <>
                   <Button
-                    variant={keyMode === "major" ? "default" : "outline"}
+                    variant="outline"
                     size="sm"
-                    className="h-8 px-3 text-xs"
+                    className={`h-8 px-3 text-xs ${keyMode === "major" ? "bg-[#597399] hover:bg-[#415a80] text-white border-[#597399]" : ""}`}
                     onClick={() => setKeyMode("major")}
                   >
                     {t("progression-builder.major-mode")}
                   </Button>
                   <Button
-                    variant={keyMode === "minor" ? "default" : "outline"}
+                    variant="outline"
                     size="sm"
-                    className="h-8 px-3 text-xs"
+                    className={`h-8 px-3 text-xs ${keyMode === "minor" ? "bg-[#597399] hover:bg-[#415a80] text-white border-[#597399]" : ""}`}
                     onClick={() => setKeyMode("minor")}
                   >
                     {t("progression-builder.minor-mode")}
@@ -396,7 +396,7 @@ export default function ChordProgressionBuilder({
                   key={key}
                   variant={selectedKey === key ? "default" : "outline"}
                   size="sm"
-                  className={`h-8 px-2 sm:px-3 text-sm font-semibold ${selectedKey === key ? "bg-blue-600 hover:bg-blue-700" : "bg-white dark:bg-transparent"}`}
+                  className={`h-8 px-2 sm:px-3 text-sm font-semibold ${selectedKey === key ? "bg-[#597399] hover:bg-[#415a80]" : "bg-white dark:bg-transparent"}`}
                   onClick={() => setSelectedKey(selectedKey === key ? "" : key)}
                 >
                   {key}
@@ -422,7 +422,7 @@ export default function ChordProgressionBuilder({
                   variant="outline"
                   size="sm"
                   onClick={() => addChord(chord)}
-                  className="h-10 text-sm transition-all hover:bg-blue-50 hover:border-blue-300"
+                  className="h-10 text-sm transition-all hover:bg-[#eaeff5] dark:hover:bg-slate-800 hover:border-[#597399]/50"
                 >
                   {selectedKey && (
                     <span className="text-[10px] text-muted-foreground mr-1">{romanNumerals[i]}</span>
@@ -471,8 +471,8 @@ export default function ChordProgressionBuilder({
                       onClick={() => toggleNote(note)}
                       className={`h-10 text-sm font-semibold ${
                         selectedNotes.includes(note)
-                          ? "bg-green-600 hover:bg-green-700 text-white"
-                          : "hover:bg-green-50 hover:border-green-300"
+                          ? "bg-[#597399] hover:bg-[#415a80] text-white"
+                          : "hover:bg-[#eaeff5] dark:hover:bg-slate-800 hover:border-[#597399]/50"
                       }`}
                     >
                       {note}
@@ -484,7 +484,7 @@ export default function ChordProgressionBuilder({
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-medium">{t("progression-builder.selected-notes")}</span>
                     {selectedNotes.map((n) => (
-                      <Badge key={n} variant="secondary" className="bg-green-100 text-green-800">{n}</Badge>
+                      <Badge key={n} variant="secondary" className="bg-[#eaeff5] dark:bg-slate-800 text-[#415a80] dark:text-blue-200">{n}</Badge>
                     ))}
                     <Button variant="ghost" size="sm" onClick={() => setSelectedNotes([])} className="h-6 px-2 text-xs">
                       <X className="h-3 w-3 mr-1" />{t("ui.clear")}
@@ -500,7 +500,7 @@ export default function ChordProgressionBuilder({
                         <Button
                           key={i}
                           variant="outline"
-                          className="justify-between h-auto p-3 text-left hover:bg-green-50 hover:border-green-300"
+                          className="justify-between h-auto p-3 text-left hover:bg-[#eaeff5] dark:hover:bg-slate-800 hover:border-[#597399]/50"
                           onClick={() => {
                             addChord(chord.name)
                             toast.success(t("progression-builder.toast-added").replace("{chord}", chord.name))
@@ -553,7 +553,7 @@ export default function ChordProgressionBuilder({
                   return (
                     <Card
                       key={index}
-                      className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
+                      className="cursor-pointer hover:shadow-md transition-all hover:border-[#597399]/50"
                       onClick={() => setProgression(chords)}
                     >
                       <CardContent className="p-3">
@@ -682,7 +682,7 @@ export default function ChordProgressionBuilder({
                   <button
                     key={chord}
                     onClick={() => onChordSelect?.(chord)}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-800 transition-colors"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
                   >
                     {chord}
                     <ExternalLink className="h-2.5 w-2.5" />
@@ -720,8 +720,8 @@ export default function ChordProgressionBuilder({
                               <div
                                 className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-3 sm:py-2 rounded-lg transition-all shrink-0 ${
                                   playingChord === chord
-                                    ? "bg-blue-600 text-white shadow-lg animate-pulse"
-                                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                                    ? "bg-[#415a80] text-white shadow-lg animate-pulse"
+                                    : "bg-[#597399] text-white hover:bg-[#597399]/90"
                                 }`}
                               >
                                 <div {...provided.dragHandleProps}>
@@ -804,7 +804,7 @@ export default function ChordProgressionBuilder({
                       <div key={`${chord}-${idx}`} className="flex flex-col items-center gap-1 shrink-0">
                         <button
                           onClick={() => onChordSelect?.(chord)}
-                          className="text-xs font-semibold text-orange-700 hover:underline"
+                          className="text-xs font-semibold text-[#597399] hover:underline"
                         >
                           {chord}
                         </button>

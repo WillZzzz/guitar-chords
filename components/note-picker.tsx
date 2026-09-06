@@ -118,7 +118,7 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
         <Button onClick={() => {
           console.log(`🎹 NotePicker: Search button clicked for: "${value}"`)
           onSearch()
-        }} className="bg-green-600 hover:bg-green-700">
+        }} className="bg-[#bf6f4a] hover:bg-[#a05537]">
           {t("ui.search")}
         </Button>
       </div>

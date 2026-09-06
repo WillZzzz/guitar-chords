@@ -30,9 +30,10 @@ type Mode = "mine" | "community"
 
 export interface MyProgressionsPanelProps {
   onProgressionEdit?: (progression: EditableProgression) => void
+  onCountChange?: (count: number) => void
 }
 
-export default function MyProgressionsPanel({ onProgressionEdit }: MyProgressionsPanelProps) {
+export default function MyProgressionsPanel({ onProgressionEdit, onCountChange }: MyProgressionsPanelProps) {
   const { user } = useAuth()
   const { t, language } = useLanguage()
   const dateFnsLocale = dateFnsLocales[language]
@@ -80,6 +81,10 @@ export default function MyProgressionsPanel({ onProgressionEdit }: MyProgression
   useEffect(() => {
     loadMine()
   }, [loadMine])
+
+  useEffect(() => {
+    onCountChange?.(progressions.length)
+  }, [progressions.length, onCountChange])
 
   useEffect(() => {
     if (mode === "community") loadCommunity()
@@ -167,7 +172,7 @@ export default function MyProgressionsPanel({ onProgressionEdit }: MyProgression
           ) : (
             progressions.map((prog) => (
               <Card key={prog.id}
-                className="cursor-pointer hover:shadow-sm hover:border-orange-300 transition-all"
+                className="cursor-pointer hover:shadow-sm hover:border-[#597399]/50 transition-all"
                 onClick={() => onProgressionEdit?.({
                   id: prog.id, name: prog.name, description: prog.description, chords: prog.chords, tags: prog.tags,
                 })}>
@@ -176,7 +181,7 @@ export default function MyProgressionsPanel({ onProgressionEdit }: MyProgression
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <p className="font-semibold text-sm truncate">{prog.name}</p>
-                        <ArrowRight className="h-3 w-3 text-orange-500 shrink-0" />
+                        <ArrowRight className="h-3 w-3 text-[#597399] shrink-0" />
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {prog.chords.slice(0, 6).map((chord, i) => (

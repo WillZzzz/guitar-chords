@@ -21,9 +21,10 @@ const dateFnsLocales = { en: enUS, zh: zhCN }
 
 export interface MyChordsPanelProps {
   onChordSelect?: (chord: string) => void
+  onCountChange?: (count: number) => void
 }
 
-export default function MyChordsPanel({ onChordSelect }: MyChordsPanelProps) {
+export default function MyChordsPanel({ onChordSelect, onCountChange }: MyChordsPanelProps) {
   const { user } = useAuth()
   const { t, language } = useLanguage()
   const dateFnsLocale = dateFnsLocales[language]
@@ -53,6 +54,10 @@ export default function MyChordsPanel({ onChordSelect }: MyChordsPanelProps) {
   useEffect(() => {
     loadFavorites()
   }, [loadFavorites])
+
+  useEffect(() => {
+    onCountChange?.(favorites.length)
+  }, [favorites.length, onCountChange])
 
   useEffect(() => {
     window.addEventListener(LIBRARY_CHANGED_EVENT, loadFavorites)
@@ -91,7 +96,7 @@ export default function MyChordsPanel({ onChordSelect }: MyChordsPanelProps) {
               onClick={() => onChordSelect?.(fav.chord_name)}>
               <CardContent className="p-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="bg-gradient-to-br from-red-400 to-pink-500 text-white rounded-md p-1.5 shrink-0">
+                  <div className="bg-gradient-to-br from-[#a05537] to-[#bf6f4a] text-white rounded-md p-1.5 shrink-0">
                     <Music className="h-3.5 w-3.5" />
                   </div>
                   <div className="min-w-0">
