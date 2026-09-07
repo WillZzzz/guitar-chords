@@ -7,6 +7,8 @@ export const TAB_THEME = {
     accentDark: "#a05537",
     light: "#fbf4ef",
     border: "#e6c9b8",
+    // Edge-tab / expanded-panel header tint (Figma: "Edge Tab - My Chords")
+    tint: "#f2e1d6",
   },
   reverse: {
     accent: "#6b8e70",
@@ -19,6 +21,8 @@ export const TAB_THEME = {
     accentDark: "#415a80",
     light: "#eaeff5",
     border: "#c9d5e3",
+    // Edge-tab / expanded-panel header tint (Figma: "Edge Tab - My Progressions")
+    tint: "#d2deee",
   },
 } as const
 

@@ -11,12 +11,16 @@ import LanguageToggle from "@/components/language-toggle"
 import { ThemeToggle } from "@/components/theme-toggle"
 import MyChordsPanel from "@/components/user-features/my-chords-panel"
 import MyProgressionsPanel from "@/components/user-features/my-progressions-panel"
+import MyChordsSimpleRail from "@/components/user-features/my-chords-simple-rail"
+import MyProgressionsSimpleRail from "@/components/user-features/my-progressions-simple-rail"
 import HistoryPanel from "@/components/user-features/history-panel"
 import LibrarySheet from "@/components/user-features/library-sheet"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
+import { useFavoriteChords } from "@/hooks/use-favorite-chords"
+import { useSavedProgressions } from "@/hooks/use-saved-progressions"
 import type { EditableProgression } from "@/lib/user-data"
-import { Music, Heart, ListMusic, Clock, ChevronLeft, ChevronRight } from "lucide-react"
+import { Music, Clock, ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { TAB_THEME as TAB_ACCENTS } from "@/lib/tab-theme"
 
 const TAB_THEME = {
@@ -40,40 +44,71 @@ const TAB_THEME = {
   },
 } as const
 
-function CollapsedSidebarRail({
+// Persistent edge tab — stays visible whether its panel is collapsed or expanded.
+// Figma: "Edge Tab - My Chords/My Progressions". Position:sticky + vertically
+// centered (top-1/2 -translate-y-1/2) is applied by the parent wrapper, not here.
+// `compact` shrinks it further for the mobile rail so it costs less width.
+function EdgeTab({
   label,
   count,
   accent,
+  tint,
+  countStyle,
+  isOpen,
+  compact,
   onExpand,
 }: {
   label: string
   count: number
   accent: string
+  tint: string
+  countStyle: "solid" | "tint"
+  isOpen: boolean
+  compact?: boolean
   onExpand: () => void
 }) {
+  const iconBoxClass = compact ? "h-6 w-6" : "h-9 w-9"
+  const iconSizeClass = compact ? "h-3 w-3" : "h-[18px] w-[18px]"
+  const chevronSizeClass = compact ? "h-3 w-3" : "h-4 w-4"
+  const countBoxClass = compact ? "h-4 w-4 text-[8px]" : "h-[26px] w-[26px] text-[11px]"
+  const labelClass = compact ? "text-[9px]" : "text-xs"
+  const Chevron = isOpen ? ChevronRight : ChevronLeft
+
   return (
-    <button
-      type="button"
-      onClick={onExpand}
-      className="flex flex-col items-center gap-3 w-full py-4 rounded-xl border border-[#e6dcd2] dark:border-slate-700 bg-[#fffdfa] dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow"
-      title={label}
-    >
-      <ChevronLeft className="h-4 w-4" style={{ color: accent }} />
-      <span
-        className="text-xs font-medium text-muted-foreground"
-        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-      >
-        {label}
-      </span>
-      {count > 0 && (
+    <div className={`flex flex-col items-center justify-between rounded-2xl border border-[#e6dcd2] dark:border-slate-700 bg-[#f5f1eb] dark:bg-slate-900 shadow-sm ${compact ? "gap-2 py-2" : "gap-4 py-3"}`}>
+      <div className={`${iconBoxClass} shrink-0 rounded-lg border border-[#e6dcd2] dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center`}>
+        <Star className={iconSizeClass} style={{ color: accent }} />
+      </div>
+      <div className={`flex flex-col items-center ${compact ? "gap-1" : "gap-2"}`}>
+        {count > 0 && (
+          <span
+            className={`flex items-center justify-center font-semibold rounded-full shrink-0 ${countBoxClass}`}
+            style={
+              countStyle === "solid"
+                ? { backgroundColor: accent, color: "#fffdfa" }
+                : { backgroundColor: tint, color: accent }
+            }
+          >
+            {count}
+          </span>
+        )}
         <span
-          className="flex items-center justify-center text-[10px] font-semibold text-white rounded-full h-5 w-5"
-          style={{ backgroundColor: accent }}
+          className={`font-medium whitespace-nowrap text-[#37302a] dark:text-slate-200 ${labelClass}`}
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
-          {count}
+          {label}
         </span>
-      )}
-    </button>
+      </div>
+      <button
+        type="button"
+        onClick={onExpand}
+        title={label}
+        className={`${iconBoxClass} min-h-0 shrink-0 rounded-lg border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center`}
+        style={{ backgroundColor: tint }}
+      >
+        <Chevron className={chevronSizeClass} style={{ color: accent }} />
+      </button>
+    </div>
   )
 }
 
@@ -81,17 +116,20 @@ export default function MainContent() {
   const [selectedChord, setSelectedChord] = useState("C")
   const [activeTab, setActiveTab] = useState("finder")
   const theme = TAB_THEME[activeTab as keyof typeof TAB_THEME] ?? TAB_THEME.finder
-  const [chordsSheetOpen, setChordsSheetOpen] = useState(false)
-  const [progressionsSheetOpen, setProgressionsSheetOpen] = useState(false)
   const [historySheetOpen, setHistorySheetOpen] = useState(false)
   const [pendingProgression, setPendingProgression] = useState<string[] | undefined>()
   const [editingProgression, setEditingProgression] = useState<EditableProgression | undefined>()
-  const [chordsSidebarCollapsed, setChordsSidebarCollapsed] = useState(true)
-  const [progressionsSidebarCollapsed, setProgressionsSidebarCollapsed] = useState(true)
-  const [chordsCount, setChordsCount] = useState(0)
-  const [progressionsCount, setProgressionsCount] = useState(0)
+  // Desktop only ever uses "collapsed"/"full" (2-state). Mobile uses all three:
+  // collapsed -> simple (thin name-only rail) -> full (same rich panel as desktop).
+  const [chordsPanelView, setChordsPanelView] = useState<"collapsed" | "simple" | "full">("collapsed")
+  const [progressionsPanelView, setProgressionsPanelView] = useState<"collapsed" | "simple" | "full">("collapsed")
   const { user } = useAuth()
   const { t } = useLanguage()
+  // Owned here (not inside the panels) so favorites/progressions stay loaded
+  // across simple <-> full transitions on mobile instead of re-fetching and
+  // flashing empty every time either view mounts.
+  const { favorites, loading: favoritesLoading, removeFavorite } = useFavoriteChords(t)
+  const { progressions, loading: progressionsLoading, deleteProgression, togglePublic } = useSavedProgressions(t)
 
   const handleChordSelectFromLibrary = (chord: string) => {
     setSelectedChord(chord)
@@ -112,30 +150,20 @@ export default function MainContent() {
 
   return (
     <div className="min-h-screen bg-[#faf7f3] dark:bg-slate-900">
-      {/* Mobile bottom sheets */}
+      {/* Mobile bottom sheet — History only. My Chords/My Progressions use the
+          persistent edge-tab panel below (same mechanism as desktop) instead
+          of a full-screen modal takeover. */}
       {user && (
-        <>
-          <LibrarySheet open={chordsSheetOpen} onOpenChange={setChordsSheetOpen} title={t("nav.my-chords")}>
-            <MyChordsPanel
-              onChordSelect={(chord) => { handleChordSelectFromLibrary(chord); setChordsSheetOpen(false) }}
-            />
-          </LibrarySheet>
-          <LibrarySheet open={progressionsSheetOpen} onOpenChange={setProgressionsSheetOpen} title={t("nav.my-progressions")}>
-            <MyProgressionsPanel
-              onProgressionEdit={(progression) => { handleProgressionEdit(progression); setProgressionsSheetOpen(false) }}
-            />
-          </LibrarySheet>
-          <LibrarySheet open={historySheetOpen} onOpenChange={setHistorySheetOpen} title={t("nav.history")}>
-            <HistoryPanel
-              onChordSelect={(chord) => { handleChordSelectFromLibrary(chord); setHistorySheetOpen(false) }}
-              onProgressionSelect={(chords) => { handleProgressionSelect(chords); setHistorySheetOpen(false) }}
-            />
-          </LibrarySheet>
-        </>
+        <LibrarySheet open={historySheetOpen} onOpenChange={setHistorySheetOpen} title={t("nav.history")}>
+          <HistoryPanel
+            onChordSelect={(chord) => { handleChordSelectFromLibrary(chord); setHistorySheetOpen(false) }}
+            onProgressionSelect={(chords) => { handleProgressionSelect(chords); setHistorySheetOpen(false) }}
+          />
+        </LibrarySheet>
       )}
 
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto px-2 sm:px-3 lg:px-4">
           {/* Desktop Layout */}
           <div className="hidden sm:grid sm:grid-cols-3 items-center h-20 gap-4">
             <div></div>
@@ -205,24 +233,11 @@ export default function MainContent() {
               </div>
             </div>
 
-            {/* Mobile controls — contextual library icon + always-visible history, both only when logged in */}
+            {/* Mobile controls — always-visible history only when logged in.
+                My Chords/My Progressions live in the edge-tab panel now, not here. */}
             <div className="flex-shrink-0 flex items-center gap-2">
               <ThemeToggle />
               <LanguageToggle />
-              {user && activeTab === "finder" && (
-                <Button variant="outline" size="icon" className="h-9 w-9"
-                  onClick={() => setChordsSheetOpen(true)} title={t("nav.my-chords")}>
-                  <Heart className="h-4 w-4" />
-                  <span className="sr-only">{t("nav.my-chords")}</span>
-                </Button>
-              )}
-              {user && activeTab === "progression" && (
-                <Button variant="outline" size="icon" className="h-9 w-9"
-                  onClick={() => setProgressionsSheetOpen(true)} title={t("nav.my-progressions")}>
-                  <ListMusic className="h-4 w-4" />
-                  <span className="sr-only">{t("nav.my-progressions")}</span>
-                </Button>
-              )}
               {user && (
                 <Button variant="outline" size="icon" className="h-9 w-9"
                   onClick={() => setHistorySheetOpen(true)} title={t("nav.history")}>
@@ -236,8 +251,8 @@ export default function MainContent() {
         </div>
       </header>
 
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-6 items-start">
+      <main className="max-w-[1400px] mx-auto px-2 sm:px-3 lg:px-4 py-8">
+        <div className="flex lg:gap-6 items-start">
           {/* Main content area */}
           <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -298,56 +313,143 @@ export default function MainContent() {
             </Tabs>
           </div>
 
-          {/* Contextual sidebar — desktop only (lg+), varies with active tab, collapsible to a slim rail.
-              The wrapper is a fixed 48px-wide sticky column so the main content's width never changes;
-              the expanded panel is absolutely positioned inside it and overlaps the main content instead
-              of pushing/shrinking it. */}
+          {/* Contextual sidebar — desktop (lg+), varies with active tab. The wrapper is a fixed
+              48px-wide column, position:sticky + vertically centered (floats in the middle of the
+              viewport regardless of scroll) so the main content's width never changes. The edge tab
+              stays visible at all times; the expanded panel is absolutely positioned flush to its
+              left edge (right-full) so it overlaps the main content instead of pushing/shrinking it.
+              Mobile has its own parallel block below (lg:hidden) with a thinner rail and an extra
+              "simple" tier. */}
           {user && activeTab === "finder" && (
-            <div className="hidden lg:block w-12 shrink-0 sticky top-28">
-              {chordsSidebarCollapsed ? (
-                <CollapsedSidebarRail
-                  label={t("nav.my-chords")}
-                  count={chordsCount}
-                  accent={theme.accent}
-                  onExpand={() => setChordsSidebarCollapsed(false)}
-                />
-              ) : (
-                <aside className="absolute right-0 top-0 z-[60] flex flex-col w-72 xl:w-80 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-lg overflow-hidden">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 h-7 w-7 z-10"
-                    onClick={() => setChordsSidebarCollapsed(true)}
-                    title={t("nav.my-chords")}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <MyChordsPanel onChordSelect={handleChordSelectFromLibrary} onCountChange={setChordsCount} />
+            <div className="hidden lg:block w-12 shrink-0 sticky top-1/2 -translate-y-1/2">
+              <EdgeTab
+                label={t("nav.my-chords")}
+                count={favorites.length}
+                accent={theme.accent}
+                tint={TAB_ACCENTS.finder.tint}
+                countStyle="solid"
+                isOpen={chordsPanelView !== "collapsed"}
+                onExpand={() => setChordsPanelView((v) => (v === "collapsed" ? "full" : "collapsed"))}
+              />
+              {chordsPanelView === "full" && (
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 xl:w-80 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <MyChordsPanel
+                    isSignedIn={!!user}
+                    favorites={favorites}
+                    loading={favoritesLoading}
+                    onRemoveFavorite={removeFavorite}
+                    onChordSelect={handleChordSelectFromLibrary}
+                    onCollapse={() => setChordsPanelView("collapsed")}
+                  />
                 </aside>
               )}
             </div>
           )}
           {user && activeTab === "progression" && (
-            <div className="hidden lg:block w-12 shrink-0 sticky top-28">
-              {progressionsSidebarCollapsed ? (
-                <CollapsedSidebarRail
-                  label={t("nav.my-progressions")}
-                  count={progressionsCount}
-                  accent={theme.accent}
-                  onExpand={() => setProgressionsSidebarCollapsed(false)}
-                />
-              ) : (
-                <aside className="absolute right-0 top-0 z-[60] flex flex-col w-72 xl:w-80 max-h-[calc(100vh-8rem)] rounded-xl border bg-card shadow-lg overflow-hidden">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 h-7 w-7 z-10"
-                    onClick={() => setProgressionsSidebarCollapsed(true)}
-                    title={t("nav.my-progressions")}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <MyProgressionsPanel onProgressionEdit={handleProgressionEdit} onCountChange={setProgressionsCount} />
+            <div className="hidden lg:block w-12 shrink-0 sticky top-1/2 -translate-y-1/2">
+              <EdgeTab
+                label={t("nav.my-progressions")}
+                count={progressions.length}
+                accent={theme.accent}
+                tint={TAB_ACCENTS.progression.tint}
+                countStyle="tint"
+                isOpen={progressionsPanelView !== "collapsed"}
+                onExpand={() => setProgressionsPanelView((v) => (v === "collapsed" ? "full" : "collapsed"))}
+              />
+              {progressionsPanelView === "full" && (
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 xl:w-80 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <MyProgressionsPanel
+                    isSignedIn={!!user}
+                    progressions={progressions}
+                    loading={progressionsLoading}
+                    onDeleteProgression={deleteProgression}
+                    onTogglePublic={togglePublic}
+                    onProgressionEdit={handleProgressionEdit}
+                    onCollapse={() => setProgressionsPanelView("collapsed")}
+                  />
+                </aside>
+              )}
+            </div>
+          )}
+
+          {/* Mobile equivalent (lg:hidden) — same edge-tab mechanism, but position:fixed instead
+              of a sticky flex sibling: on a small screen every pixel of main-content width matters,
+              so the rail costs the page ZERO layout width (unlike desktop, which can afford to
+              reserve a column) and instead floats on top of the content, still centered in the
+              viewport regardless of scroll. Also has an extra "simple" tier in between: collapsed
+              -> simple (thin name-only rail, tap an item to load it) -> full (identical rich panel
+              to desktop, reached via the expand icon inside the simple rail). */}
+          {user && activeTab === "finder" && (
+            <div className="lg:hidden fixed right-1 top-1/2 -translate-y-1/2 z-[60]">
+              <EdgeTab
+                label={t("nav.my-chords")}
+                count={favorites.length}
+                accent={theme.accent}
+                tint={TAB_ACCENTS.finder.tint}
+                countStyle="solid"
+                compact
+                isOpen={chordsPanelView !== "collapsed"}
+                onExpand={() => setChordsPanelView((v) => (v === "collapsed" ? "simple" : "collapsed"))}
+              />
+              {chordsPanelView === "simple" && (
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-fit min-w-[44px] max-w-[7rem] max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <MyChordsSimpleRail
+                    isSignedIn={!!user}
+                    favorites={favorites}
+                    loading={favoritesLoading}
+                    onChordSelect={handleChordSelectFromLibrary}
+                    onExpand={() => setChordsPanelView("full")}
+                  />
+                </aside>
+              )}
+              {chordsPanelView === "full" && (
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <MyChordsPanel
+                    isSignedIn={!!user}
+                    favorites={favorites}
+                    loading={favoritesLoading}
+                    onRemoveFavorite={removeFavorite}
+                    onChordSelect={handleChordSelectFromLibrary}
+                    onCollapse={() => setChordsPanelView("simple")}
+                  />
+                </aside>
+              )}
+            </div>
+          )}
+          {user && activeTab === "progression" && (
+            <div className="lg:hidden fixed right-1 top-1/2 -translate-y-1/2 z-[60]">
+              <EdgeTab
+                label={t("nav.my-progressions")}
+                count={progressions.length}
+                accent={theme.accent}
+                tint={TAB_ACCENTS.progression.tint}
+                countStyle="tint"
+                compact
+                isOpen={progressionsPanelView !== "collapsed"}
+                onExpand={() => setProgressionsPanelView((v) => (v === "collapsed" ? "simple" : "collapsed"))}
+              />
+              {progressionsPanelView === "simple" && (
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-32 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <MyProgressionsSimpleRail
+                    isSignedIn={!!user}
+                    progressions={progressions}
+                    loading={progressionsLoading}
+                    onProgressionEdit={handleProgressionEdit}
+                    onExpand={() => setProgressionsPanelView("full")}
+                  />
+                </aside>
+              )}
+              {progressionsPanelView === "full" && (
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                  <MyProgressionsPanel
+                    isSignedIn={!!user}
+                    progressions={progressions}
+                    loading={progressionsLoading}
+                    onDeleteProgression={deleteProgression}
+                    onTogglePublic={togglePublic}
+                    onProgressionEdit={handleProgressionEdit}
+                    onCollapse={() => setProgressionsPanelView("simple")}
+                  />
                 </aside>
               )}
             </div>

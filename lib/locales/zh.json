@@ -339,7 +339,8 @@
     "stop": "停止",
     "loading": "加载中...",
     "show-keyboard": "显示键盘",
-    "hide-keyboard": "隐藏键盘"
+    "hide-keyboard": "隐藏键盘",
+    "expand": "展开"
   },
   "note-picker": {
     "notes": "音符",
