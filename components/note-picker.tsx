@@ -47,7 +47,7 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
     <div className="w-full space-y-3">
       {/* Current Input Display */}
       <div className="flex items-center gap-2">
-        <div className="flex-1 relative">
+        <div className="flex-1 min-w-0 relative">
           {showKeyboard ? (
             <Input
               value={value}
@@ -67,12 +67,12 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
               autoFocus
             />
           ) : (
-            <div 
-              className="min-h-10 flex items-center px-3 border rounded-md bg-background text-foreground cursor-text hover:bg-muted/50 transition-colors"
+            <div
+              className="h-10 flex items-center px-3 border rounded-md bg-background text-foreground cursor-text hover:bg-muted/50 transition-colors overflow-hidden"
               onClick={handleDisplayClick}
             >
               {value || (
-                <span className="text-muted-foreground text-sm">
+                <span className="text-muted-foreground text-sm truncate whitespace-nowrap">
                   {placeholder || t('chord-finder.search-placeholder')}
                 </span>
               )}

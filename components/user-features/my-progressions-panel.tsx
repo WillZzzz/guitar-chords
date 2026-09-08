@@ -8,19 +8,15 @@ import { Switch } from "@/components/ui/switch"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import {
-  getSavedProgressions,
-  deleteSavedProgression,
-  setProgressionPublic,
   getPublicProgressions,
   copyPublicProgression,
-  LIBRARY_CHANGED_EVENT,
   type SavedProgression,
   type PublicProgression,
   type EditableProgression,
 } from "@/lib/user-data"
 import { formatDistanceToNow } from "date-fns"
 import { enUS, zhCN } from "date-fns/locale"
-import { ListMusic, Trash2, ArrowRight, Copy, Users, Bookmark } from "lucide-react"
+import { ListMusic, Trash2, ArrowRight, Copy, Users, Bookmark, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 import { EmptyState, LibraryLoadingSkeleton } from "./library-ui"
 
@@ -29,40 +25,35 @@ const dateFnsLocales = { en: enUS, zh: zhCN }
 type Mode = "mine" | "community"
 
 export interface MyProgressionsPanelProps {
+  isSignedIn: boolean
+  progressions: SavedProgression[]
+  loading: boolean
+  onDeleteProgression: (id: string) => void
+  onTogglePublic: (prog: SavedProgression, isPublic: boolean) => void
   onProgressionEdit?: (progression: EditableProgression) => void
-  onCountChange?: (count: number) => void
+  onCollapse?: () => void
 }
 
-export default function MyProgressionsPanel({ onProgressionEdit, onCountChange }: MyProgressionsPanelProps) {
+// "Mine" data is presentational (comes from the useSavedProgressions hook
+// owned by MainContent, shared with the Simple rail, so it stays loaded —
+// no re-fetch flash across simple/full transitions). Community browsing
+// stays local since it's Full-view-only.
+export default function MyProgressionsPanel({
+  isSignedIn,
+  progressions,
+  loading: loadingMine,
+  onDeleteProgression,
+  onTogglePublic,
+  onProgressionEdit,
+  onCollapse,
+}: MyProgressionsPanelProps) {
   const { user } = useAuth()
   const { t, language } = useLanguage()
   const dateFnsLocale = dateFnsLocales[language]
   const [mode, setMode] = useState<Mode>("mine")
-  const [progressions, setProgressions] = useState<SavedProgression[]>([])
-  const [loadingMine, setLoadingMine] = useState(true)
   const [community, setCommunity] = useState<PublicProgression[]>([])
   const [loadingCommunity, setLoadingCommunity] = useState(false)
-  const mineRequestIdRef = useRef(0)
   const communityRequestIdRef = useRef(0)
-
-  const loadMine = useCallback(async () => {
-    if (!user) {
-      setProgressions([])
-      setLoadingMine(false)
-      return
-    }
-    const requestId = ++mineRequestIdRef.current
-    setLoadingMine(true)
-    try {
-      const progs = await getSavedProgressions(user.id)
-      if (mineRequestIdRef.current !== requestId) return
-      setProgressions(progs)
-    } catch {
-      if (mineRequestIdRef.current === requestId) toast.error(t("user-library.toast-load-failed"))
-    } finally {
-      if (mineRequestIdRef.current === requestId) setLoadingMine(false)
-    }
-  }, [user, t])
 
   const loadCommunity = useCallback(async () => {
     const requestId = ++communityRequestIdRef.current
@@ -79,44 +70,12 @@ export default function MyProgressionsPanel({ onProgressionEdit, onCountChange }
   }, [t])
 
   useEffect(() => {
-    loadMine()
-  }, [loadMine])
-
-  useEffect(() => {
-    onCountChange?.(progressions.length)
-  }, [progressions.length, onCountChange])
-
-  useEffect(() => {
     if (mode === "community") loadCommunity()
   }, [mode, loadCommunity])
 
-  useEffect(() => {
-    window.addEventListener(LIBRARY_CHANGED_EVENT, loadMine)
-    return () => window.removeEventListener(LIBRARY_CHANGED_EVENT, loadMine)
-  }, [loadMine])
-
-  const handleDeleteProgression = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteProgression = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!user) return
-    try {
-      await deleteSavedProgression(user.id, id)
-      setProgressions((prev) => prev.filter((p) => p.id !== id))
-      toast.success(t("user-library.toast-progression-deleted"))
-    } catch {
-      toast.error(t("user-library.toast-progression-delete-failed"))
-    }
-  }
-
-  const handleTogglePublic = async (prog: SavedProgression, isPublic: boolean) => {
-    if (!user) return
-    setProgressions((prev) => prev.map((p) => (p.id === prog.id ? { ...p, is_public: isPublic } : p)))
-    try {
-      await setProgressionPublic(user.id, prog.id, isPublic)
-      toast.success(isPublic ? t("progression-builder.toast-published") : t("progression-builder.toast-unpublished"))
-    } catch {
-      setProgressions((prev) => prev.map((p) => (p.id === prog.id ? { ...p, is_public: !isPublic } : p)))
-      toast.error(t("progression-builder.toast-publish-failed"))
-    }
+    onDeleteProgression(id)
   }
 
   const handleSaveCopy = async (prog: PublicProgression, e: React.MouseEvent) => {
@@ -134,8 +93,18 @@ export default function MyProgressionsPanel({ onProgressionEdit, onCountChange }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 pt-4 pb-3 border-b">
-        <h2 className="font-semibold text-sm">{t("user-library.title-my-progressions")}</h2>
+      <div className="relative px-4 pt-4 pb-3 border-b border-[#e6dcd2] dark:border-slate-700 bg-[#d2deee] dark:bg-slate-800">
+        <h2 className="font-semibold text-sm text-[#37302a] dark:text-blue-100">{t("user-library.title-my-progressions")}</h2>
+        {onCollapse && (
+          <button
+            type="button"
+            onClick={onCollapse}
+            title={t("nav.my-progressions")}
+            className="absolute top-3 right-3 h-7 w-7 min-h-0 rounded-md bg-[#fffdfa] dark:bg-slate-900 border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center text-[#597399] dark:text-blue-300"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        )}
         <div className="mt-3 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
           <button
             onClick={() => setMode("mine")}
@@ -163,7 +132,7 @@ export default function MyProgressionsPanel({ onProgressionEdit, onCountChange }
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
         {mode === "mine" ? (
-          !user ? (
+          !isSignedIn ? (
             <EmptyState icon={<ListMusic className="h-8 w-8" />} message={t("progression-builder.sign-in-mine")} />
           ) : loadingMine ? (
             <LibraryLoadingSkeleton />
@@ -209,7 +178,7 @@ export default function MyProgressionsPanel({ onProgressionEdit, onCountChange }
                     </span>
                     <Switch
                       checked={prog.is_public}
-                      onCheckedChange={(checked) => handleTogglePublic(prog, checked)}
+                      onCheckedChange={(checked) => onTogglePublic(prog, checked)}
                     />
                   </div>
                 </CardContent>

@@ -339,7 +339,8 @@
     "stop": "Stop",
     "loading": "Loading...",
     "show-keyboard": "Show Keyboard",
-    "hide-keyboard": "Hide Keyboard"
+    "hide-keyboard": "Hide Keyboard",
+    "expand": "Expand"
   },
   "note-picker": {
     "notes": "Notes",

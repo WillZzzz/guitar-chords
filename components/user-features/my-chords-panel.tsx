@@ -1,90 +1,56 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
-import {
-  getFavoriteChords,
-  removeFavoriteChord,
-  LIBRARY_CHANGED_EVENT,
-  type FavoriteChord,
-} from "@/lib/user-data"
+import type { FavoriteChord } from "@/lib/user-data"
 import { formatDistanceToNow } from "date-fns"
 import { enUS, zhCN } from "date-fns/locale"
-import { Heart, Music, ExternalLink, Trash2 } from "lucide-react"
-import { toast } from "sonner"
+import { Heart, Music, ExternalLink, Trash2, ChevronRight } from "lucide-react"
 import { EmptyState, LibraryLoadingSkeleton } from "./library-ui"
 
 const dateFnsLocales = { en: enUS, zh: zhCN }
 
 export interface MyChordsPanelProps {
+  isSignedIn: boolean
+  favorites: FavoriteChord[]
+  loading: boolean
+  onRemoveFavorite: (fav: FavoriteChord) => void
   onChordSelect?: (chord: string) => void
-  onCountChange?: (count: number) => void
+  onCollapse?: () => void
 }
 
-export default function MyChordsPanel({ onChordSelect, onCountChange }: MyChordsPanelProps) {
-  const { user } = useAuth()
+// Presentational only — data comes from the useFavoriteChords hook owned by
+// MainContent, so it stays loaded (no re-fetch flash) across simple/full
+// panel transitions on mobile.
+export default function MyChordsPanel({ isSignedIn, favorites, loading, onRemoveFavorite, onChordSelect, onCollapse }: MyChordsPanelProps) {
   const { t, language } = useLanguage()
   const dateFnsLocale = dateFnsLocales[language]
-  const [favorites, setFavorites] = useState<FavoriteChord[]>([])
-  const [loading, setLoading] = useState(true)
-  const requestIdRef = useRef(0)
 
-  const loadFavorites = useCallback(async () => {
-    if (!user) {
-      setFavorites([])
-      setLoading(false)
-      return
-    }
-    const requestId = ++requestIdRef.current
-    setLoading(true)
-    try {
-      const favs = await getFavoriteChords(user.id)
-      if (requestIdRef.current !== requestId) return
-      setFavorites(favs)
-    } catch {
-      if (requestIdRef.current === requestId) toast.error(t("user-library.toast-load-failed"))
-    } finally {
-      if (requestIdRef.current === requestId) setLoading(false)
-    }
-  }, [user, t])
-
-  useEffect(() => {
-    loadFavorites()
-  }, [loadFavorites])
-
-  useEffect(() => {
-    onCountChange?.(favorites.length)
-  }, [favorites.length, onCountChange])
-
-  useEffect(() => {
-    window.addEventListener(LIBRARY_CHANGED_EVENT, loadFavorites)
-    return () => window.removeEventListener(LIBRARY_CHANGED_EVENT, loadFavorites)
-  }, [loadFavorites])
-
-  const handleRemoveFavorite = async (fav: FavoriteChord, e: React.MouseEvent) => {
+  const handleRemoveFavorite = (fav: FavoriteChord, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!user) return
-    try {
-      await removeFavoriteChord(user.id, fav.chord_name)
-      setFavorites((prev) => prev.filter((f) => f.id !== fav.id))
-      toast.success(t("user-library.toast-favorite-removed"))
-    } catch {
-      toast.error(t("user-library.toast-favorite-remove-failed"))
-    }
+    onRemoveFavorite(fav)
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 pt-4 pb-3 border-b">
-        <h2 className="font-semibold text-sm">{t("user-library.title-my-chords")}</h2>
-        <p className="text-xs text-muted-foreground mt-1">{t("user-library.caption-my-chords")}</p>
+      <div className="relative px-4 pt-4 pb-3 border-b border-[#e6dcd2] dark:border-slate-700 bg-[#f2e1d6] dark:bg-slate-800">
+        <h2 className="font-semibold text-sm text-[#37302a] dark:text-orange-100">{t("user-library.title-my-chords")}</h2>
+        <p className="text-xs text-[#6b5f55] dark:text-slate-300 mt-1">{t("user-library.caption-my-chords")}</p>
+        {onCollapse && (
+          <button
+            type="button"
+            onClick={onCollapse}
+            title={t("nav.my-chords")}
+            className="absolute top-3 right-3 h-7 w-7 min-h-0 rounded-md bg-[#fffdfa] dark:bg-slate-900 border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center text-[#bf6f4a] dark:text-orange-300"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-        {!user ? (
+        {!isSignedIn ? (
           <EmptyState icon={<Heart className="h-8 w-8" />} message={t("user-library.sign-in-my-chords")} />
         ) : loading ? (
           <LibraryLoadingSkeleton />
