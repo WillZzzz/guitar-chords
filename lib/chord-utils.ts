@@ -1383,7 +1383,11 @@ export function getChordData(chordName: string, t?: TranslateFunction): ChordInf
       notes: chordsDbChord.notes,
       intervals: chordsDbChord.intervals,
       quality: determineChordQualityFromNotes(chordsDbChord.symbol), // Determine quality from symbol
-      variations: chordsDbChord.fingerings,
+      variations: chordsDbChord.fingerings.map((f) => ({
+        ...f,
+        name: f.name ?? "Variation",
+        difficulty: f.difficulty ?? "Intermediate",
+      })),
       semitones: chordsDbChord.intervals.map(intervalToSemitones), // Convert intervals to semitones
     }
     console.log(`✅ Converted @tombatossals/chords-db info:`, {
@@ -1413,7 +1417,11 @@ export function getChordData(chordName: string, t?: TranslateFunction): ChordInf
         notes: fingeringChord.notes,
         intervals: fingeringChord.intervals,
         quality: determineChordQuality(fingeringChord), // Better quality detection
-        variations: fingeringChord.fingerings,
+        variations: fingeringChord.fingerings.map((f) => ({
+          ...f,
+          name: f.name ?? "Variation",
+          difficulty: f.difficulty ?? "Intermediate",
+        })),
         semitones: fingeringChord.intervals.map(intervalToSemitones), // Convert intervals to semitones
       }
       console.log(`✅ Converted chord info from chord-fingering:`, {

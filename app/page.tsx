@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import MainContent from "@/components/main-content"
+import SiteFooter from "@/components/site-footer"
 import { LanguageProvider } from "@/contexts/language-context"
 import { AuthProvider } from "@/contexts/auth-context"
 import { Toaster } from "sonner"
@@ -16,8 +17,11 @@ export default function Home() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-50">
-          <MainContent />
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <div className="flex-1">
+            <MainContent />
+          </div>
+          <SiteFooter />
           <Toaster position="top-center" richColors closeButton duration={3000} />
         </div>
       </AuthProvider>

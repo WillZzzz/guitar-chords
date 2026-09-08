@@ -3,6 +3,11 @@
     "title": "吉他和弦理论",
     "subtitle": "掌握和弦、理论和进行"
   },
+  "footer": {
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "copyright": "© 2026 吉他和弦理论"
+  },
   "nav": {
     "chord-finder": "和弦查找",
     "reverse-lookup": "反向查找",
@@ -147,6 +152,8 @@
     "creating-account": "创建账户中...",
     "create-account": "创建账户",
     "continue-with-google": "使用Google继续",
+    "legal-disclaimer-prefix": "继续即表示您同意我们的",
+    "legal-disclaimer-and": "和",
     "sign-in-to-continue": "登录以继续并同步您的数据",
     "or": "或",
     "try-again": "重试",
