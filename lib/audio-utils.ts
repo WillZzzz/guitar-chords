@@ -122,7 +122,24 @@ export function clearDebugLogs(): void {
 
 // Device detection with comprehensive logging
 function getDeviceInfo() {
-  if (typeof window === "undefined") return { platform: "server" }
+  if (typeof window === "undefined") {
+    return {
+      userAgent: "server",
+      platform: "server",
+      maxTouchPoints: 0,
+      vendor: "",
+      language: "",
+      cookieEnabled: false,
+      onLine: false,
+      hardwareConcurrency: 0,
+      deviceMemory: undefined as any,
+      connection: undefined as any,
+      windowSize: "0x0",
+      screenSize: "0x0",
+      pixelRatio: 1,
+      timezone: "UTC",
+    }
+  }
 
   const info = {
     userAgent: navigator.userAgent,
@@ -226,7 +243,7 @@ function initAudioContext(): AudioContext | null {
     }
 
     return audioContext
-  } catch (error) {
+  } catch (error: any) {
     addDebugLog("error", "AUDIO_INIT", "Failed to create audio context", {
       error: error.message,
       stack: error.stack,
@@ -269,7 +286,7 @@ export async function unlockAudio(): Promise<boolean> {
     addDebugLog("info", "UNLOCK", "Unlock already in progress, waiting with timeout...")
     try {
       return await withTimeout(unlockPromise, 10000, "existing unlock promise")
-    } catch (error) {
+    } catch (error: any) {
       addDebugLog("error", "UNLOCK", "Existing unlock promise timed out, resetting", {
         error: error.message,
       })
@@ -287,7 +304,7 @@ export async function unlockAudio(): Promise<boolean> {
     unlockPromise = null
     addDebugLog("info", "UNLOCK", "Audio unlock completed", { success: result })
     return result
-  } catch (error) {
+  } catch (error: any) {
     addDebugLog("error", "UNLOCK", "Audio unlock failed or timed out", {
       error: error.message,
     })
@@ -326,7 +343,7 @@ async function performAudioUnlock(): Promise<boolean> {
         addDebugLog("info", "UNLOCK_PERFORM", "Context resume completed", {
           newState: ctx.state,
         })
-      } catch (error) {
+      } catch (error: any) {
         addDebugLog("error", "UNLOCK_PERFORM", "Context resume failed or timed out", {
           error: error.message,
           state: ctx.state,
@@ -399,7 +416,7 @@ async function performAudioUnlock(): Promise<boolean> {
 
           oscillator.stop(now + 0.1)
           addDebugLog("info", "UNLOCK_PERFORM", "Test sound stop scheduled")
-        } catch (error) {
+        } catch (error: any) {
           addDebugLog("error", "UNLOCK_PERFORM", "Error in test sound creation", {
             error: error.message,
           })
@@ -410,7 +427,7 @@ async function performAudioUnlock(): Promise<boolean> {
       // Wait for test sound with timeout
       await withTimeout(testSoundPromise, 2000, "test sound playback")
       addDebugLog("info", "UNLOCK_PERFORM", "Test sound completed successfully")
-    } catch (error) {
+    } catch (error: any) {
       addDebugLog("warn", "UNLOCK_PERFORM", "Test sound failed, continuing anyway", {
         error: error.message,
       })
@@ -437,15 +454,10 @@ async function performAudioUnlock(): Promise<boolean> {
       addDebugLog("info", "UNLOCK_PERFORM", "Audio unlock successful!")
     } else {
       addDebugLog("warn", "UNLOCK_PERFORM", "Audio unlock uncertain - context state unclear")
-      // On iOS, sometimes suspended is OK after user interaction
-      if (isIOS && finalState === "suspended") {
-        isAudioUnlocked = true
-        addDebugLog("info", "UNLOCK_PERFORM", "Accepting suspended state on iOS as unlocked")
-      }
     }
 
     return isAudioUnlocked
-  } catch (error) {
+  } catch (error: any) {
     addDebugLog("error", "UNLOCK_PERFORM", "Audio unlock error", {
       error: error.message,
       stack: error.stack,
@@ -574,7 +586,7 @@ function playNote(frequency: number, startTime: number, duration: number, volume
       actualStartTime: startTime,
       actualStopTime: startTime + duration,
     })
-  } catch (error) {
+  } catch (error: any) {
     addDebugLog("error", "PLAY_NOTE", "Error playing note", {
       frequency,
       error: error.message,
@@ -630,7 +642,7 @@ export async function playChord(notes: string[], strum = true): Promise<boolean>
       try {
         await withTimeout(ctx.resume(), 2000, "context resume for playback")
         await new Promise((resolve) => setTimeout(resolve, 100))
-      } catch (error) {
+      } catch (error: any) {
         addDebugLog("warn", "PLAY_CHORD", "Context resume failed, continuing anyway", {
           error: error.message,
         })
@@ -708,7 +720,7 @@ export async function playChord(notes: string[], strum = true): Promise<boolean>
     })
 
     return true
-  } catch (error) {
+  } catch (error: any) {
     addDebugLog("error", "PLAY_CHORD", "Error playing chord", {
       error: error.message,
       stack: error.stack,
@@ -749,7 +761,7 @@ export function stopAllSounds(): void {
         audioContext = null
         isAudioUnlocked = false
       }
-    } catch (error) {
+    } catch (error: any) {
       addDebugLog("error", "STOP", "Error stopping audio", {
         error: error.message,
       })
@@ -800,7 +812,7 @@ export function initializeAudio(): void {
       } else {
         addDebugLog("warn", "INIT", "Failed to unlock audio on user interaction")
       }
-    } catch (error) {
+    } catch (error: any) {
       addDebugLog("error", "INIT", "Error during audio unlock", {
         error: error.message,
       })

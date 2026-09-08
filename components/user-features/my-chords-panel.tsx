@@ -60,7 +60,7 @@ export default function MyChordsPanel({ isSignedIn, favorites, loading, onRemove
           favorites.map((fav) => (
             <Card key={fav.id} className="cursor-pointer hover:shadow-sm transition-shadow"
               onClick={() => onChordSelect?.(fav.chord_name)}>
-              <CardContent className="p-3 flex items-center justify-between gap-2">
+              <CardContent className="p-3 flex items-center gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="bg-gradient-to-br from-[#a05537] to-[#bf6f4a] text-white rounded-md p-1.5 shrink-0">
                     <Music className="h-3.5 w-3.5" />

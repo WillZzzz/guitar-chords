@@ -26,7 +26,7 @@ export function getTonalChordData(chordName: string): TonalChordData | null {
 
     // Determine chord type/quality
     let chordType = "Major"
-    let quality = chord.quality || "Major"
+    let quality: string = chord.quality || "Major"
 
     if (chord.aliases.some((alias) => alias.includes("m") && !alias.includes("maj"))) {
       chordType = "Minor"

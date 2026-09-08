@@ -88,8 +88,6 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
 
   const [activeSection, setActiveSection] = useState<"fingering" | "theory" | "related">("fingering")
 
-  console.log(`🎵 ChordFinder: selectedChord = "${selectedChord}"`)
-  
   // Use state for chord data to ensure proper re-rendering
   const [currentChordData, setCurrentChordData] = useState<ChordInfo | null>(null)
   
@@ -442,7 +440,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
         </CardHeader>
         <CardContent>
           {chordData.variations && chordData.variations.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {chordData.variations.map((variation, index) => (
                 <div key={index} className="border rounded-lg p-3 bg-white">
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -455,17 +453,15 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
 
                     {/* Chord Info */}
                     <div className="flex-1 space-y-2 min-w-0">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center flex-wrap gap-2">
                         <h3 className="font-semibold text-base">{translateVariationName(variation.name, t)}</h3>
                         <Badge
-                          variant={
+                          variant="outline"
+                          className={
                             variation.difficulty === "Beginner"
-                              ? "default"
-                              : variation.difficulty === "Intermediate"
-                                ? "secondary"
-                                : "outline"
+                              ? "text-xs bg-[#bf6f4a] text-white border-transparent hover:bg-[#bf6f4a]"
+                              : "text-xs bg-[#fbf4ef] dark:bg-slate-800 text-[#37302a] dark:text-orange-200 border-[#e6dcd2] dark:border-slate-700"
                           }
-                          className="text-xs"
                         >
                           {t(`chord.difficulty.${variation.difficulty.toLowerCase()}`)}
                         </Badge>
@@ -482,7 +478,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
                           onClick={() => handlePlayChord(variation.positions)}
                           disabled={isPlaying}
                           size="sm"
-                          className="gap-2"
+                          className="gap-2 bg-[#bf6f4a] hover:bg-[#a05537] text-white"
                         >
                           {isPlaying ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Play className="h-4 w-4" />}
 {isPlaying ? t("chord-finder.playing") : t("chord-finder.play")}

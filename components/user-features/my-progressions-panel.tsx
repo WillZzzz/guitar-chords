@@ -146,8 +146,8 @@ export default function MyProgressionsPanel({
                   id: prog.id, name: prog.name, description: prog.description, chords: prog.chords, tags: prog.tags,
                 })}>
                 <CardContent className="p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0">
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <p className="font-semibold text-sm truncate">{prog.name}</p>
                         <ArrowRight className="h-3 w-3 text-[#597399] shrink-0" />

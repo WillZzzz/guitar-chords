@@ -20,26 +20,21 @@ import { useLanguage } from "@/contexts/language-context"
 import { useFavoriteChords } from "@/hooks/use-favorite-chords"
 import { useSavedProgressions } from "@/hooks/use-saved-progressions"
 import type { EditableProgression } from "@/lib/user-data"
-import { Music, Clock, ChevronLeft, ChevronRight, Star } from "lucide-react"
+import { Clock, ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { TAB_THEME as TAB_ACCENTS } from "@/lib/tab-theme"
+import LogoMark from "@/components/logo-mark"
 
 const TAB_THEME = {
   finder: {
     accent: TAB_ACCENTS.finder.accent,
-    logoGradient: `linear-gradient(135deg, ${TAB_ACCENTS.finder.accentDark}, ${TAB_ACCENTS.finder.accent})`,
-    badgeGradient: `linear-gradient(135deg, ${TAB_ACCENTS.finder.accentDark}, #f97316)`,
     headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.finder.accent} 50%, ${TAB_ACCENTS.finder.accentDark})`,
   },
   reverse: {
     accent: TAB_ACCENTS.reverse.accent,
-    logoGradient: `linear-gradient(135deg, ${TAB_ACCENTS.reverse.accent}, ${TAB_ACCENTS.reverse.accent})`,
-    badgeGradient: `linear-gradient(135deg, ${TAB_ACCENTS.reverse.accent}, ${TAB_ACCENTS.reverse.accentDark})`,
     headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.reverse.accent} 50%, ${TAB_ACCENTS.reverse.accentDark})`,
   },
   progression: {
     accent: TAB_ACCENTS.progression.accent,
-    logoGradient: TAB_ACCENTS.progression.accent,
-    badgeGradient: TAB_ACCENTS.progression.accent,
     headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.progression.accent} 50%, ${TAB_ACCENTS.progression.accentDark})`,
   },
 } as const
@@ -170,18 +165,7 @@ export default function MainContent() {
 
             {/* Centered Logo/Title */}
             <div className="flex items-center justify-center space-x-3">
-              <div className="relative">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-[background] duration-300"
-                  style={{ background: theme.logoGradient }}
-                >
-                  <Music className="h-6 w-6 text-white" />
-                </div>
-                <div
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full animate-pulse transition-[background] duration-300"
-                  style={{ background: theme.badgeGradient }}
-                />
-              </div>
+              <LogoMark className="w-12 h-12 shrink-0" />
               <div className="space-y-1 text-center">
                 <h1
                   className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent leading-tight transition-[background] duration-300"
@@ -210,18 +194,7 @@ export default function MainContent() {
           {/* Mobile Layout */}
           <div className="sm:hidden flex items-center justify-between h-20 px-2">
             <div className="flex items-center space-x-2 min-w-0 flex-1 mr-2">
-              <div className="relative shrink-0">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-[background] duration-300"
-                  style={{ background: theme.logoGradient }}
-                >
-                  <Music className="h-5 w-5 text-white" />
-                </div>
-                <div
-                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse transition-[background] duration-300"
-                  style={{ background: theme.badgeGradient }}
-                />
-              </div>
+              <LogoMark className="w-10 h-10 shrink-0" />
               <div className="min-w-0">
                 <h1
                   className="text-base font-bold bg-clip-text text-transparent truncate transition-[background] duration-300"
@@ -332,7 +305,7 @@ export default function MainContent() {
                 onExpand={() => setChordsPanelView((v) => (v === "collapsed" ? "full" : "collapsed"))}
               />
               {chordsPanelView === "full" && (
-                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 xl:w-80 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-56 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
                   <MyChordsPanel
                     isSignedIn={!!user}
                     favorites={favorites}
@@ -357,7 +330,7 @@ export default function MainContent() {
                 onExpand={() => setProgressionsPanelView((v) => (v === "collapsed" ? "full" : "collapsed"))}
               />
               {progressionsPanelView === "full" && (
-                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 xl:w-80 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-56 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
                   <MyProgressionsPanel
                     isSignedIn={!!user}
                     progressions={progressions}
@@ -403,7 +376,7 @@ export default function MainContent() {
                 </aside>
               )}
               {chordsPanelView === "full" && (
-                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-56 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
                   <MyChordsPanel
                     isSignedIn={!!user}
                     favorites={favorites}
@@ -440,7 +413,7 @@ export default function MainContent() {
                 </aside>
               )}
               {progressionsPanelView === "full" && (
-                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-72 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-56 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
                   <MyProgressionsPanel
                     isSignedIn={!!user}
                     progressions={progressions}

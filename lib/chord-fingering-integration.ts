@@ -9,9 +9,18 @@ export interface ChordFingeringPosition {
   note: string
 }
 
+// The library's raw stringNote/stringIndex/note fields are converted to this
+// simpler string/fret/finger shape (see convertFingeringPosition) before
+// being stored here — matches lib/chord-utils.ts's ChordPosition.
+export interface ChordFingeringVariationPosition {
+  string: number
+  fret: number
+  finger: number
+}
+
 export interface ChordFingeringVariation {
   positionString: string
-  positions: ChordFingeringPosition[]
+  positions: ChordFingeringVariationPosition[]
   difficulty?: 'Beginner' | 'Intermediate' | 'Advanced'
   description?: string
   name?: string
@@ -105,7 +114,7 @@ function isHumanlyPlayable(fingering: any): boolean {
   }
   
   // Check for backward fingering patterns (higher strings shouldn't have higher frets consistently)
-  const sortedPositions = frettedPositions.sort((a, b) => a.string - b.string)
+  const sortedPositions = frettedPositions.sort((a: any, b: any) => a.string - b.string)
   let backwardCount = 0
   for (let i = 0; i < sortedPositions.length - 1; i++) {
     const current = sortedPositions[i]
@@ -193,7 +202,7 @@ export function getChordFromFingeringLibrary(chordSymbol: string): ChordFingerin
         console.log(`📊 Converted fingering:`, result)
         return result
       })
-      .filter(fingering => isHumanlyPlayable(fingering))
+      .filter((fingering: any) => isHumanlyPlayable(fingering))
 
     console.log(`🎵 Filtered fingerings: ${chord.fingerings.length} → ${convertedFingerings.length} (removed ${chord.fingerings.length - convertedFingerings.length} impossible fingerings)`)
 

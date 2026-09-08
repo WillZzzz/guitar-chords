@@ -24,7 +24,7 @@ export async function initializeHTML5Audio(): Promise<boolean> {
     const testAudio = new Audio()
     const canPlay = testAudio.canPlayType("audio/wav")
 
-    if (canPlay === "" || canPlay === "no") {
+    if (canPlay === "" || (canPlay as string) === "no") {
       throw new Error("HTML5 Audio not supported")
     }
 

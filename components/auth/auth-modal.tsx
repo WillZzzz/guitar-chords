@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import { toast } from "sonner"
+import Link from "next/link"
 
 interface AuthModalProps {
   open: boolean
@@ -347,6 +348,17 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
                 </form>
               </TabsContent>
             </Tabs>
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              {t("auth.legal-disclaimer-prefix")}{" "}
+              <Link href="/terms" className="underline underline-offset-2 hover:text-foreground">
+                {t("footer.terms")}
+              </Link>{" "}
+              {t("auth.legal-disclaimer-and")}{" "}
+              <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                {t("footer.privacy")}
+              </Link>
+              .
+            </p>
           </>
         )}
       </DialogContent>

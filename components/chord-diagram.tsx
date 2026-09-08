@@ -12,11 +12,14 @@ interface ChordDiagramProps {
 export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramProps) {
   const fretCount = 5
   const stringCount = 6
-  const stringSpacing = 25
-  const fretHeight = 35
+  const stringSpacing = 20
+  const fretHeight = 26
   const nutHeight = 4
-  const width = stringSpacing * (stringCount - 1) + 60
-  const height = fretHeight * fretCount + nutHeight + 80
+  const margin = 22
+  const topOffset = nutHeight + 14
+  const bottomLabelSpace = 20
+  const width = stringSpacing * (stringCount - 1) + margin * 2
+  const height = topOffset + fretHeight * fretCount + bottomLabelSpace
 
   // Calculate actual start fret based on positions - fix for dots outside chart
   const frettedPositions = positions.filter((p) => p.fret > 0)
@@ -40,21 +43,21 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
 
   // Get string X position (string 1 = high E on the right, string 6 = low E on the left)
   const getStringX = (string: number) => {
-    return 30 + (6 - string) * stringSpacing
+    return margin + (6 - string) * stringSpacing
   }
 
   // Get fret Y position - fixed calculation to prevent dots outside chart
   const getFretY = (fret: number) => {
-    if (fret === 0) return nutHeight + 20 // Open string position above nut
+    if (fret === 0) return topOffset // Open string position above nut
 
     // Ensure fret is within display range
     const relativeFret = fret - displayStartFret + 1
     if (relativeFret < 1 || relativeFret > fretCount) {
       console.warn(`Fret ${fret} is outside display range ${displayStartFret}-${displayStartFret + fretCount - 1}`)
-      return nutHeight + 20 + fretHeight * 2.5 // Default to middle position
+      return topOffset + fretHeight * 2.5 // Default to middle position
     }
 
-    return nutHeight + 20 + relativeFret * fretHeight
+    return topOffset + relativeFret * fretHeight
   }
 
   return (
@@ -63,17 +66,17 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
 
         {/* Nut (thick horizontal line at top for open position) */}
         {displayStartFret === 1 && (
-          <rect x={30} y={nutHeight + 20 - 2} width={stringSpacing * (stringCount - 1)} height={4} fill="#333" />
+          <rect x={margin} y={topOffset - 2} width={stringSpacing * (stringCount - 1)} height={4} fill="#333" />
         )}
 
         {/* Frets (horizontal lines) */}
         {Array.from({ length: fretCount + 1 }, (_, i) => (
           <line
             key={`fret-${i}`}
-            x1={30}
-            y1={nutHeight + 20 + i * fretHeight}
-            x2={30 + stringSpacing * (stringCount - 1)}
-            y2={nutHeight + 20 + i * fretHeight}
+            x1={margin}
+            y1={topOffset + i * fretHeight}
+            x2={margin + stringSpacing * (stringCount - 1)}
+            y2={topOffset + i * fretHeight}
             stroke="#333"
             strokeWidth={i === 0 && displayStartFret > 1 ? "3" : "1"}
           />
@@ -84,9 +87,9 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
           <line
             key={`string-${i}`}
             x1={getStringX(i + 1)}
-            y1={nutHeight + 20}
+            y1={topOffset}
             x2={getStringX(i + 1)}
-            y2={nutHeight + 20 + fretHeight * fretCount}
+            y2={topOffset + fretHeight * fretCount}
             stroke="#333"
             strokeWidth="1"
           />
@@ -97,8 +100,8 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
           <text
             key={`label-${i}`}
             x={getStringX(6 - i)}
-            y={height - 10}
-            fontSize="12"
+            y={height - 6}
+            fontSize="11"
             textAnchor="middle"
             fill="#666"
             fontWeight="bold"
@@ -115,7 +118,7 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
             // Muted string (X)
             return (
               <g key={`muted-${index}`}>
-                <text x={x} y={nutHeight + 10} fontSize="16" textAnchor="middle" fill="#666" fontWeight="bold">
+                <text x={x} y={topOffset - 6} fontSize="14" textAnchor="middle" fill="#666" fontWeight="bold">
                   ×
                 </text>
               </g>
@@ -124,22 +127,22 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
             // Open string (O)
             return (
               <g key={`open-${index}`}>
-                <circle cx={x} cy={nutHeight + 10} r="7" fill="none" stroke="#333" strokeWidth="2" />
+                <circle cx={x} cy={topOffset - 6} r="6" fill="none" stroke="#333" strokeWidth="2" />
               </g>
             )
           } else {
             // Fretted note - position between frets
             const relativeFret = pos.fret - displayStartFret + 1
-            
+
             // Always render fingering positions if they are within reasonable range
             // The display window should accommodate the actual chord data
             if (relativeFret >= 1 && relativeFret <= fretCount) {
-              const fretY = nutHeight + 20 + (relativeFret - 0.5) * fretHeight
+              const fretY = topOffset + (relativeFret - 0.5) * fretHeight
               return (
                 <g key={`fretted-${index}`}>
-                  <circle cx={x} cy={fretY} r="10" fill="#2563eb" stroke="#1d4ed8" strokeWidth="2" />
+                  <circle cx={x} cy={fretY} r="8.5" fill="#bf6f4a" stroke="#a05537" strokeWidth="2" />
                   {pos.finger && pos.finger > 0 && (
-                    <text x={x} y={fretY + 4} fontSize="12" textAnchor="middle" fill="white" fontWeight="bold">
+                    <text x={x} y={fretY + 4} fontSize="11" textAnchor="middle" fill="white" fontWeight="bold">
                       {pos.finger}
                     </text>
                   )}
@@ -158,8 +161,8 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
             <g key={`fret-numbers-${i}`}>
               {/* Left side fret numbers */}
               <text
-                x={15}
-                y={nutHeight + 20 + (i + 0.5) * fretHeight + 4}
+                x={margin / 2}
+                y={topOffset + (i + 0.5) * fretHeight + 4}
                 fontSize="10"
                 textAnchor="middle"
                 fill="#666"
@@ -169,8 +172,8 @@ export default function ChordDiagram({ positions, startFret = 1 }: ChordDiagramP
               </text>
               {/* Right side fret numbers */}
               <text
-                x={width - 15}
-                y={nutHeight + 20 + (i + 0.5) * fretHeight + 4}
+                x={width - margin / 2}
+                y={topOffset + (i + 0.5) * fretHeight + 4}
                 fontSize="10"
                 textAnchor="middle"
                 fill="#666"

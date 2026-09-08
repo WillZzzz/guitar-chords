@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false
       }
 
-      if (data.user) {
+      if (data?.user) {
         toast.success("Account created successfully! Please check your email to verify your account.")
         return true
       }
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false
       }
 
-      if (data.user) {
+      if (data?.user) {
         toast.success("Signed in successfully!")
         return true
       }

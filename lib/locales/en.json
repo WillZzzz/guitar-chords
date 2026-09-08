@@ -3,6 +3,11 @@
     "title": "Guitar Chord Theory",
     "subtitle": "Master chords, theory & progressions"
   },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2026 Guitar Chord Theory"
+  },
   "nav": {
     "chord-finder": "Chord Finder",
     "reverse-lookup": "Reverse Lookup",
@@ -147,6 +152,8 @@
     "creating-account": "Creating account...",
     "create-account": "Create Account",
     "continue-with-google": "Continue with Google",
+    "legal-disclaimer-prefix": "By continuing, you agree to our",
+    "legal-disclaimer-and": "and",
     "sign-in-to-continue": "Sign in to continue and sync your data",
     "or": "or",
     "try-again": "Try Again",
