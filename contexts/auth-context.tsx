@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { supabase, signUp as supabaseSignUp, signIn as supabaseSignIn, signOut as supabaseSignOut, resetPasswordForEmail as supabaseResetPassword, updatePassword as supabaseUpdatePassword } from "@/lib/supabase"
+import { supabase, signUp as supabaseSignUp, signIn as supabaseSignIn, signInWithGoogle as supabaseSignInWithGoogle, signOut as supabaseSignOut, resetPasswordForEmail as supabaseResetPassword, updatePassword as supabaseUpdatePassword } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
 
 interface AuthContextType {
@@ -12,6 +12,7 @@ interface AuthContextType {
   passwordRecovery: boolean
   signUp: (email: string, password: string, displayName?: string) => Promise<boolean>
   signIn: (email: string, password: string) => Promise<boolean>
+  signInWithGoogle: () => Promise<boolean>
   signOut: () => Promise<{ error: any }>
   resetPassword: (email: string) => Promise<boolean>
   updatePassword: (newPassword: string) => Promise<boolean>
@@ -101,6 +102,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const signInWithGoogle = async (): Promise<boolean> => {
+    try {
+      const { error } = await supabaseSignInWithGoogle()
+
+      if (error) {
+        console.error("Google sign in error:", error)
+        toast.error(error.message)
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error("Google sign in error:", error)
+      toast.error("Failed to sign in with Google")
+      return false
+    }
+  }
+
   const signOut = async () => {
     try {
       const { error } = await supabaseSignOut()
@@ -148,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearPasswordRecovery = () => setPasswordRecovery(false)
 
   return (
-    <AuthContext.Provider value={{ user, loading, passwordRecovery, signUp, signIn, signOut, resetPassword, updatePassword, clearPasswordRecovery }}>
+    <AuthContext.Provider value={{ user, loading, passwordRecovery, signUp, signIn, signInWithGoogle, signOut, resetPassword, updatePassword, clearPasswordRecovery }}>
       {children}
     </AuthContext.Provider>
   )
