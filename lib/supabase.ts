@@ -86,6 +86,19 @@ export const signIn = async (email: string, password: string) => {
   return { data, error }
 }
 
+export const signInWithGoogle = async () => {
+  if (!supabase) {
+    return { error: { message: "Supabase is not configured. Please set up your environment variables." } }
+  }
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+    },
+  })
+  return { data, error }
+}
+
 export const signOut = async () => {
   if (!supabase) {
     return { error: { message: "Supabase is not configured. Please set up your environment variables." } }
