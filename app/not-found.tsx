@@ -1,5 +1,6 @@
 import Link from "next/link"
 import LogoMark from "@/components/logo-mark"
+import { SITE_NAME } from "@/lib/site-config"
 
 export default function NotFound() {
   return (
@@ -14,7 +15,7 @@ export default function NotFound() {
         className="mt-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow"
         style={{ background: "linear-gradient(135deg, #bf6f4a 0%, #a05537 100%)" }}
       >
-        Back to Guitar Chord Theory
+        Back to {SITE_NAME}
       </Link>
     </div>
   )
