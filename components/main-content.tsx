@@ -23,6 +23,7 @@ import type { EditableProgression } from "@/lib/user-data"
 import { Clock, ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { TAB_THEME as TAB_ACCENTS } from "@/lib/tab-theme"
 import LogoMark from "@/components/logo-mark"
+import TipJarButton from "@/components/tip-jar-button"
 
 const TAB_THEME = {
   finder: {
@@ -179,6 +180,7 @@ export default function MainContent() {
 
             {/* Right side controls */}
             <div className="hidden sm:flex items-center justify-end space-x-2">
+              <TipJarButton />
               <ThemeToggle />
               <LanguageToggle />
               {user && (
@@ -209,6 +211,7 @@ export default function MainContent() {
             {/* Mobile controls — always-visible history only when logged in.
                 My Chords/My Progressions live in the edge-tab panel now, not here. */}
             <div className="flex-shrink-0 flex items-center gap-2">
+              <TipJarButton className="h-9 w-9" />
               <ThemeToggle />
               <LanguageToggle />
               {user && (
