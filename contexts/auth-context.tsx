@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { toast } from "sonner"
 import { supabase, signUp as supabaseSignUp, signIn as supabaseSignIn, signInWithGoogle as supabaseSignInWithGoogle, signOut as supabaseSignOut, resetPasswordForEmail as supabaseResetPassword, updatePassword as supabaseUpdatePassword } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
+import { AnalyticsEvents } from "@/lib/analytics"
 
 interface AuthContextType {
   user: User | null
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data?.user) {
         toast.success("Account created successfully! Please check your email to verify your account.")
+        AnalyticsEvents.signupCompleted("email")
         return true
       }
 
@@ -91,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data?.user) {
         toast.success("Signed in successfully!")
+        AnalyticsEvents.signinCompleted("email")
         return true
       }
 

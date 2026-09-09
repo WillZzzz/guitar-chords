@@ -21,6 +21,7 @@ import { Chord } from "tonal"
 import { playChordHTML5 } from "@/lib/audio-html5-fallback"
 import { analyzeChordScale } from "@/lib/scale-analysis"
 import { clickableDivProps } from "@/lib/a11y"
+import { AnalyticsEvents } from "@/lib/analytics"
 
 interface ChordFinderProps {
   onChordSelect?: (chord: string) => void
@@ -221,6 +222,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
   const toggleFavorite = async () => {
     if (!user || !chordData) {
       toast.error(t("msg.sign-in-to-save"))
+      AnalyticsEvents.signupPromptShown("favorite_chord")
       return
     }
     if (favoriteBusy) return
@@ -238,6 +240,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
         await addFavoriteChord(user.id, selectedChord, chordType, rootNote)
         setIsFavorited(true)
         toast.success(t("msg.added-to-favorites"))
+        AnalyticsEvents.favoriteAdded()
       }
     } catch {
       toast.error(t("msg.error-unexpected"))
