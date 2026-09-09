@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Keyboard, X, Delete } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
+import { clickableDivProps } from '@/lib/a11y'
 
 interface NotePickerProps {
   value: string
@@ -69,7 +70,7 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
           ) : (
             <div
               className="h-10 flex items-center px-3 border rounded-md bg-background text-foreground cursor-text hover:bg-muted/50 transition-colors overflow-hidden"
-              onClick={handleDisplayClick}
+              {...clickableDivProps(handleDisplayClick)}
             >
               {value || (
                 <span className="text-muted-foreground text-sm truncate whitespace-nowrap">

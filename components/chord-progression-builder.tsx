@@ -19,6 +19,7 @@ import { Chord, Key, Interval, Note } from "tonal"
 import { Plus, X, Save, GripVertical, ListMusic, Play, Volume2, Music, Share2, ChevronUp, ChevronDown, Minus, Square, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import MiniChordDiagram from "@/components/mini-chord-diagram"
+import { clickableDivProps } from "@/lib/a11y"
 
 const ALL_KEYS = ["C", "G", "D", "A", "E", "B", "F#", "F", "Bb", "Eb", "Ab", "Db"]
 
@@ -554,7 +555,7 @@ export default function ChordProgressionBuilder({
                     <Card
                       key={index}
                       className="cursor-pointer hover:shadow-md transition-all hover:border-[#597399]/50"
-                      onClick={() => setProgression(chords)}
+                      {...clickableDivProps(() => setProgression(chords))}
                     >
                       <CardContent className="p-3">
                         <h4 className="font-semibold text-sm mb-1">{prog.name}</h4>

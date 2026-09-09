@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns"
 import { enUS, zhCN } from "date-fns/locale"
 import { Heart, Music, ExternalLink, Trash2, ChevronRight } from "lucide-react"
 import { EmptyState, LibraryLoadingSkeleton } from "./library-ui"
+import { clickableDivProps } from "@/lib/a11y"
 
 const dateFnsLocales = { en: enUS, zh: zhCN }
 
@@ -59,7 +60,7 @@ export default function MyChordsPanel({ isSignedIn, favorites, loading, onRemove
         ) : (
           favorites.map((fav) => (
             <Card key={fav.id} className="cursor-pointer hover:shadow-sm transition-shadow"
-              onClick={() => onChordSelect?.(fav.chord_name)}>
+              {...clickableDivProps(() => onChordSelect?.(fav.chord_name))}>
               <CardContent className="p-3 flex items-center gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="bg-gradient-to-br from-[#a05537] to-[#bf6f4a] text-white rounded-md p-1.5 shrink-0">

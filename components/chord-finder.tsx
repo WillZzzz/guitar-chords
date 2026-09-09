@@ -20,6 +20,7 @@ import NotePicker from "./note-picker"
 import { Chord } from "tonal"
 import { playChordHTML5 } from "@/lib/audio-html5-fallback"
 import { analyzeChordScale } from "@/lib/scale-analysis"
+import { clickableDivProps } from "@/lib/a11y"
 
 interface ChordFinderProps {
   onChordSelect?: (chord: string) => void
@@ -647,7 +648,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
                 <div
                   key={relatedChord}
                   className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => handleChordClick(relatedChord)}
+                  {...clickableDivProps(() => handleChordClick(relatedChord))}
                 >
                   <div className="text-center space-y-2">
                     <div className="bg-gray-100 rounded p-2">

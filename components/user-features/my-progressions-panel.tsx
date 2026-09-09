@@ -19,6 +19,7 @@ import { enUS, zhCN } from "date-fns/locale"
 import { ListMusic, Trash2, ArrowRight, Copy, Users, Bookmark, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 import { EmptyState, LibraryLoadingSkeleton } from "./library-ui"
+import { clickableDivProps } from "@/lib/a11y"
 
 const dateFnsLocales = { en: enUS, zh: zhCN }
 
@@ -142,9 +143,9 @@ export default function MyProgressionsPanel({
             progressions.map((prog) => (
               <Card key={prog.id}
                 className="cursor-pointer hover:shadow-sm hover:border-[#597399]/50 transition-all"
-                onClick={() => onProgressionEdit?.({
+                {...clickableDivProps(() => onProgressionEdit?.({
                   id: prog.id, name: prog.name, description: prog.description, chords: prog.chords, tags: prog.tags,
-                })}>
+                }))}>
                 <CardContent className="p-3">
                   <div className="flex items-start gap-2">
                     <div className="min-w-0">

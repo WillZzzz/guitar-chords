@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import { addFavoriteChord, removeFavoriteChord, isChordFavorite } from "@/lib/user-data"
+import { clickableDivProps } from "@/lib/a11y"
 import { Music2, RotateCcw, ChevronRight, Heart } from "lucide-react"
 import { Chord } from "tonal"
 import { toast } from "sonner"
@@ -155,7 +156,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                   <div
                     key={index}
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-[#eef3ec] dark:hover:bg-slate-800 cursor-pointer transition-colors group"
-                    onClick={() => onChordSelect?.(chord.name)}
+                    {...clickableDivProps(() => onChordSelect?.(chord.name))}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
