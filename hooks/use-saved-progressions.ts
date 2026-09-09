@@ -10,6 +10,7 @@ import {
   type SavedProgression,
 } from "@/lib/user-data"
 import { toast } from "sonner"
+import { AnalyticsEvents } from "@/lib/analytics"
 
 // Shared data source for the current user's saved ("mine") progressions —
 // used by both the full detail panel and the mobile Simple rail. Community
@@ -69,6 +70,7 @@ export function useSavedProgressions(t: (key: string) => string) {
       try {
         await setProgressionPublic(user.id, prog.id, isPublic)
         toast.success(isPublic ? t("progression-builder.toast-published") : t("progression-builder.toast-unpublished"))
+        if (isPublic) AnalyticsEvents.progressionPublished()
       } catch {
         setProgressions((prev) => prev.map((p) => (p.id === prog.id ? { ...p, is_public: !isPublic } : p)))
         toast.error(t("progression-builder.toast-publish-failed"))

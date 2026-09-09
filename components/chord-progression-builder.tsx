@@ -19,6 +19,8 @@ import { Chord, Key, Interval, Note } from "tonal"
 import { Plus, X, Save, GripVertical, ListMusic, Play, Volume2, Music, Share2, ChevronUp, ChevronDown, Minus, Square, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import MiniChordDiagram from "@/components/mini-chord-diagram"
+import { clickableDivProps } from "@/lib/a11y"
+import { AnalyticsEvents } from "@/lib/analytics"
 
 const ALL_KEYS = ["C", "G", "D", "A", "E", "B", "F#", "F", "Bb", "Eb", "Ab", "Db"]
 
@@ -308,6 +310,7 @@ export default function ChordProgressionBuilder({
     }
     if (!user) {
       toast.error(t("progression-builder.toast-sign-in-required"))
+      AnalyticsEvents.signupPromptShown("save_progression")
       return
     }
     const tagArray = tags.split(",").map((tag) => tag.trim()).filter(Boolean)
@@ -324,6 +327,7 @@ export default function ChordProgressionBuilder({
         const saved = await saveProgression(user.id, name, progression, description, tagsOrUndef)
         addProgressionLookup(user.id, saved.id, name, progression).catch(() => {})
         toast.success(t("progression-builder.toast-saved"))
+        AnalyticsEvents.progressionSaved()
         setProgressionName("")
         setProgressionDescription("")
         setTags("")
@@ -554,7 +558,7 @@ export default function ChordProgressionBuilder({
                     <Card
                       key={index}
                       className="cursor-pointer hover:shadow-md transition-all hover:border-[#597399]/50"
-                      onClick={() => setProgression(chords)}
+                      {...clickableDivProps(() => setProgression(chords))}
                     >
                       <CardContent className="p-3">
                         <h4 className="font-semibold text-sm mb-1">{prog.name}</h4>

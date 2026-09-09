@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import { toast } from "sonner"
 import Link from "next/link"
+import { AnalyticsEvents } from "@/lib/analytics"
 
 interface AuthModalProps {
   open: boolean
@@ -112,9 +113,13 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
       const success = await signInWithGoogle()
       if (!success) {
         setIsGoogleLoading(false)
+      } else {
+        // Google doesn't tell us here whether this was a new or returning
+        // user (Supabase creates the account transparently on first OAuth
+        // login), so this covers both under one event. On success,
+        // signInWithOAuth navigates the browser away to Google immediately.
+        AnalyticsEvents.signinCompleted("google")
       }
-      // On success, signInWithOAuth navigates the browser away to Google, so
-      // there's nothing more to do here.
     } catch {
       toast.error(t("msg.error-unexpected"))
       setIsGoogleLoading(false)

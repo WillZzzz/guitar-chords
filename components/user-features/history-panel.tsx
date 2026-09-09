@@ -13,6 +13,7 @@ import {
   type ChordLookup,
 } from "@/lib/user-data"
 import { formatDistanceToNow } from "date-fns"
+import { clickableDivProps } from "@/lib/a11y"
 import { enUS, zhCN } from "date-fns/locale"
 import { Clock, BarChart3, Trash2, Music, ListMusic } from "lucide-react"
 import { toast } from "sonner"
@@ -90,11 +91,11 @@ export default function HistoryPanel({ onChordSelect, onProgressionSelect }: His
         ) : (
           history.map((lookup) => (
             <Card key={lookup.id} className="cursor-pointer hover:shadow-sm transition-shadow"
-              onClick={() =>
+              {...clickableDivProps(() =>
                 lookup.kind === "progression"
                   ? onProgressionSelect?.(lookup.chords ?? [])
                   : onChordSelect?.(lookup.chord_name)
-              }>
+              )}>
               <CardContent className="p-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div

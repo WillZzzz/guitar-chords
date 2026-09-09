@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { useLanguage } from "@/contexts/language-context"
+import { TIP_JAR_URL } from "@/lib/site-config"
+import { track } from "@vercel/analytics"
 
 export default function SiteFooter() {
   const { t } = useLanguage()
@@ -16,6 +18,20 @@ export default function SiteFooter() {
         <Link href="/terms" className="hover:underline hover:text-foreground">
           {t("footer.terms")}
         </Link>
+        {TIP_JAR_URL && (
+          <>
+            <span aria-hidden>·</span>
+            <a
+              href={TIP_JAR_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline hover:text-foreground"
+              onClick={() => track("tip_jar_clicked")}
+            >
+              {t("footer.support")}
+            </a>
+          </>
+        )}
       </div>
       <p className="mt-2">{t("footer.copyright")}</p>
     </footer>
