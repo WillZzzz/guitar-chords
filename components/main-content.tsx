@@ -160,26 +160,26 @@ export default function MainContent() {
 
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="max-w-[1400px] mx-auto px-2 sm:px-3 lg:px-4">
-          {/* Desktop Layout */}
-          <div className="hidden sm:grid sm:grid-cols-3 items-center h-20 gap-4">
-            <div></div>
-
-            {/* Centered Logo/Title */}
-            <div className="flex items-center justify-center space-x-3">
+          {/* Desktop/tablet Layout — flex + justify-between, not a 3-col grid with an empty
+              spacer to fake-center the title: that spacer ate a third of the row's width for
+              nothing, which left too little room for the title at tablet widths (e.g. iPad
+              portrait) and made it wrap and overflow into the tab row below. */}
+          <div className="hidden sm:flex items-center justify-between h-20 gap-4">
+            <div className="flex items-center gap-3 min-w-0">
               <LogoMark className="w-12 h-12 shrink-0" />
-              <div className="space-y-1 text-center">
+              <div className="space-y-1 min-w-0">
                 <h1
-                  className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent leading-tight transition-[background] duration-300"
+                  className="text-2xl lg:text-3xl font-bold bg-clip-text text-transparent leading-tight truncate transition-[background] duration-300"
                   style={{ backgroundImage: theme.headingGradient }}
                 >
                   {t("header.title")}
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">{t("header.subtitle")}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium truncate">{t("header.subtitle")}</p>
               </div>
             </div>
 
             {/* Right side controls */}
-            <div className="hidden sm:flex items-center justify-end space-x-2">
+            <div className="flex items-center justify-end space-x-2 shrink-0">
               <TipJarButton />
               <ThemeToggle />
               <LanguageToggle />
@@ -228,7 +228,7 @@ export default function MainContent() {
       </header>
 
       <main className="max-w-[1400px] mx-auto px-2 sm:px-3 lg:px-4 py-8">
-        <div className="flex lg:gap-6 items-start">
+        <div className="flex sm:gap-6 items-start">
           {/* Main content area */}
           <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -289,15 +289,16 @@ export default function MainContent() {
             </Tabs>
           </div>
 
-          {/* Contextual sidebar — desktop (lg+), varies with active tab. The wrapper is a fixed
-              48px-wide column, position:sticky + vertically centered (floats in the middle of the
-              viewport regardless of scroll) so the main content's width never changes. The edge tab
-              stays visible at all times; the expanded panel is absolutely positioned flush to its
-              left edge (right-full) so it overlaps the main content instead of pushing/shrinking it.
-              Mobile has its own parallel block below (lg:hidden) with a thinner rail and an extra
-              "simple" tier. */}
+          {/* Contextual sidebar — desktop/tablet (sm+, matches the header's own breakpoint so a
+              wide-enough header never pairs with the phone-style floating panel below), varies with
+              active tab. The wrapper is a fixed 48px-wide column, position:sticky + vertically
+              centered (floats in the middle of the viewport regardless of scroll) so the main
+              content's width never changes. The edge tab stays visible at all times; the expanded
+              panel is absolutely positioned flush to its left edge (right-full) so it overlaps the
+              main content instead of pushing/shrinking it. Phones have their own parallel block
+              below (sm:hidden) with a thinner rail and an extra "simple" tier. */}
           {user && activeTab === "finder" && (
-            <div className="hidden lg:block w-12 shrink-0 sticky top-1/2 -translate-y-1/2">
+            <div className="hidden sm:block w-12 shrink-0 sticky top-1/2 -translate-y-1/2">
               <EdgeTab
                 label={t("nav.my-chords")}
                 count={favorites.length}
@@ -322,7 +323,7 @@ export default function MainContent() {
             </div>
           )}
           {user && activeTab === "progression" && (
-            <div className="hidden lg:block w-12 shrink-0 sticky top-1/2 -translate-y-1/2">
+            <div className="hidden sm:block w-12 shrink-0 sticky top-1/2 -translate-y-1/2">
               <EdgeTab
                 label={t("nav.my-progressions")}
                 count={progressions.length}
@@ -348,15 +349,16 @@ export default function MainContent() {
             </div>
           )}
 
-          {/* Mobile equivalent (lg:hidden) — same edge-tab mechanism, but position:fixed instead
-              of a sticky flex sibling: on a small screen every pixel of main-content width matters,
-              so the rail costs the page ZERO layout width (unlike desktop, which can afford to
-              reserve a column) and instead floats on top of the content, still centered in the
-              viewport regardless of scroll. Also has an extra "simple" tier in between: collapsed
-              -> simple (thin name-only rail, tap an item to load it) -> full (identical rich panel
-              to desktop, reached via the expand icon inside the simple rail). */}
+          {/* Phone equivalent (sm:hidden, i.e. below 640px — everything from a large phablet up to
+              iPad portrait gets the sm+ treatment above instead) — same edge-tab mechanism, but
+              position:fixed instead of a sticky flex sibling: on a small screen every pixel of
+              main-content width matters, so the rail costs the page ZERO layout width (unlike sm+,
+              which can afford to reserve a column) and instead floats on top of the content, still
+              centered in the viewport regardless of scroll. Also has an extra "simple" tier in
+              between: collapsed -> simple (thin name-only rail, tap an item to load it) -> full
+              (identical rich panel to sm+, reached via the expand icon inside the simple rail). */}
           {user && activeTab === "finder" && (
-            <div className="lg:hidden fixed right-1 top-1/2 -translate-y-1/2 z-[60]">
+            <div className="sm:hidden fixed right-1 top-1/2 -translate-y-1/2 z-[60]">
               <EdgeTab
                 label={t("nav.my-chords")}
                 count={favorites.length}
@@ -393,7 +395,7 @@ export default function MainContent() {
             </div>
           )}
           {user && activeTab === "progression" && (
-            <div className="lg:hidden fixed right-1 top-1/2 -translate-y-1/2 z-[60]">
+            <div className="sm:hidden fixed right-1 top-1/2 -translate-y-1/2 z-[60]">
               <EdgeTab
                 label={t("nav.my-progressions")}
                 count={progressions.length}
