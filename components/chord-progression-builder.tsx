@@ -207,15 +207,6 @@ export default function ChordProgressionBuilder({
     return chordDegreeMap.get(`${info.tonic}|${info.quality}`) ?? null
   }
 
-  // Unique notes across the whole progression, for the "notes involved" summary.
-  const progressionNotes = useMemo(() => {
-    const notes = new Set<string>()
-    progression.forEach((chord) => {
-      Chord.get(chord).notes.forEach((n) => notes.add(n))
-    })
-    return Array.from(notes)
-  }, [progression])
-
   const addChord = (chord: string) => setProgression((prev) => [...prev, chord])
   const removeChord = (index: number) => setProgression((prev) => prev.filter((_, i) => i !== index))
   const clearProgression = () => setProgression([])
@@ -803,14 +794,22 @@ export default function ChordProgressionBuilder({
                   {progression.map((chord, idx) => {
                     const { chordData, variation, hasAlt } = getFingeringInfo(chord, idx)
                     return (
-                      <div key={`${chord}-${idx}-fingering`} className="min-h-[156px] flex flex-col items-center justify-center gap-0.5">
+                      <div key={`${chord}-${idx}-fingering`} className="min-h-[156px] flex flex-col items-center justify-center gap-1">
                         {variation ? (
-                          <MiniChordDiagram positions={variation.positions} startFret={variation.startFret} />
+                          <MiniChordDiagram
+                            positions={variation.positions}
+                            startFret={variation.startFret}
+                            accentColor="#597399"
+                            accentColorDark="#415a80"
+                          />
                         ) : (
                           <div className="w-16 h-20 border rounded flex items-center justify-center text-xs text-muted-foreground text-center px-1">
                             No data
                           </div>
                         )}
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          {Chord.get(chord).notes.join(" · ")}
+                        </p>
                         {hasAlt && (
                           <button
                             onClick={() =>
@@ -820,9 +819,9 @@ export default function ChordProgressionBuilder({
                                 return { ...prev, [key]: next }
                               })
                             }
-                            className="text-[10px] text-muted-foreground hover:text-foreground"
+                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
                           >
-                            alt {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
+                            alt fingering {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
                           </button>
                         )}
                       </div>
@@ -830,18 +829,6 @@ export default function ChordProgressionBuilder({
                   })}
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Notes involved — union of notes across every chord currently in the progression */}
-          {progression.length > 0 && progressionNotes.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap pt-1">
-              <span className="text-xs text-muted-foreground">{t("progression-builder.notes-involved")}</span>
-              {progressionNotes.map((note) => (
-                <Badge key={note} variant="secondary" className="bg-[#eaeff5] dark:bg-slate-800 text-[#415a80] dark:text-blue-200">
-                  {note}
-                </Badge>
-              ))}
             </div>
           )}
 
@@ -864,12 +851,17 @@ export default function ChordProgressionBuilder({
                           <MiniChordDiagram
                             positions={variation.positions}
                             startFret={variation.startFret}
+                            accentColor="#597399"
+                            accentColorDark="#415a80"
                           />
                         ) : (
                           <div className="w-16 h-20 border rounded flex items-center justify-center text-xs text-muted-foreground text-center px-1">
                             No data
                           </div>
                         )}
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          {Chord.get(chord).notes.join(" · ")}
+                        </p>
                         {hasAlt && (
                           <button
                             onClick={() =>
@@ -879,9 +871,9 @@ export default function ChordProgressionBuilder({
                                 return { ...prev, [key]: next }
                               })
                             }
-                            className="text-[10px] text-muted-foreground hover:text-foreground"
+                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
                           >
-                            alt {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
+                            alt fingering {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
                           </button>
                         )}
                       </div>

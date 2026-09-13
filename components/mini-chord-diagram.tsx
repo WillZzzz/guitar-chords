@@ -7,9 +7,18 @@ interface ChordPosition {
 interface MiniChordDiagramProps {
   positions: ChordPosition[]
   startFret?: number
+  // Defaults to the Chord Finder tab's terracotta — pass the host page's own
+  // accent (e.g. Progression Builder's navy) so the dots match that page's theme.
+  accentColor?: string
+  accentColorDark?: string
 }
 
-export default function MiniChordDiagram({ positions, startFret = 1 }: MiniChordDiagramProps) {
+export default function MiniChordDiagram({
+  positions,
+  startFret = 1,
+  accentColor = "#bf6f4a",
+  accentColorDark = "#a05537",
+}: MiniChordDiagramProps) {
   const fretCount = 4
   const stringCount = 6
   const stringSpacing = 15
@@ -131,7 +140,7 @@ export default function MiniChordDiagram({ positions, startFret = 1 }: MiniChord
               const fretY = nutHeight + 15 + (relativeFret - 0.5) * fretHeight
               return (
                 <g key={`fretted-${index}`}>
-                  <circle cx={x} cy={fretY} r="5" fill="#bf6f4a" stroke="#a05537" strokeWidth="1" />
+                  <circle cx={x} cy={fretY} r="5" fill={accentColor} stroke={accentColorDark} strokeWidth="1" />
                   {pos.finger && pos.finger > 0 && (
                     <text x={x} y={fretY + 2.5} fontSize="6.5" textAnchor="middle" fill="white" fontWeight="bold">
                       {pos.finger}

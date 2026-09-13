@@ -242,7 +242,6 @@
     "chord-name-examples": "尝试：Cmaj7, Am7, F#dim, Bbsus4, G13 等",
     "select-notes-instruction": "选择音符来构建和弦：",
     "selected-notes": "已选音符：",
-    "notes-involved": "涉及音符：",
     "none": "无",
     "possible-chords": "可能的和弦",
     "no-chords-found": "没有找到使用这些音符的和弦",
