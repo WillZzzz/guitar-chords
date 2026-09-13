@@ -46,13 +46,19 @@ const ALL_COMMON_CHORDS = [
 const ROMAN_MAJOR = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
 const ROMAN_MINOR = ["i", "ii°", "III", "iv", "v", "VI", "VII"]
 
-const COMMON_PROGRESSIONS = [
+const COMMON_PROGRESSIONS: {
+  name: string
+  displayKey: string | null
+  chords: string[]
+  displayName?: string
+  homeKey?: string
+}[] = [
   { name: "I-V-vi-IV",    displayKey: "progression-desc.i-v-vi-iv",    chords: ["C", "G", "Am", "F"] },
   { name: "vi-IV-I-V",    displayKey: "progression-desc.classic-rock",  chords: ["Am", "F", "C", "G"] },
   { name: "I-vi-IV-V",    displayKey: "progression-desc.fifties",       chords: ["C", "Am", "F", "G"] },
   { name: "I-IV-V",       displayKey: null,                              chords: ["C", "F", "G"],        displayName: "Basic blues/rock" },
   { name: "ii-V-I",       displayKey: "progression-desc.ii-v-i",        chords: ["Dm", "G", "C"] },
-  { name: "i-VII-VI-V",   displayKey: null,                              chords: ["Am", "G", "F", "E"],  displayName: "Andalusian cadence" },
+  { name: "i-VII-VI-V",   displayKey: null,                              chords: ["Am", "G", "F", "E"],  displayName: "Andalusian cadence", homeKey: "A" },
   { name: "I-V-vi-iii-IV",displayKey: null,                              chords: ["C", "G", "Am", "Em", "F"], displayName: "Axis / Let It Be" },
   { name: "vi-ii-V-I",    displayKey: null,                              chords: ["Am7", "Dm7", "G7", "Cmaj7"], displayName: "Jazz turnaround" },
   { name: "I-II-IV-I",    displayKey: null,                              chords: ["C", "D", "F", "C"],   displayName: "Neo soul" },
@@ -576,7 +582,13 @@ export default function ChordProgressionBuilder({
             <CollapsibleContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {COMMON_PROGRESSIONS.map((prog, index) => {
-                  const semitones = KEY_SEMITONES[selectedKey] ?? 0
+                  // Each template is written in its own home key (C for most, A for the
+                  // Andalusian cadence's minor tonic) — the shift has to account for that,
+                  // not just treat every template as if it started on C.
+                  const homeKey = prog.homeKey ?? "C"
+                  const semitones = selectedKey
+                    ? ((KEY_SEMITONES[selectedKey] ?? 0) - (KEY_SEMITONES[homeKey] ?? 0) + 12) % 12
+                    : 0
                   const chords = transposeChords(prog.chords, semitones)
                   return (
                     <Card
