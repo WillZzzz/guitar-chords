@@ -46,13 +46,19 @@ const ALL_COMMON_CHORDS = [
 const ROMAN_MAJOR = ["I", "ii", "iii", "IV", "V", "vi", "vii°"]
 const ROMAN_MINOR = ["i", "ii°", "III", "iv", "v", "VI", "VII"]
 
-const COMMON_PROGRESSIONS = [
+const COMMON_PROGRESSIONS: {
+  name: string
+  displayKey: string | null
+  chords: string[]
+  displayName?: string
+  homeKey?: string
+}[] = [
   { name: "I-V-vi-IV",    displayKey: "progression-desc.i-v-vi-iv",    chords: ["C", "G", "Am", "F"] },
   { name: "vi-IV-I-V",    displayKey: "progression-desc.classic-rock",  chords: ["Am", "F", "C", "G"] },
   { name: "I-vi-IV-V",    displayKey: "progression-desc.fifties",       chords: ["C", "Am", "F", "G"] },
   { name: "I-IV-V",       displayKey: null,                              chords: ["C", "F", "G"],        displayName: "Basic blues/rock" },
   { name: "ii-V-I",       displayKey: "progression-desc.ii-v-i",        chords: ["Dm", "G", "C"] },
-  { name: "i-VII-VI-VII", displayKey: null,                              chords: ["Am", "G", "F", "E"],  displayName: "Andalusian cadence" },
+  { name: "i-VII-VI-V",   displayKey: null,                              chords: ["Am", "G", "F", "E"],  displayName: "Andalusian cadence", homeKey: "A" },
   { name: "I-V-vi-iii-IV",displayKey: null,                              chords: ["C", "G", "Am", "Em", "F"], displayName: "Axis / Let It Be" },
   { name: "vi-ii-V-I",    displayKey: null,                              chords: ["Am7", "Dm7", "G7", "Cmaj7"], displayName: "Jazz turnaround" },
   { name: "I-II-IV-I",    displayKey: null,                              chords: ["C", "D", "F", "C"],   displayName: "Neo soul" },
@@ -182,6 +188,30 @@ export default function ChordProgressionBuilder({
   }, [selectedKey, keyMode])
 
   const romanNumerals = keyMode === "major" ? ROMAN_MAJOR : ROMAN_MINOR
+
+  // Maps "tonic|quality" (e.g. "G|Major") to a roman numeral for the selected key's
+  // 7 diatonic triads. Matching on tonic+quality (not exact chord name) means an
+  // extended chord like "G7" or "Cmaj7" still resolves to its triad's degree.
+  // Chords outside the key (or with a quality tonal can't classify, e.g. sus chords)
+  // intentionally have no entry — not every chord can be given a degree.
+  const chordDegreeMap = useMemo(() => {
+    if (!selectedKey) return null
+    const map = new Map<string, string>()
+    diatonicChords.forEach((dChord: string, i: number) => {
+      const info = Chord.get(dChord)
+      if (info.tonic && info.quality && info.quality !== "Unknown") {
+        map.set(`${info.tonic}|${info.quality}`, romanNumerals[i])
+      }
+    })
+    return map
+  }, [selectedKey, diatonicChords, romanNumerals])
+
+  const getChordDegree = (chord: string): string | null => {
+    if (!chordDegreeMap) return null
+    const info = Chord.get(chord)
+    if (!info.tonic || !info.quality || info.quality === "Unknown") return null
+    return chordDegreeMap.get(`${info.tonic}|${info.quality}`) ?? null
+  }
 
   const addChord = (chord: string) => setProgression((prev) => [...prev, chord])
   const removeChord = (index: number) => setProgression((prev) => prev.filter((_, i) => i !== index))
@@ -552,7 +582,13 @@ export default function ChordProgressionBuilder({
             <CollapsibleContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {COMMON_PROGRESSIONS.map((prog, index) => {
-                  const semitones = KEY_SEMITONES[selectedKey] ?? 0
+                  // Each template is written in its own home key (C for most, A for the
+                  // Andalusian cadence's minor tonic) — the shift has to account for that,
+                  // not just treat every template as if it started on C.
+                  const homeKey = prog.homeKey ?? "C"
+                  const semitones = selectedKey
+                    ? ((KEY_SEMITONES[selectedKey] ?? 0) - (KEY_SEMITONES[homeKey] ?? 0) + 12) % 12
+                    : 0
                   const chords = transposeChords(prog.chords, semitones)
                   return (
                     <Card
@@ -731,6 +767,9 @@ export default function ChordProgressionBuilder({
                                 <div {...provided.dragHandleProps}>
                                   <GripVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 </div>
+                                {getChordDegree(chord) && (
+                                  <span className="text-[10px] text-white/70 font-normal">{getChordDegree(chord)}</span>
+                                )}
                                 <span className="font-semibold text-sm sm:text-base">{chord}</span>
                                 <Button
                                   variant="ghost"
@@ -767,14 +806,22 @@ export default function ChordProgressionBuilder({
                   {progression.map((chord, idx) => {
                     const { chordData, variation, hasAlt } = getFingeringInfo(chord, idx)
                     return (
-                      <div key={`${chord}-${idx}-fingering`} className="min-h-[156px] flex flex-col items-center justify-center gap-0.5">
+                      <div key={`${chord}-${idx}-fingering`} className="min-h-[156px] flex flex-col items-center justify-center gap-1">
                         {variation ? (
-                          <MiniChordDiagram positions={variation.positions} startFret={variation.startFret} />
+                          <MiniChordDiagram
+                            positions={variation.positions}
+                            startFret={variation.startFret}
+                            accentColor="#597399"
+                            accentColorDark="#415a80"
+                          />
                         ) : (
                           <div className="w-16 h-20 border rounded flex items-center justify-center text-xs text-muted-foreground text-center px-1">
                             No data
                           </div>
                         )}
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          {Chord.get(chord).notes.join(" · ")}
+                        </p>
                         {hasAlt && (
                           <button
                             onClick={() =>
@@ -784,9 +831,9 @@ export default function ChordProgressionBuilder({
                                 return { ...prev, [key]: next }
                               })
                             }
-                            className="text-[10px] text-muted-foreground hover:text-foreground"
+                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
                           >
-                            alt {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
+                            alt fingering {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
                           </button>
                         )}
                       </div>
@@ -816,12 +863,17 @@ export default function ChordProgressionBuilder({
                           <MiniChordDiagram
                             positions={variation.positions}
                             startFret={variation.startFret}
+                            accentColor="#597399"
+                            accentColorDark="#415a80"
                           />
                         ) : (
                           <div className="w-16 h-20 border rounded flex items-center justify-center text-xs text-muted-foreground text-center px-1">
                             No data
                           </div>
                         )}
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          {Chord.get(chord).notes.join(" · ")}
+                        </p>
                         {hasAlt && (
                           <button
                             onClick={() =>
@@ -831,9 +883,9 @@ export default function ChordProgressionBuilder({
                                 return { ...prev, [key]: next }
                               })
                             }
-                            className="text-[10px] text-muted-foreground hover:text-foreground"
+                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
                           >
-                            alt {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
+                            alt fingering {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
                           </button>
                         )}
                       </div>
