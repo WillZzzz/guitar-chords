@@ -130,7 +130,7 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
           {/* Notes and Accidentals - Combined Row */}
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-400 shrink-0">
+              <span className="text-xs font-medium text-gray-600 dark:text-muted-foreground shrink-0">
                 {t('note-picker.notes')}:
               </span>
               <div className="flex flex-wrap gap-1">
@@ -162,7 +162,7 @@ export default function NotePicker({ value, onChange, onSearch, placeholder }: N
 
           {/* Quality and Extension Buttons - Combined */}
           <div className="space-y-2">
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            <span className="text-xs font-medium text-gray-600 dark:text-muted-foreground">
               {t('note-picker.qualities')} & {t('note-picker.extensions')}:
             </span>
             <div className="flex flex-wrap gap-1">

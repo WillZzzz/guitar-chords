@@ -16,7 +16,6 @@ import {
   deleteChordProgression,
   getUserChordProgressions,
   getPublicChordProgressions,
-  getUserProfilesByIds,
 } from "@/lib/supabase"
 
 export interface FavoriteChord {
@@ -48,7 +47,6 @@ export interface PublicProgression {
   chords: string[]
   tags?: string[]
   created_at: string
-  author_name: string
 }
 
 export interface EditableProgression {
@@ -251,24 +249,16 @@ export async function deleteSavedProgression(userId: string, progressionId: stri
   notifyLibraryChanged()
 }
 
-// Community: browsing/copying other users' public progressions
+// Community: browsing/copying other users' public progressions.
+// No author attribution by design for now — see feedback_community_attribution
+// memory / conversation: the app has no username concept (signup's display
+// name is optional and often blank), so showing "by <blank>" is worse than
+// showing nothing. Revisit if Community ever grows enough to need identity.
 
 export async function getPublicProgressions(limit = 20): Promise<PublicProgression[]> {
   const { data, error } = await getPublicChordProgressions(limit)
   throwIfError(error)
   const rows = data ?? []
-
-  // Author display names are resolved separately (no FK between chord_progressions
-  // and user_profiles for PostgREST to embed) — best-effort, falls back to
-  // "Anonymous" if it fails or the user_profiles read-policy isn't set up yet.
-  const userIds = Array.from(new Set(rows.map((row: any) => row.user_id)))
-  let nameById = new Map<string, string>()
-  try {
-    const { data: profiles } = await getUserProfilesByIds(userIds)
-    nameById = new Map((profiles ?? []).map((p: any) => [p.id, p.display_name]))
-  } catch {
-    // ignore — attribution just falls back to "Anonymous" below
-  }
 
   return rows.map((row: any) => ({
     id: row.id,
@@ -278,7 +268,6 @@ export async function getPublicProgressions(limit = 20): Promise<PublicProgressi
     chords: row.chords as string[],
     tags: row.tags?.length ? row.tags : undefined,
     created_at: row.created_at,
-    author_name: nameById.get(row.user_id) ?? "Anonymous",
   }))
 }
 

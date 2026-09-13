@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import { useFavoriteChords } from "@/hooks/use-favorite-chords"
 import { useSavedProgressions } from "@/hooks/use-saved-progressions"
+import { useCommunityProgressions } from "@/hooks/use-community-progressions"
 import type { EditableProgression } from "@/lib/user-data"
 import { Clock, ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { TAB_THEME as TAB_ACCENTS } from "@/lib/tab-theme"
@@ -28,14 +29,17 @@ import TipJarButton from "@/components/tip-jar-button"
 const TAB_THEME = {
   finder: {
     accent: TAB_ACCENTS.finder.accent,
+    darkAccent: TAB_ACCENTS.finder.darkAccent,
     headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.finder.accent} 50%, ${TAB_ACCENTS.finder.accentDark})`,
   },
   reverse: {
     accent: TAB_ACCENTS.reverse.accent,
+    darkAccent: TAB_ACCENTS.reverse.darkAccent,
     headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.reverse.accent} 50%, ${TAB_ACCENTS.reverse.accentDark})`,
   },
   progression: {
     accent: TAB_ACCENTS.progression.accent,
+    darkAccent: TAB_ACCENTS.progression.darkAccent,
     headingGradient: `linear-gradient(90deg, var(--heading-grad-start), ${TAB_ACCENTS.progression.accent} 50%, ${TAB_ACCENTS.progression.accentDark})`,
   },
 } as const
@@ -71,14 +75,14 @@ function EdgeTab({
   const Chevron = isOpen ? ChevronRight : ChevronLeft
 
   return (
-    <div className={`flex flex-col items-center justify-between rounded-2xl border border-[#e6dcd2] dark:border-slate-700 bg-[#f5f1eb] dark:bg-slate-900 shadow-sm ${compact ? "gap-2 py-2" : "gap-4 py-3"}`}>
-      <div className={`${iconBoxClass} shrink-0 rounded-lg border border-[#e6dcd2] dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center`}>
+    <div className={`flex flex-col items-center justify-between rounded-2xl border border-[#e6dcd2] dark:border-border bg-[#f5f1eb] dark:bg-card shadow-sm ${compact ? "gap-2 py-2" : "gap-4 py-3"}`}>
+      <div className={`${iconBoxClass} shrink-0 rounded-lg border border-[#e6dcd2] dark:border-border bg-white dark:bg-muted flex items-center justify-center`}>
         <Star className={iconSizeClass} style={{ color: accent }} />
       </div>
       <div className={`flex flex-col items-center ${compact ? "gap-1" : "gap-2"}`}>
         {count > 0 && (
           <span
-            className={`flex items-center justify-center font-semibold rounded-full shrink-0 ${countBoxClass}`}
+            className={`flex items-center justify-center font-semibold rounded-full shrink-0 ${countBoxClass} ${countStyle === "tint" ? "dark:!bg-muted dark:!text-foreground" : ""}`}
             style={
               countStyle === "solid"
                 ? { backgroundColor: accent, color: "#fffdfa" }
@@ -89,7 +93,7 @@ function EdgeTab({
           </span>
         )}
         <span
-          className={`font-medium whitespace-nowrap text-[#37302a] dark:text-slate-200 ${labelClass}`}
+          className={`font-medium whitespace-nowrap text-[#37302a] dark:text-[#d4cdc4] ${labelClass}`}
           style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
           {label}
@@ -99,7 +103,7 @@ function EdgeTab({
         type="button"
         onClick={onExpand}
         title={label}
-        className={`${iconBoxClass} min-h-0 shrink-0 rounded-lg border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center`}
+        className={`${iconBoxClass} min-h-0 shrink-0 rounded-lg border border-[#e6dcd2] dark:border-border flex items-center justify-center`}
         style={{ backgroundColor: tint }}
       >
         <Chevron className={chevronSizeClass} style={{ color: accent }} />
@@ -126,6 +130,7 @@ export default function MainContent() {
   // flashing empty every time either view mounts.
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavoriteChords(t)
   const { progressions, loading: progressionsLoading, deleteProgression, togglePublic } = useSavedProgressions(t)
+  const { community, loadingCommunity, loadCommunity } = useCommunityProgressions(t)
 
   const handleChordSelectFromLibrary = (chord: string) => {
     setSelectedChord(chord)
@@ -145,7 +150,7 @@ export default function MainContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf7f3] dark:bg-slate-900">
+    <div className="min-h-screen bg-[#faf7f3] dark:bg-background">
       {/* Mobile bottom sheet — History only. My Chords/My Progressions use the
           persistent edge-tab panel below (same mechanism as desktop) instead
           of a full-screen modal takeover. */}
@@ -158,7 +163,7 @@ export default function MainContent() {
         </LibrarySheet>
       )}
 
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
+      <header className="bg-white/80 dark:bg-[#1d1a16]/90 backdrop-blur-sm border-b border-gray-200 dark:border-border sticky top-0 z-50">
         <div className="max-w-[1400px] mx-auto px-2 sm:px-3 lg:px-4">
           {/* Desktop/tablet Layout — flex + justify-between, not a 3-col grid with an empty
               spacer to fake-center the title: that spacer ate a third of the row's width for
@@ -174,7 +179,7 @@ export default function MainContent() {
                 >
                   {t("header.title")}
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium truncate">{t("header.subtitle")}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-[#b8afa5] font-medium truncate">{t("header.subtitle")}</p>
               </div>
             </div>
 
@@ -204,7 +209,7 @@ export default function MainContent() {
                 >
                   {t("header.title")}
                 </h1>
-                <p className="text-xs text-gray-500 font-medium truncate">{t("header.subtitle")}</p>
+                <p className="text-xs text-gray-500 dark:text-[#b8afa5] font-medium truncate">{t("header.subtitle")}</p>
               </div>
             </div>
 
@@ -232,10 +237,10 @@ export default function MainContent() {
           {/* Main content area */}
           <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 gap-1 mb-8 h-auto p-1 bg-[#faf7f3] dark:bg-slate-800 border border-[#e6dcd2] dark:border-slate-700 rounded-xl">
+              <TabsList className="grid w-full grid-cols-3 gap-1 mb-8 h-auto p-1 bg-[#faf7f3] dark:bg-muted border border-[#e6dcd2] dark:border-border rounded-xl">
                 <TabsTrigger
                   value="finder"
-                  className="border border-[#e6dcd2] dark:border-slate-700 rounded-lg data-[state=active]:border-[#e6dcd2] data-[state=active]:bg-[#fffdfa] dark:data-[state=active]:bg-slate-900 data-[state=active]:text-[#bf6f4a] data-[state=active]:shadow-none text-[#9c9187] dark:text-slate-400 h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
+                  className="border border-[#e6dcd2] dark:border-border rounded-lg data-[state=active]:border-[#e6dcd2] data-[state=active]:bg-[#fffdfa] dark:data-[state=active]:border-[#8b5e3c] dark:data-[state=active]:bg-[#8b5e3c] data-[state=active]:text-[#bf6f4a] dark:data-[state=active]:text-[#f0ebe5] data-[state=active]:shadow-none text-[#9c9187] dark:text-[#a39890] h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
                 >
                   <span className="block">
                     {t("nav.chord-finder").split(' ').map((word, i, arr) => (
@@ -245,7 +250,7 @@ export default function MainContent() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="reverse"
-                  className="border border-[#e6dcd2] dark:border-slate-700 rounded-lg data-[state=active]:border-[#e6dcd2] data-[state=active]:bg-[#fffdfa] dark:data-[state=active]:bg-slate-900 data-[state=active]:text-[#6b8e70] data-[state=active]:shadow-none text-[#9c9187] dark:text-slate-400 h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
+                  className="border border-[#e6dcd2] dark:border-border rounded-lg data-[state=active]:border-[#e6dcd2] data-[state=active]:bg-[#fffdfa] dark:data-[state=active]:border-[#4a7a50] dark:data-[state=active]:bg-[#4a7a50] data-[state=active]:text-[#6b8e70] dark:data-[state=active]:text-[#f0ebe5] data-[state=active]:shadow-none text-[#9c9187] dark:text-[#a39890] h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
                 >
                   <span className="block">
                     {t("nav.reverse-lookup").split(' ').map((word, i, arr) => (
@@ -255,7 +260,7 @@ export default function MainContent() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="progression"
-                  className="border border-[#e6dcd2] dark:border-slate-700 rounded-lg data-[state=active]:border-[#597399] data-[state=active]:bg-[#597399] data-[state=active]:text-white data-[state=active]:shadow-none text-[#9c9187] dark:text-slate-400 h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
+                  className="border border-[#e6dcd2] dark:border-border rounded-lg data-[state=active]:border-[#597399] data-[state=active]:bg-[#597399] dark:data-[state=active]:border-[#8aadcc] dark:data-[state=active]:bg-[#8aadcc] data-[state=active]:text-white dark:data-[state=active]:text-[#f0ebe5] data-[state=active]:shadow-none text-[#9c9187] dark:text-[#a39890] h-auto py-3 px-2 whitespace-normal text-center leading-tight font-medium data-[state=active]:font-semibold"
                 >
                   <span className="block">
                     {t("nav.progression-builder").split(' ').map((word, i, arr) => (
@@ -309,7 +314,7 @@ export default function MainContent() {
                 onExpand={() => setChordsPanelView((v) => (v === "collapsed" ? "full" : "collapsed"))}
               />
               {chordsPanelView === "full" && (
-                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-56 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-48 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
                   <MyChordsPanel
                     isSignedIn={!!user}
                     favorites={favorites}
@@ -341,6 +346,9 @@ export default function MainContent() {
                     loading={progressionsLoading}
                     onDeleteProgression={deleteProgression}
                     onTogglePublic={togglePublic}
+                    community={community}
+                    loadingCommunity={loadingCommunity}
+                    onLoadCommunity={loadCommunity}
                     onProgressionEdit={handleProgressionEdit}
                     onCollapse={() => setProgressionsPanelView("collapsed")}
                   />
@@ -381,7 +389,7 @@ export default function MainContent() {
                 </aside>
               )}
               {chordsPanelView === "full" && (
-                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-56 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
+                <aside className="absolute right-full top-1/2 -translate-y-1/2 z-[60] flex flex-col w-48 max-h-[85vh] rounded-xl border bg-card shadow-lg overflow-hidden">
                   <MyChordsPanel
                     isSignedIn={!!user}
                     favorites={favorites}
@@ -425,6 +433,9 @@ export default function MainContent() {
                     loading={progressionsLoading}
                     onDeleteProgression={deleteProgression}
                     onTogglePublic={togglePublic}
+                    community={community}
+                    loadingCommunity={loadingCommunity}
+                    onLoadCommunity={loadCommunity}
                     onProgressionEdit={handleProgressionEdit}
                     onCollapse={() => setProgressionsPanelView("simple")}
                   />

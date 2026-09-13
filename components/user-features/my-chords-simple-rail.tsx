@@ -20,12 +20,12 @@ export default function MyChordsSimpleRail({ isSignedIn, favorites, loading, onC
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-center px-2 py-2 border-b border-[#e6dcd2] dark:border-slate-700 bg-[#f2e1d6] dark:bg-slate-800">
+      <div className="flex items-center justify-center px-2 py-2 border-b border-[#e6dcd2] dark:border-border bg-[#f2e1d6] dark:bg-[#2e2220]">
         <button
           type="button"
           onClick={onExpand}
           title={t("ui.expand")}
-          className="h-6 w-6 min-h-0 shrink-0 rounded-md bg-[#fffdfa] dark:bg-slate-900 border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center text-[#bf6f4a] dark:text-orange-300"
+          className="h-6 w-6 min-h-0 shrink-0 rounded-md bg-[#fffdfa] dark:bg-card border border-[#e6dcd2] dark:border-border flex items-center justify-center text-[#bf6f4a] dark:text-orange-300"
         >
           <ChevronsLeft className="h-3.5 w-3.5" />
         </button>
@@ -45,7 +45,7 @@ export default function MyChordsSimpleRail({ isSignedIn, favorites, loading, onC
               key={fav.id}
               type="button"
               onClick={() => onChordSelect?.(fav.chord_name)}
-              className="w-full px-2 py-1.5 text-center text-sm font-semibold text-[#37302a] dark:text-slate-100 hover:bg-[#fbf4ef] dark:hover:bg-slate-800 transition-colors whitespace-nowrap"
+              className="w-full px-2 py-1.5 text-center text-sm font-semibold text-[#37302a] dark:text-foreground hover:bg-[#fbf4ef] dark:hover:bg-muted transition-colors whitespace-nowrap"
               title={fav.chord_name}
             >
               {fav.chord_name}

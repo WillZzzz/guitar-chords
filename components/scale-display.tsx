@@ -79,14 +79,14 @@ export default function ScaleDisplay({
           </div>
 
           {/* Chord Function */}
-          <div className="bg-[#fbf4ef] dark:bg-slate-800/60 p-4 rounded-lg">
+          <div className="bg-[#fbf4ef] dark:bg-[#282320]/60 p-4 rounded-lg">
             <div className="flex items-start gap-2">
               <Info className="h-4 w-4 text-[#bf6f4a] mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-[#37302a] dark:text-slate-100 mb-1">
+                <h4 className="text-sm font-medium text-[#37302a] dark:text-foreground mb-1">
                   {t('theory.chord-function')}:
                 </h4>
-                <p className="text-sm text-[#6b5f55] dark:text-slate-300">
+                <p className="text-sm text-[#6b5f55] dark:text-[#d4cdc4]">
                   {chordFunction}
                 </p>
               </div>
@@ -94,7 +94,7 @@ export default function ScaleDisplay({
           </div>
 
           {/* Legend */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
+          <div className="bg-gray-50 dark:bg-[#1d1a16]/50 p-4 rounded-lg">
             <h4 className="text-sm font-medium mb-2">{t('theory.legend')}:</h4>
             <div className="flex flex-wrap gap-2 text-xs">
               <div className="flex items-center gap-1">
@@ -149,7 +149,7 @@ export default function ScaleDisplay({
                         className={`text-xs ${
                           isHighlighted
                             ? 'bg-[#bf6f4a] hover:bg-[#a05537]'
-                            : 'text-gray-500'
+                            : 'text-gray-500 dark:text-muted-foreground'
                         }`}
                       >
                         {note}

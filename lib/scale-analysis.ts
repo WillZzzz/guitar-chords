@@ -274,13 +274,13 @@ function determineChordFunction(chordName: string, scaleInfo: ScaleInfo | null):
  */
 export function getChordNoteColor(index: number, isHighlighted: boolean): string {
   if (!isHighlighted) {
-    return 'text-gray-400 bg-gray-100 dark:text-gray-500 dark:bg-gray-800'
+    return 'text-gray-400 bg-gray-100 dark:text-gray-400 dark:bg-muted'
   }
 
   // Root note keeps a distinct color; every other chord tone (3rd/5th/7th/extensions)
   // shares the Chord Finder page's terracotta accent.
   if (index === 0) {
-    return 'text-red-700 bg-red-100 border-red-300 dark:text-red-300 dark:bg-red-900 dark:border-red-700'
+    return 'text-red-700 bg-red-100 border-red-300 dark:text-[#f8fafc] dark:bg-[#2e2220] dark:border-[#8b5e3c]'
   }
-  return 'text-[#a05537] bg-[#fbf4ef] border-[#e6c9b8] dark:text-orange-300 dark:bg-slate-800 dark:border-slate-700'
+  return 'text-[#a05537] bg-[#fbf4ef] border-[#e6c9b8] dark:text-orange-300 dark:bg-muted dark:border-border'
 }

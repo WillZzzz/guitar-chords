@@ -13,6 +13,15 @@ export function useFavoriteChords(t: (key: string) => string) {
   const [favorites, setFavorites] = useState<FavoriteChord[]>([])
   const [loading, setLoading] = useState(true)
   const requestIdRef = useRef(0)
+  // `t` (LanguageContext) and `user` (AuthContext, re-emitted on every auth
+  // event including no-op token refreshes) both hand out new references far
+  // more often than the data actually needs refetching. Keying the effect off
+  // `user?.id` (a stable primitive) instead of the `user` object, and reading
+  // `t` through a ref, stops a fresh Supabase request from firing on every
+  // unrelated re-render — that redundant-request burst was the likely cause
+  // of intermittent "Failed to load your library" errors on page load.
+  const tRef = useRef(t)
+  tRef.current = t
 
   const loadFavorites = useCallback(async () => {
     if (!user) {
@@ -27,11 +36,12 @@ export function useFavoriteChords(t: (key: string) => string) {
       if (requestIdRef.current !== requestId) return
       setFavorites(favs)
     } catch {
-      if (requestIdRef.current === requestId) toast.error(t("user-library.toast-load-failed"))
+      if (requestIdRef.current === requestId) toast.error(tRef.current("user-library.toast-load-failed"))
     } finally {
       if (requestIdRef.current === requestId) setLoading(false)
     }
-  }, [user, t])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   useEffect(() => {
     loadFavorites()

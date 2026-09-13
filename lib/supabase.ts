@@ -335,28 +335,12 @@ export const getUserChordProgressions = async (userId: string) => {
 export const getPublicChordProgressions = async (limit = 20) => {
   if (!supabase) return { data: null, error: { message: "Supabase is not configured." } }
 
-  // No embedded user_profiles join here: chord_progressions.user_id and
-  // user_profiles.id both reference auth.users independently, but there is no
-  // foreign key *between* the two tables, so PostgREST can't traverse an
-  // embed for it. Author names are resolved separately via getUserProfilesByIds.
   const { data, error } = await supabase
     .from("chord_progressions")
     .select("*")
     .eq("is_public", true)
     .order("created_at", { ascending: false })
     .limit(limit)
-
-  return { data, error }
-}
-
-export const getUserProfilesByIds = async (userIds: string[]) => {
-  if (!supabase) return { data: null, error: { message: "Supabase is not configured." } }
-  if (userIds.length === 0) return { data: [], error: null }
-
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("id, display_name")
-    .in("id", userIds)
 
   return { data, error }
 }

@@ -124,7 +124,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                   onClick={() => toggleNote(note)}
                   variant={selectedNotes.includes(note) ? "default" : "outline"}
                   className={`h-12 ${
-                    selectedNotes.includes(note) ? "bg-[#6b8e70] hover:bg-[#507355]" : "hover:bg-[#eef3ec] dark:hover:bg-slate-800"
+                    selectedNotes.includes(note) ? "bg-[#6b8e70] hover:bg-[#507355]" : "hover:bg-[#eef3ec] dark:hover:bg-muted"
                   }`}
                 >
                   {note}
@@ -139,7 +139,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
               <h3 className="text-sm font-medium mb-2">{t("variations.selected-notes")}:</h3>
               <div className="flex flex-wrap gap-2">
                 {selectedNotes.map((note) => (
-                  <Badge key={note} variant="secondary" className="bg-[#eef3ec] dark:bg-slate-800">
+                  <Badge key={note} variant="secondary" className="bg-[#eef3ec] dark:bg-muted">
                     {note}
                   </Badge>
                 ))}
@@ -155,7 +155,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                 {possibleChords.map((chord, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-[#eef3ec] dark:hover:bg-slate-800 cursor-pointer transition-colors group"
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-[#eef3ec] dark:hover:bg-muted cursor-pointer transition-colors group"
                     {...clickableDivProps(() => onChordSelect?.(chord.name))}
                   >
                     <div className="flex-1">
