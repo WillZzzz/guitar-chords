@@ -52,7 +52,7 @@ const COMMON_PROGRESSIONS = [
   { name: "I-vi-IV-V",    displayKey: "progression-desc.fifties",       chords: ["C", "Am", "F", "G"] },
   { name: "I-IV-V",       displayKey: null,                              chords: ["C", "F", "G"],        displayName: "Basic blues/rock" },
   { name: "ii-V-I",       displayKey: "progression-desc.ii-v-i",        chords: ["Dm", "G", "C"] },
-  { name: "i-VII-VI-VII", displayKey: null,                              chords: ["Am", "G", "F", "E"],  displayName: "Andalusian cadence" },
+  { name: "i-VII-VI-V",   displayKey: null,                              chords: ["Am", "G", "F", "E"],  displayName: "Andalusian cadence" },
   { name: "I-V-vi-iii-IV",displayKey: null,                              chords: ["C", "G", "Am", "Em", "F"], displayName: "Axis / Let It Be" },
   { name: "vi-ii-V-I",    displayKey: null,                              chords: ["Am7", "Dm7", "G7", "Cmaj7"], displayName: "Jazz turnaround" },
   { name: "I-II-IV-I",    displayKey: null,                              chords: ["C", "D", "F", "C"],   displayName: "Neo soul" },
