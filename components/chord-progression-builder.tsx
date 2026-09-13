@@ -183,6 +183,39 @@ export default function ChordProgressionBuilder({
 
   const romanNumerals = keyMode === "major" ? ROMAN_MAJOR : ROMAN_MINOR
 
+  // Maps "tonic|quality" (e.g. "G|Major") to a roman numeral for the selected key's
+  // 7 diatonic triads. Matching on tonic+quality (not exact chord name) means an
+  // extended chord like "G7" or "Cmaj7" still resolves to its triad's degree.
+  // Chords outside the key (or with a quality tonal can't classify, e.g. sus chords)
+  // intentionally have no entry — not every chord can be given a degree.
+  const chordDegreeMap = useMemo(() => {
+    if (!selectedKey) return null
+    const map = new Map<string, string>()
+    diatonicChords.forEach((dChord: string, i: number) => {
+      const info = Chord.get(dChord)
+      if (info.tonic && info.quality && info.quality !== "Unknown") {
+        map.set(`${info.tonic}|${info.quality}`, romanNumerals[i])
+      }
+    })
+    return map
+  }, [selectedKey, diatonicChords, romanNumerals])
+
+  const getChordDegree = (chord: string): string | null => {
+    if (!chordDegreeMap) return null
+    const info = Chord.get(chord)
+    if (!info.tonic || !info.quality || info.quality === "Unknown") return null
+    return chordDegreeMap.get(`${info.tonic}|${info.quality}`) ?? null
+  }
+
+  // Unique notes across the whole progression, for the "notes involved" summary.
+  const progressionNotes = useMemo(() => {
+    const notes = new Set<string>()
+    progression.forEach((chord) => {
+      Chord.get(chord).notes.forEach((n) => notes.add(n))
+    })
+    return Array.from(notes)
+  }, [progression])
+
   const addChord = (chord: string) => setProgression((prev) => [...prev, chord])
   const removeChord = (index: number) => setProgression((prev) => prev.filter((_, i) => i !== index))
   const clearProgression = () => setProgression([])
@@ -731,6 +764,9 @@ export default function ChordProgressionBuilder({
                                 <div {...provided.dragHandleProps}>
                                   <GripVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 </div>
+                                {getChordDegree(chord) && (
+                                  <span className="text-[10px] text-white/70 font-normal">{getChordDegree(chord)}</span>
+                                )}
                                 <span className="font-semibold text-sm sm:text-base">{chord}</span>
                                 <Button
                                   variant="ghost"
@@ -794,6 +830,18 @@ export default function ChordProgressionBuilder({
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Notes involved — union of notes across every chord currently in the progression */}
+          {progression.length > 0 && progressionNotes.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap pt-1">
+              <span className="text-xs text-muted-foreground">{t("progression-builder.notes-involved")}</span>
+              {progressionNotes.map((note) => (
+                <Badge key={note} variant="secondary" className="bg-[#eaeff5] dark:bg-slate-800 text-[#415a80] dark:text-blue-200">
+                  {note}
+                </Badge>
+              ))}
             </div>
           )}
 

@@ -242,6 +242,7 @@
     "chord-name-examples": "Try: Cmaj7, Am7, F#dim, Bbsus4, G13, etc.",
     "select-notes-instruction": "Select notes to build a chord:",
     "selected-notes": "Selected Notes: ",
+    "notes-involved": "Notes:",
     "none": "None",
     "possible-chords": "Possible Chords",
     "no-chords-found": "No chords found with these notes",

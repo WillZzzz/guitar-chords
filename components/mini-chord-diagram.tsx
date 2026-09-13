@@ -125,13 +125,18 @@ export default function MiniChordDiagram({ positions, startFret = 1 }: MiniChord
               </g>
             )
           } else {
-            // Fretted note - smaller dots, no finger numbers, only if within display range
+            // Fretted note - only if within display range
             const relativeFret = pos.fret - displayStartFret + 1
             if (relativeFret >= 1 && relativeFret <= fretCount) {
               const fretY = nutHeight + 15 + (relativeFret - 0.5) * fretHeight
               return (
                 <g key={`fretted-${index}`}>
-                  <circle cx={x} cy={fretY} r="4" fill="#333" />
+                  <circle cx={x} cy={fretY} r="5" fill="#bf6f4a" stroke="#a05537" strokeWidth="1" />
+                  {pos.finger && pos.finger > 0 && (
+                    <text x={x} y={fretY + 2.5} fontSize="6.5" textAnchor="middle" fill="white" fontWeight="bold">
+                      {pos.finger}
+                    </text>
+                  )}
                 </g>
               )
             }
