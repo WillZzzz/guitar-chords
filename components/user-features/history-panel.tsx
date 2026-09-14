@@ -33,6 +33,13 @@ export default function HistoryPanel({ onChordSelect, onProgressionSelect }: His
   const [history, setHistory] = useState<ChordLookup[]>([])
   const [loading, setLoading] = useState(true)
   const requestIdRef = useRef(0)
+  // See the identical comment in hooks/use-favorite-chords.ts: `t` and `user`
+  // both hand out new references far more often than the data needs
+  // refetching, which was firing a redundant Supabase request on every
+  // unrelated re-render — the likely cause of intermittent "Failed to load
+  // your library" errors.
+  const tRef = useRef(t)
+  tRef.current = t
 
   const loadHistory = useCallback(async () => {
     if (!user) {
@@ -47,11 +54,12 @@ export default function HistoryPanel({ onChordSelect, onProgressionSelect }: His
       if (requestIdRef.current !== requestId) return
       setHistory(hist)
     } catch {
-      if (requestIdRef.current === requestId) toast.error(t("user-library.toast-load-failed"))
+      if (requestIdRef.current === requestId) toast.error(tRef.current("user-library.toast-load-failed"))
     } finally {
       if (requestIdRef.current === requestId) setLoading(false)
     }
-  }, [user, t])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   useEffect(() => {
     loadHistory()

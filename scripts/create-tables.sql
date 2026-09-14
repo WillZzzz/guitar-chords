@@ -111,11 +111,15 @@ CREATE POLICY "Users can delete own chord progressions" ON public.chord_progress
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Function to automatically create user profile
+-- NULLIF(..., '') matters: the signup form's display-name field is optional
+-- and submits '' (not NULL) when left blank, which COALESCE alone does not
+-- treat as missing -- without it every user who skips that field gets a
+-- permanent empty-string display_name instead of falling back to their email.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.user_profiles (id, email, display_name)
-  VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)));
+  VALUES (NEW.id, NEW.email, COALESCE(NULLIF(NEW.raw_user_meta_data->>'display_name', ''), split_part(NEW.email, '@', 1)));
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

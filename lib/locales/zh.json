@@ -302,7 +302,6 @@
     "save-copy-button": "保存副本",
     "toast-copy-saved": "副本已保存到您的库",
     "toast-copy-failed": "保存副本失败",
-    "by-author": "由 {author} 创建",
     "toast-community-load-failed": "加载社区进行失败"
   },
   "saved-progressions": {
@@ -348,7 +347,8 @@
     "loading": "加载中...",
     "show-keyboard": "显示键盘",
     "hide-keyboard": "隐藏键盘",
-    "expand": "展开"
+    "expand": "展开",
+    "refresh": "刷新"
   },
   "note-picker": {
     "notes": "音符",

@@ -391,7 +391,7 @@ export default function ChordProgressionBuilder({
         <CardContent className="space-y-6 p-4 sm:p-6 pt-0">
 
           {/* Key Filter */}
-          <div className="p-3 sm:p-4 bg-[#faf7f3] dark:bg-slate-800/50 border-2 border-[#e6dcd2] dark:border-slate-700 rounded-lg">
+          <div className="p-3 sm:p-4 bg-[#faf7f3] dark:bg-[#282320]/50 border-2 border-[#e6dcd2] dark:border-border rounded-lg">
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               <span className="flex items-center justify-center h-6 w-6 rounded-full bg-[#597399] text-white text-xs font-bold shrink-0">1</span>
               <span className="text-sm font-semibold">{t("progression-builder.key-filter")}</span>
@@ -456,7 +456,7 @@ export default function ChordProgressionBuilder({
                   variant="outline"
                   size="sm"
                   onClick={() => addChord(chord)}
-                  className="h-10 text-sm transition-all hover:bg-[#eaeff5] dark:hover:bg-slate-800 hover:border-[#597399]/50"
+                  className="h-10 text-sm transition-all hover:bg-[#eaeff5] dark:hover:bg-muted hover:border-[#597399]/50"
                 >
                   {selectedKey && (
                     <span className="text-[10px] text-muted-foreground mr-1">{romanNumerals[i]}</span>
@@ -469,7 +469,7 @@ export default function ChordProgressionBuilder({
           </div>
 
           {/* Custom Chord Input */}
-          <div className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-lg border">
+          <div className="p-4 bg-gray-50 dark:bg-[#282320]/50 rounded-lg border">
             <h4 className="text-sm font-medium mb-3">{t("progression-builder.add-custom-chord")}</h4>
             <Tabs defaultValue="name" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -506,7 +506,7 @@ export default function ChordProgressionBuilder({
                       className={`h-10 text-sm font-semibold ${
                         selectedNotes.includes(note)
                           ? "bg-[#597399] hover:bg-[#415a80] text-white"
-                          : "hover:bg-[#eaeff5] dark:hover:bg-slate-800 hover:border-[#597399]/50"
+                          : "hover:bg-[#eaeff5] dark:hover:bg-muted hover:border-[#597399]/50"
                       }`}
                     >
                       {note}
@@ -518,7 +518,7 @@ export default function ChordProgressionBuilder({
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-medium">{t("progression-builder.selected-notes")}</span>
                     {selectedNotes.map((n) => (
-                      <Badge key={n} variant="secondary" className="bg-[#eaeff5] dark:bg-slate-800 text-[#415a80] dark:text-blue-200">{n}</Badge>
+                      <Badge key={n} variant="secondary" className="bg-[#eaeff5] dark:bg-muted text-[#415a80] dark:text-[#8aadcc]">{n}</Badge>
                     ))}
                     <Button variant="ghost" size="sm" onClick={() => setSelectedNotes([])} className="h-6 px-2 text-xs">
                       <X className="h-3 w-3 mr-1" />{t("ui.clear")}
@@ -534,7 +534,7 @@ export default function ChordProgressionBuilder({
                         <Button
                           key={i}
                           variant="outline"
-                          className="justify-between h-auto p-3 text-left hover:bg-[#eaeff5] dark:hover:bg-slate-800 hover:border-[#597399]/50"
+                          className="justify-between h-auto p-3 text-left hover:bg-[#eaeff5] dark:hover:bg-muted hover:border-[#597399]/50"
                           onClick={() => {
                             addChord(chord.name)
                             toast.success(t("progression-builder.toast-added").replace("{chord}", chord.name))
@@ -557,7 +557,7 @@ export default function ChordProgressionBuilder({
                 )}
 
                 {selectedNotes.length >= 2 && detectedChords.length === 0 && (
-                  <div className="text-center py-4 text-muted-foreground bg-white dark:bg-slate-900 rounded-lg border">
+                  <div className="text-center py-4 text-muted-foreground bg-white dark:bg-card rounded-lg border">
                     <Music className="mx-auto h-8 w-8 mb-2 opacity-50" />
                     <p className="text-sm">{t("progression-builder.no-chords-found")}</p>
                   </div>
@@ -722,7 +722,7 @@ export default function ChordProgressionBuilder({
                   <button
                     key={chord}
                     onClick={() => onChordSelect?.(chord)}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-muted hover:bg-[#dde6ef] dark:hover:bg-[#352e28] text-[#415a80] dark:text-[#8aadcc] transition-colors"
                   >
                     {chord}
                     <ExternalLink className="h-2.5 w-2.5" />
@@ -831,7 +831,7 @@ export default function ChordProgressionBuilder({
                                 return { ...prev, [key]: next }
                               })
                             }
-                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
+                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-muted hover:bg-[#dde6ef] dark:hover:bg-[#352e28] text-[#415a80] dark:text-[#8aadcc] transition-colors"
                           >
                             alt fingering {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
                           </button>
@@ -883,7 +883,7 @@ export default function ChordProgressionBuilder({
                                 return { ...prev, [key]: next }
                               })
                             }
-                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-slate-800 hover:bg-[#dde6ef] dark:hover:bg-slate-700 text-[#415a80] dark:text-blue-200 transition-colors"
+                            className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border border-[#597399]/30 bg-[#eaeff5] dark:bg-muted hover:bg-[#dde6ef] dark:hover:bg-[#352e28] text-[#415a80] dark:text-[#8aadcc] transition-colors"
                           >
                             alt fingering {(altFingering[`${chord}-${idx}`] ?? 0) + 1}/{chordData!.variations!.length}
                           </button>

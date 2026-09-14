@@ -19,7 +19,7 @@ export default function TipJarButton({ className }: { className?: string }) {
     <Button
       variant="outline"
       size="icon"
-      className={`border-[#bf6f4a]/40 text-[#bf6f4a] hover:bg-[#fbf4ef] hover:text-[#a05537] dark:hover:bg-slate-800 ${className ?? ""}`}
+      className={`border-[#bf6f4a]/40 text-[#bf6f4a] hover:bg-[#fbf4ef] hover:text-[#a05537] dark:hover:bg-muted ${className ?? ""}`}
       title={t("footer.support")}
       onClick={() => {
         track("tip_jar_clicked")

@@ -21,12 +21,12 @@ export default function MyProgressionsSimpleRail({ isSignedIn, progressions, loa
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-center px-2 py-2 border-b border-[#e6dcd2] dark:border-slate-700 bg-[#d2deee] dark:bg-slate-800">
+      <div className="flex items-center justify-center px-2 py-2 border-b border-[#e6dcd2] dark:border-border bg-[#d2deee] dark:bg-[#20262e]">
         <button
           type="button"
           onClick={onExpand}
           title={t("ui.expand")}
-          className="h-6 w-6 min-h-0 shrink-0 rounded-md bg-[#fffdfa] dark:bg-slate-900 border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center text-[#597399] dark:text-blue-300"
+          className="h-6 w-6 min-h-0 shrink-0 rounded-md bg-[#fffdfa] dark:bg-card border border-[#e6dcd2] dark:border-border flex items-center justify-center text-[#597399] dark:text-[#8aadcc]"
         >
           <ChevronsLeft className="h-3.5 w-3.5" />
         </button>
@@ -48,7 +48,7 @@ export default function MyProgressionsSimpleRail({ isSignedIn, progressions, loa
               onClick={() => onProgressionEdit?.({
                 id: prog.id, name: prog.name, description: prog.description, chords: prog.chords, tags: prog.tags,
               })}
-              className="w-full px-2 py-1.5 text-left text-xs font-semibold text-[#37302a] dark:text-slate-100 hover:bg-[#eaeff5] dark:hover:bg-slate-800 transition-colors truncate"
+              className="w-full px-2 py-1.5 text-left text-xs font-semibold text-[#37302a] dark:text-foreground hover:bg-[#eaeff5] dark:hover:bg-muted transition-colors truncate"
               title={prog.name}
             >
               {prog.name}

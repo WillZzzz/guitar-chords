@@ -35,15 +35,15 @@ export default function MyChordsPanel({ isSignedIn, favorites, loading, onRemove
 
   return (
     <div className="flex flex-col h-full">
-      <div className="relative px-4 pt-4 pb-3 border-b border-[#e6dcd2] dark:border-slate-700 bg-[#f2e1d6] dark:bg-slate-800">
+      <div className="relative px-4 pt-4 pb-3 border-b border-[#e6dcd2] dark:border-border bg-[#f2e1d6] dark:bg-[#2e2220]">
         <h2 className="font-semibold text-sm text-[#37302a] dark:text-orange-100">{t("user-library.title-my-chords")}</h2>
-        <p className="text-xs text-[#6b5f55] dark:text-slate-300 mt-1">{t("user-library.caption-my-chords")}</p>
+        <p className="text-xs text-[#6b5f55] dark:text-[#d4cdc4] mt-1">{t("user-library.caption-my-chords")}</p>
         {onCollapse && (
           <button
             type="button"
             onClick={onCollapse}
             title={t("nav.my-chords")}
-            className="absolute top-3 right-3 h-7 w-7 min-h-0 rounded-md bg-[#fffdfa] dark:bg-slate-900 border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center text-[#bf6f4a] dark:text-orange-300"
+            className="absolute top-3 right-3 h-7 w-7 min-h-0 rounded-md bg-[#fffdfa] dark:bg-card border border-[#e6dcd2] dark:border-border flex items-center justify-center text-[#bf6f4a] dark:text-orange-300"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -62,26 +62,26 @@ export default function MyChordsPanel({ isSignedIn, favorites, loading, onRemove
             <Card key={fav.id} className="cursor-pointer hover:shadow-sm transition-shadow"
               {...clickableDivProps(() => onChordSelect?.(fav.chord_name))}>
               <CardContent className="p-3 flex items-center gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="bg-gradient-to-br from-[#a05537] to-[#bf6f4a] text-white rounded-md p-1.5 shrink-0">
-                    <Music className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm">{fav.chord_name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {formatDistanceToNow(new Date(fav.created_at), { addSuffix: true, locale: dateFnsLocale })}
-                    </p>
-                  </div>
+                <div className="bg-gradient-to-br from-[#a05537] to-[#bf6f4a] text-white rounded-md p-1.5 shrink-0">
+                  <Music className="h-3.5 w-3.5" />
                 </div>
-                <div className="flex items-center shrink-0">
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                    onClick={(e) => { e.stopPropagation(); onChordSelect?.(fav.chord_name) }}>
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-red-400 hover:text-red-600 hover:bg-red-50"
-                    onClick={(e) => handleRemoveFavorite(fav, e)}>
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="font-semibold text-sm truncate min-w-0">{fav.chord_name}</p>
+                    <div className="flex items-center shrink-0">
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                        onClick={(e) => { e.stopPropagation(); onChordSelect?.(fav.chord_name) }}>
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                        onClick={(e) => handleRemoveFavorite(fav, e)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {formatDistanceToNow(new Date(fav.created_at), { addSuffix: true, locale: dateFnsLocale })}
+                  </p>
                 </div>
               </CardContent>
             </Card>

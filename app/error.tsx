@@ -15,9 +15,9 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 px-4 text-center dark:bg-gray-950">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 px-4 text-center dark:bg-background">
       <LogoMark className="h-14 w-14" />
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Something went wrong</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-foreground">Something went wrong</h1>
       <p className="max-w-sm text-muted-foreground">
         An unexpected error occurred. You can try again, or head back to the home page.
       </p>

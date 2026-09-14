@@ -302,7 +302,6 @@
     "save-copy-button": "Save a copy",
     "toast-copy-saved": "Saved a copy to your library",
     "toast-copy-failed": "Failed to save a copy",
-    "by-author": "by {author}",
     "toast-community-load-failed": "Failed to load community progressions"
   },
   "saved-progressions": {
@@ -348,7 +347,8 @@
     "loading": "Loading...",
     "show-keyboard": "Show Keyboard",
     "hide-keyboard": "Hide Keyboard",
-    "expand": "Expand"
+    "expand": "Expand",
+    "refresh": "Refresh"
   },
   "note-picker": {
     "notes": "Notes",

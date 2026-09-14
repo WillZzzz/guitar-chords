@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,7 +8,6 @@ import { Switch } from "@/components/ui/switch"
 import { useAuth } from "@/contexts/auth-context"
 import { useLanguage } from "@/contexts/language-context"
 import {
-  getPublicProgressions,
   copyPublicProgression,
   type SavedProgression,
   type PublicProgression,
@@ -16,7 +15,7 @@ import {
 } from "@/lib/user-data"
 import { formatDistanceToNow } from "date-fns"
 import { enUS, zhCN } from "date-fns/locale"
-import { ListMusic, Trash2, ArrowRight, Copy, Users, Bookmark, ChevronRight } from "lucide-react"
+import { ListMusic, Trash2, ArrowRight, Copy, Users, Bookmark, ChevronRight, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { EmptyState, LibraryLoadingSkeleton } from "./library-ui"
 import { clickableDivProps } from "@/lib/a11y"
@@ -31,20 +30,27 @@ export interface MyProgressionsPanelProps {
   loading: boolean
   onDeleteProgression: (id: string) => void
   onTogglePublic: (prog: SavedProgression, isPublic: boolean) => void
+  community: PublicProgression[]
+  loadingCommunity: boolean
+  onLoadCommunity: (force?: boolean) => void
   onProgressionEdit?: (progression: EditableProgression) => void
   onCollapse?: () => void
 }
 
-// "Mine" data is presentational (comes from the useSavedProgressions hook
-// owned by MainContent, shared with the Simple rail, so it stays loaded —
-// no re-fetch flash across simple/full transitions). Community browsing
-// stays local since it's Full-view-only.
+// "Mine" data and the community feed are both owned by MainContent (via
+// useSavedProgressions / useCommunityProgressions) and shared with the Simple
+// rail, so nothing here re-fetches when the panel collapses and re-expands —
+// switching to the Community tab used to cost a fresh round trip every single
+// time because this panel (and its local state) fully unmounted on collapse.
 export default function MyProgressionsPanel({
   isSignedIn,
   progressions,
   loading: loadingMine,
   onDeleteProgression,
   onTogglePublic,
+  community,
+  loadingCommunity,
+  onLoadCommunity,
   onProgressionEdit,
   onCollapse,
 }: MyProgressionsPanelProps) {
@@ -52,27 +58,10 @@ export default function MyProgressionsPanel({
   const { t, language } = useLanguage()
   const dateFnsLocale = dateFnsLocales[language]
   const [mode, setMode] = useState<Mode>("mine")
-  const [community, setCommunity] = useState<PublicProgression[]>([])
-  const [loadingCommunity, setLoadingCommunity] = useState(false)
-  const communityRequestIdRef = useRef(0)
-
-  const loadCommunity = useCallback(async () => {
-    const requestId = ++communityRequestIdRef.current
-    setLoadingCommunity(true)
-    try {
-      const pubs = await getPublicProgressions()
-      if (communityRequestIdRef.current !== requestId) return
-      setCommunity(pubs)
-    } catch {
-      if (communityRequestIdRef.current === requestId) toast.error(t("progression-builder.toast-community-load-failed"))
-    } finally {
-      if (communityRequestIdRef.current === requestId) setLoadingCommunity(false)
-    }
-  }, [t])
 
   useEffect(() => {
-    if (mode === "community") loadCommunity()
-  }, [mode, loadCommunity])
+    if (mode === "community") onLoadCommunity()
+  }, [mode, onLoadCommunity])
 
   const handleDeleteProgression = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -94,14 +83,14 @@ export default function MyProgressionsPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="relative px-4 pt-4 pb-3 border-b border-[#e6dcd2] dark:border-slate-700 bg-[#d2deee] dark:bg-slate-800">
+      <div className="relative px-4 pt-4 pb-3 border-b border-[#e6dcd2] dark:border-border bg-[#d2deee] dark:bg-[#20262e]">
         <h2 className="font-semibold text-sm text-[#37302a] dark:text-blue-100">{t("user-library.title-my-progressions")}</h2>
         {onCollapse && (
           <button
             type="button"
             onClick={onCollapse}
             title={t("nav.my-progressions")}
-            className="absolute top-3 right-3 h-7 w-7 min-h-0 rounded-md bg-[#fffdfa] dark:bg-slate-900 border border-[#e6dcd2] dark:border-slate-700 flex items-center justify-center text-[#597399] dark:text-blue-300"
+            className="absolute top-3 right-3 h-7 w-7 min-h-0 rounded-md bg-[#fffdfa] dark:bg-card border border-[#e6dcd2] dark:border-border flex items-center justify-center text-[#597399] dark:text-[#8aadcc]"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -126,9 +115,22 @@ export default function MyProgressionsPanel({
             {t("progression-builder.tab-community")}
           </button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          {mode === "mine" ? t("progression-builder.caption-mine") : t("progression-builder.caption-community")}
-        </p>
+        <div className="flex items-center justify-between gap-2 mt-2">
+          <p className="text-xs text-muted-foreground">
+            {mode === "mine" ? t("progression-builder.caption-mine") : t("progression-builder.caption-community")}
+          </p>
+          {mode === "community" && (
+            <button
+              type="button"
+              onClick={() => onLoadCommunity(true)}
+              disabled={loadingCommunity}
+              title={t("ui.refresh")}
+              className="shrink-0 text-muted-foreground hover:text-foreground disabled:opacity-40"
+            >
+              <RefreshCw className={`h-3 w-3 ${loadingCommunity ? "animate-spin" : ""}`} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
@@ -165,7 +167,7 @@ export default function MyProgressionsPanel({
                         {formatDistanceToNow(new Date(prog.updated_at ?? prog.created_at), { addSuffix: true, locale: dateFnsLocale })}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
                       onClick={(e) => handleDeleteProgression(prog.id, e)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -196,9 +198,6 @@ export default function MyProgressionsPanel({
               <CardContent className="p-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm truncate">{prog.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("progression-builder.by-author").replace("{author}", prog.author_name)}
-                  </p>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {prog.chords.slice(0, 6).map((chord, i) => (
                       <Badge key={i} variant="outline" className="text-xs px-1.5 py-0">{chord}</Badge>

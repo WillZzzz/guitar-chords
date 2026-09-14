@@ -370,7 +370,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
       </Card>
 
       {/* Section tabs — mutually exclusive: only the active section's content renders below */}
-      <div className="rounded-xl border border-[#e6dcd2] dark:border-slate-700 bg-[#fffdfa] dark:bg-slate-900 overflow-hidden">
+      <div className="rounded-xl border border-[#e6dcd2] dark:border-border bg-[#fffdfa] dark:bg-card overflow-hidden">
         <div className="grid grid-cols-3">
           {(
             [
@@ -385,11 +385,11 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
                 key={tab.key}
                 onClick={() => setActiveSection(tab.key)}
                 className={`px-4 py-3 text-sm text-center transition-colors ${
-                  i < 2 ? "border-r border-[#e6dcd2] dark:border-slate-700" : ""
+                  i < 2 ? "border-r border-[#e6dcd2] dark:border-border" : ""
                 } ${
                   isActive
-                    ? "bg-[#f2e1d6] dark:bg-slate-800 text-[#bf6f4a] dark:text-orange-300 font-semibold"
-                    : "bg-[#faf7f3] dark:bg-slate-900 text-[#37302a] dark:text-slate-200 font-medium hover:bg-[#f2e1d6]/40 dark:hover:bg-slate-800/60"
+                    ? "bg-[#f2e1d6] dark:bg-muted text-[#bf6f4a] dark:text-orange-300 font-semibold"
+                    : "bg-[#faf7f3] dark:bg-card text-[#37302a] dark:text-[#d4cdc4] font-medium hover:bg-[#f2e1d6]/40 dark:hover:bg-muted/60"
                 }`}
               >
                 <span className={isActive ? "inline-block border-b-2 border-[#bf6f4a] pb-0.5" : ""}>
@@ -446,11 +446,11 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
           {chordData.variations && chordData.variations.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {chordData.variations.map((variation, index) => (
-                <div key={index} className="border rounded-lg p-3 bg-white">
+                <div key={index} className="border rounded-lg p-3 bg-white dark:bg-card">
                   <div className="flex flex-col sm:flex-row gap-3">
                     {/* Chord Diagram */}
                     <div className="flex justify-center sm:justify-start shrink-0">
-                      <div className="bg-[#fbf4ef] dark:bg-slate-800 rounded p-2">
+                      <div className="bg-[#fbf4ef] dark:bg-muted rounded p-2">
                         <ChordDiagram positions={variation.positions} startFret={variation.startFret} />
                       </div>
                     </div>
@@ -464,7 +464,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
                           className={
                             variation.difficulty === "Beginner"
                               ? "text-xs bg-[#bf6f4a] text-white border-transparent hover:bg-[#bf6f4a]"
-                              : "text-xs bg-[#fbf4ef] dark:bg-slate-800 text-[#37302a] dark:text-orange-200 border-[#e6dcd2] dark:border-slate-700"
+                              : "text-xs bg-[#fbf4ef] dark:bg-muted text-[#37302a] dark:text-orange-200 border-[#e6dcd2] dark:border-border"
                           }
                         >
                           {t(`chord.difficulty.${variation.difficulty.toLowerCase()}`)}
@@ -520,7 +520,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
               <h4 className="font-medium mb-3">{t("section.chord-notes")}</h4>
               <div className="flex flex-wrap gap-2">
                 {tonalChordData.notes?.map((note: string, index: number) => (
-                  <Badge key={index} variant="outline" className="bg-[#fbf4ef] dark:bg-slate-800 text-[#bf6f4a] dark:text-orange-300 border-[#e6dcd2] dark:border-slate-700">
+                  <Badge key={index} variant="outline" className="bg-[#fbf4ef] dark:bg-muted text-[#bf6f4a] dark:text-orange-300 border-[#e6dcd2] dark:border-border">
                     {note}
                   </Badge>
                 ))}
@@ -545,7 +545,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
           <div className="space-y-4">
             <div>
               <h4 className="font-medium mb-3">{t("section.chord-analysis")}</h4>
-              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+              <div className="bg-gray-50 dark:bg-muted rounded-lg p-4 space-y-3">
                 <div className="flex items-start gap-3">
                   <Badge variant="outline" className="mt-0.5">
                     Type
@@ -595,7 +595,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
                     </div>
                     <div className="flex flex-wrap gap-1 mb-2">
                       {progression.chords.map((chord, i) => (
-                        <span key={i} className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                        <span key={i} className="text-sm font-mono bg-gray-100 dark:bg-muted px-2 py-1 rounded">
                           {chord}
                         </span>
                       ))}
@@ -609,7 +609,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
             {/* Playing Tips */}
             <div>
               <h4 className="font-medium mb-3">{t("section.playing-tips")}</h4>
-              <div className="bg-[#fbf4ef] dark:bg-slate-800 border border-amber-200 dark:border-amber-800/50 rounded-lg p-4">
+              <div className="bg-[#fbf4ef] dark:bg-muted border border-amber-200 dark:border-amber-800/50 rounded-lg p-4">
                 <ul className="space-y-2 text-sm">
                   {getPlayingTips(selectedChord, chordData, t).map((tip, index) => (
                     <li key={index} className="flex items-start gap-2">
@@ -650,11 +650,11 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
               return (
                 <div
                   key={relatedChord}
-                  className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-muted transition-colors"
                   {...clickableDivProps(() => handleChordClick(relatedChord))}
                 >
                   <div className="text-center space-y-2">
-                    <div className="bg-gray-100 rounded p-2">
+                    <div className="bg-gray-100 dark:bg-muted rounded p-2">
                       {relatedData?.variations?.[0]?.positions ? (
                         <MiniChordDiagram positions={relatedData.variations[0].positions} />
                       ) : (
