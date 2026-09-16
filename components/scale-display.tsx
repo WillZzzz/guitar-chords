@@ -41,7 +41,7 @@ export default function ScaleDisplay({
             {chordName} {t('theory.chord-from-scale')} <strong>{primaryScale.name}</strong>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {/* Scale Notes Visualization */}
           <div>
             <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
@@ -55,11 +55,11 @@ export default function ScaleDisplay({
                   primaryScale.highlightedIndices.indexOf(index),
                   isHighlighted
                 )
-                
+
                 return (
                   <div
                     key={index}
-                    className={`relative px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all ${colorClass} ${
+                    className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all ${colorClass} ${
                       isHighlighted ? 'ring-2 ring-offset-2 ring-[#bf6f4a] scale-110' : ''
                     }`}
                   >
@@ -69,9 +69,6 @@ export default function ScaleDisplay({
                         {primaryScale.scaleDegrees[index]}
                       </div>
                     </div>
-                    {isHighlighted && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#bf6f4a] rounded-full animate-pulse" />
-                    )}
                   </div>
                 )
               })}
@@ -79,45 +76,12 @@ export default function ScaleDisplay({
           </div>
 
           {/* Chord Function */}
-          <div className="bg-[#fbf4ef] dark:bg-[#282320]/60 p-4 rounded-lg">
-            <div className="flex items-start gap-2">
-              <Info className="h-4 w-4 text-[#bf6f4a] mt-0.5" />
-              <div>
-                <h4 className="text-sm font-medium text-[#37302a] dark:text-foreground mb-1">
-                  {t('theory.chord-function')}:
-                </h4>
-                <p className="text-sm text-[#6b5f55] dark:text-[#d4cdc4]">
-                  {chordFunction}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Legend */}
-          <div className="bg-gray-50 dark:bg-[#1d1a16]/50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium mb-2">{t('theory.legend')}:</h4>
-            <div className="flex flex-wrap gap-2 text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-[#c0392b]"></div>
-                <span>{t('theory.root-note')}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-[#bf6f4a]"></div>
-                <span>{t('theory.third')}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-[#bf6f4a]"></div>
-                <span>{t('theory.fifth')}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-[#bf6f4a]"></div>
-                <span>{t('theory.seventh')}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-[#9c9187]"></div>
-                <span>{t('theory.scale-note')}</span>
-              </div>
-            </div>
+          <div className="bg-[#fbf4ef] dark:bg-[#282320]/60 px-3 py-2 rounded-lg flex items-center gap-2">
+            <Info className="h-4 w-4 text-[#bf6f4a] shrink-0" />
+            <p className="text-sm text-[#6b5f55] dark:text-[#d4cdc4] truncate">
+              <span className="font-medium text-[#37302a] dark:text-foreground">{t('theory.chord-function')}:</span>{' '}
+              {chordFunction}
+            </p>
           </div>
         </CardContent>
         </Card>

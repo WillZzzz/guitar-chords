@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Music, Clock, Play, Volume2, Heart } from "lucide-react"
 import { getChordData } from "@/lib/chord-utils"
+import { normalizeChordInput } from "@/lib/chord-notation"
 import { getTranslatedChordDescription, ChordInfo } from "@/lib/chord-libraries"
 import { playChordFromPositionsSmart, stopAllAudio } from "@/lib/audio-utils-hybrid"
 import { useAuth } from "@/contexts/auth-context"
@@ -172,7 +173,7 @@ export default function ChordFinder({ onChordSelect, initialChord }: ChordFinder
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
-      const chord = searchTerm.trim()
+      const chord = normalizeChordInput(searchTerm.trim())
       setSelectedChord(chord)
       onChordSelect?.(chord)
       recordLookup(chord)
