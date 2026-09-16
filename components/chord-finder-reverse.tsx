@@ -11,12 +11,27 @@ import { clickableDivProps } from "@/lib/a11y"
 import { Music2, RotateCcw, ChevronRight, Heart } from "lucide-react"
 import { Chord } from "tonal"
 import { toast } from "sonner"
+import { normalizeChordInput } from "@/lib/chord-notation"
 
 interface ChordFinderReverseProps {
   onChordSelect?: (chord: string) => void
 }
 
 const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+// The 12-note chromatic set is ambiguous when spelled sharp-only (the black
+// keys are just as often written as flats) — shown as "D#/Eb" etc. here so
+// neither spelling is presented as more "correct" than the other. The
+// underlying value stored in state/passed to Tonal stays the plain sharp
+// name; this is a display-only label.
+const NOTE_DISPLAY_LABELS: Record<string, string> = {
+  "C#": "C#/Db",
+  "D#": "D#/Eb",
+  "F#": "F#/Gb",
+  "G#": "G#/Ab",
+  "A#": "A#/Bb",
+}
+const noteLabel = (note: string) => NOTE_DISPLAY_LABELS[note] ?? note
 
 interface ChordMatch {
   name: string
@@ -123,11 +138,11 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
                   key={note}
                   onClick={() => toggleNote(note)}
                   variant={selectedNotes.includes(note) ? "default" : "outline"}
-                  className={`h-12 ${
+                  className={`h-12 px-1 text-sm sm:text-base ${
                     selectedNotes.includes(note) ? "bg-[#6b8e70] hover:bg-[#507355]" : "hover:bg-[#eef3ec] dark:hover:bg-muted"
                   }`}
                 >
-                  {note}
+                  {noteLabel(note)}
                 </Button>
               ))}
             </div>
@@ -140,7 +155,7 @@ export default function ChordFinderReverse({ onChordSelect }: ChordFinderReverse
               <div className="flex flex-wrap gap-2">
                 {selectedNotes.map((note) => (
                   <Badge key={note} variant="secondary" className="bg-[#eef3ec] dark:bg-muted">
-                    {note}
+                    {noteLabel(note)}
                   </Badge>
                 ))}
               </div>
@@ -234,7 +249,7 @@ function findChordsFromNotes(selectedNotes: string[]): ChordMatch[] {
     if (matchCount === normalizedChord.length && extraNotes === 0) confidence = 100
 
     return {
-      name: chordName,
+      name: normalizeChordInput(chordName),
       confidence,
       notes: chordNotes,
       type: chordData.type || chordData.quality || "",
@@ -283,7 +298,7 @@ function findPartialMatches(selectedNotes: string[], alreadyFound: string[]): Ch
       confidence = Math.max(0, Math.min(100, confidence - extraNotes * 8))
 
       results.push({
-        name: chordName,
+        name: normalizeChordInput(chordName),
         confidence,
         notes: chordData.notes,
         type: chordData.type || chordData.quality || "",

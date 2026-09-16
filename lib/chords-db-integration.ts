@@ -27,17 +27,22 @@ export interface ChordsDbInfo {
 
 // Normalize suffix for comparison
 function normalizeSuffix(suffix: string): string {
+  // Case-sensitive first: "M"/"M7" (major, major 7th) are only distinguishable
+  // from "m"/minor by case — lowercasing before matching collapsed both onto
+  // the same map key and made the 'major' mapping unreachable (the actual bug
+  // behind C-major searches resolving to C-minor fingering shapes).
+  if (suffix === 'M') return 'major'
+  if (suffix === 'M7') return 'maj7'
+  if (suffix === 'm') return 'minor'
+
   const suffixMap: { [key: string]: string } = {
     'maj7': 'maj7',
     'major7': 'maj7',
-    'M7': 'maj7',
     'major': 'major',
     'maj': 'major',
-    'M': 'major',
     '': 'major',
     'minor': 'minor',
     'min': 'minor',
-    'm': 'minor',
     '7': '7',
     'dom7': '7',
     '9': '9',
@@ -49,7 +54,7 @@ function normalizeSuffix(suffix: string): string {
     'aug': 'aug',
     '+': 'aug'
   }
-  
+
   const normalized = suffixMap[suffix.toLowerCase()] || suffix.toLowerCase()
   console.log(`🔍 Suffix normalization: "${suffix}" → "${normalized}"`)
   return normalized
